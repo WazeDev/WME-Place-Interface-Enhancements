@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2017.10.24.02
+// @version      2017.10.24.03
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -19,7 +19,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2017.10.24.02";
+    var curr_ver = "2017.10.24.03";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -656,11 +656,12 @@ var UpdateObject, MultiAction;
             }
         });
 
-        var observer = new MutationObserver(function(mutations) {
+        //Obsoleted by WME update released 2017-10-24
+        /*var observer = new MutationObserver(function(mutations) {
                mutations.forEach(function(mutation) {
                    if ($('#dialog-region').find('.venue-image-dialog').length > 0 && $('#detailsWrap').length == 0) ImageDialogEnhancement();
                });
-           });
+           });*/
 
         observer.observe(document.getElementById('dialog-region'), { childList: true, subtree: true });
 
@@ -1323,14 +1324,14 @@ var UpdateObject, MultiAction;
             console.log("WMEPIE - No segment found; cannot set street or city name.");
 
         if(category === resCategory && settings.EditRPPAfterCreated)
-            editRPPAddress();
+            setTimeout(editRPPAddress, 50);
     }
 
     function editRPPAddress(rppTries){
         rppTries = rppTries || 1;
 
-        if ($('.edit-button').length > 0) {
-            $('.edit-button').trigger("click");
+        if ($('.address-edit-view').length > 0) {
+            $('.full-address').trigger("click");
             $('.house-number:first').focus();
 
         } else if (rppTries < 1000) {
@@ -1822,53 +1823,6 @@ var UpdateObject, MultiAction;
                 disablePLSpotEstimatorDrawMode();
                 disablePLSpotEstimatorCalibrationDrawMode();
             }
-        }
-    }
-
-    function ImageDialogEnhancement(){
-        $('.venue-image-dialog .details').wrap("<div id='detailsWrap'></div>");
-        $('#detailsWrap').append("<div style='position:absolute;right:12px; bottom:25px;'><i class='fa fa-trash-o fa-lg' id='DeleteFromImageDialog' style='cursor:pointer;' aria-hidden='true'></i></div>");
-        var dataID = $('#detailsWrap').parent().find('img')[0].src;
-        dataID = /_(.+)/g.exec(dataID)[1];
-        $('#DeleteFromImageDialog').click(function(){
-            $('div[data-id="' + dataID + '"] button.image-delete-button').click();
-            $('.venue-image-dialog').find('.close').click();
-        });
-
-        //Image dialog navigation arrows
-        if(W.selectionManager.selectedItems[0].model.attributes.images.length > 1){
-            let thisImageIndex;
-            let PlaceImages = W.selectionManager.selectedItems[0].model.attributes.images;
-            for(let i=0; i<PlaceImages.length; i++){
-                if(W.selectionManager.selectedItems[0].model.attributes.images[i].id === dataID){
-                    thisImageIndex = i;
-                    break;
-                }
-            }
-            $('.modal-body').addClass('imgcon');
-            $('.modal-body').prepend((thisImageIndex + 1) + "/" + W.selectionManager.selectedItems[0].model.attributes.images.length);
-            $('.imgcon').append('<div class="imnav"><div class="prim control"></div><div class="zmim control"></div><div class="neim control"></div></div>');
-            $('.prim').click(function(){
-                let prevIndex;
-
-                if(thisImageIndex == 0)
-                    prevIndex = PlaceImages.length - 1;
-                else
-                    prevIndex = thisImageIndex - 1;
-                dataID = PlaceImages[prevIndex].id;
-                $('div[data-id="' + dataID +'"] img').click();
-            });
-
-            $('.neim').click(function(){
-                let nextIndex;
-
-                if(thisImageIndex == PlaceImages.length - 1)
-                    nextIndex = 0;
-                else
-                    nextIndex = thisImageIndex + 1;
-                dataID = PlaceImages[nextIndex].id;
-                $('div[data-id="' + dataID +'"] img').click();
-            });
         }
     }
 
@@ -2802,6 +2756,55 @@ var UpdateObject, MultiAction;
             for(var j=0; j<subCategories.length;j++){
                 console.log(subCategories[j]);
             }
+        }
+    }
+
+
+    //Obsoleted by WME update released 2017-10-24
+    function ImageDialogEnhancement(){
+        $('.venue-image-dialog .details').wrap("<div id='detailsWrap'></div>");
+        $('#detailsWrap').append("<div style='position:absolute;right:12px; bottom:25px;'><i class='fa fa-trash-o fa-lg' id='DeleteFromImageDialog' style='cursor:pointer;' aria-hidden='true'></i></div>");
+        var dataID = $('#detailsWrap').parent().find('img')[0].src;
+        dataID = /_(.+)/g.exec(dataID)[1];
+        $('#DeleteFromImageDialog').click(function(){
+            $('div[data-id="' + dataID + '"] button.image-delete-button').click();
+            $('.venue-image-dialog').find('.close').click();
+        });
+
+        //Image dialog navigation arrows
+        if(W.selectionManager.selectedItems[0].model.attributes.images.length > 1){
+            let thisImageIndex;
+            let PlaceImages = W.selectionManager.selectedItems[0].model.attributes.images;
+            for(let i=0; i<PlaceImages.length; i++){
+                if(W.selectionManager.selectedItems[0].model.attributes.images[i].id === dataID){
+                    thisImageIndex = i;
+                    break;
+                }
+            }
+            $('.modal-body').addClass('imgcon');
+            $('.modal-body').prepend((thisImageIndex + 1) + "/" + W.selectionManager.selectedItems[0].model.attributes.images.length);
+            $('.imgcon').append('<div class="imnav"><div class="prim control"></div><div class="zmim control"></div><div class="neim control"></div></div>');
+            $('.prim').click(function(){
+                let prevIndex;
+
+                if(thisImageIndex == 0)
+                    prevIndex = PlaceImages.length - 1;
+                else
+                    prevIndex = thisImageIndex - 1;
+                dataID = PlaceImages[prevIndex].id;
+                $('div[data-id="' + dataID +'"] img').click();
+            });
+
+            $('.neim').click(function(){
+                let nextIndex;
+
+                if(thisImageIndex == PlaceImages.length - 1)
+                    nextIndex = 0;
+                else
+                    nextIndex = thisImageIndex + 1;
+                dataID = PlaceImages[nextIndex].id;
+                $('div[data-id="' + dataID +'"] img').click();
+            });
         }
     }
 })();
