@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      1.02.24
+// @version      2017.10.24.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -19,10 +19,10 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "1.02.24";
+    var curr_ver = "2017.10.24.02";
     var settings = {};
-    var placeMenuSelector = "#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
-
+    var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
+//"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
     var placementMode = false;
     var resCategory = "RESIDENCE_HOME";
     var wazePL;
@@ -115,7 +115,7 @@ var UpdateObject, MultiAction;
             '<div class="controls-container pie-controls-container" id="divShowCopyPlaceButton" title="' + I18n.t('pie.prefs.ShowCopyPlaceButtonTitle') + '" ><input type="checkbox" id="_cbShowCopyPlaceButton" class="pieSettingsCheckbox" /><label for="_cbShowCopyPlaceButton" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowCopyPlaceButton') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divShowExternalProviderTooltip" title="' + I18n.t('pie.prefs.ShowGPIDTooltipTitle') + '" ><input type="checkbox" id="_cbShowExternalProviderTooltip" class="pieSettingsCheckbox" /><label for="_cbShowExternalProviderTooltip" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowGPIDTooltip') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divClearDescription" title="' + I18n.t('pie.prefs.ClearDescriptionTitle') + '" ><input type="checkbox" id="_cbClearDescription" class="pieSettingsCheckbox" /><label for="_cbClearDescription" style="white-space:pre-line;">' + I18n.t('pie.prefs.ClearDescription') + '</label></div>',
-            '<div class="controls-container pie-controls-container" id="divMoveAddress" title="' + I18n.t('pie.prefs.MoveAddressTitle') + '"><input type="checkbox" id="_cbMoveAddress" class="pieSettingsCheckbox"/><label for="_cbMoveAddress" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveAddress') + '</label></div>',
+            //'<div class="controls-container pie-controls-container" id="divMoveAddress" title="' + I18n.t('pie.prefs.MoveAddressTitle') + '"><input type="checkbox" id="_cbMoveAddress" class="pieSettingsCheckbox"/><label for="_cbMoveAddress" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveAddress') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divMoveHNEntry" title="' + I18n.t('pie.prefs.MoveHNEntryTitle') + '"><input type="checkbox" id="_cbMoveHNEntry" class="pieSettingsCheckbox"/><label for="_cbMoveHNEntry" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveHNEntry') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divNavLink" title="' + I18n.t('pie.prefs.NavLinkTitle') + '"><input type="checkbox" id="_cbNavLink" class="pieSettingsCheckbox"/><label for="_cbNavLink" style="white-space:pre-line;">' + I18n.t('pie.prefs.NavLink') + '</label></div>',
             '</fieldset>',
@@ -322,10 +322,11 @@ var UpdateObject, MultiAction;
         });
 
         $('#_cbMoveAddress').change(function(){
-            if(this.checked)
+            //This is now supported natively in WME (beta as of 2017-10-16)
+            /*if(this.checked)
                 registerEvents(MoveAddress);
             else
-                unregisterEvents(MoveAddress);
+                unregisterEvents(MoveAddress);*/
         });
 
         $('#_cbMoveHNEntry').change(function(){
@@ -677,6 +678,8 @@ var UpdateObject, MultiAction;
         MO_MPLayer.observe(W.map.problemLayer.div,{childList : true});
 
         wazePL = document.querySelector('.WazeControlPermalink>a.fa-link');
+        if(wazePL == null)
+            wazePL = document.querySelector('.permalink');
         wazePL.id = 'wazePermalink';
     }
 
@@ -778,7 +781,7 @@ var UpdateObject, MultiAction;
 		var a = W.map.getZoom() > 3,
 			b = W.map.landmarkLayer.getVisibility(),
 			c = closestSegmentLayer.getVisibility(),
-			d = $('#map-lightbox > div').length === 0,/* Check for HN editing */
+			d = !$('#map-lightbox > div').is(':visible'),//$('#map-lightbox > div').length === 0,/* Check for HN editing */
             e = (W.selectionManager.hasSelectedItems() && W.selectionManager.selectedItems[0].model.type !== "bigJunction");
 
 		if (a && b && c && d && e) {
@@ -892,12 +895,15 @@ var UpdateObject, MultiAction;
             cat = $('#pieItem' + (i+1))[0].value;
             icon = $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].getAttribute("data-icon");
             if(cat !== "PARKING_LOT" && cat !== resCategory)
-                $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive" style="' + (icon !== "" ? "padding-left:0px;" : "") + ' height:40px;" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><span class="menu-title ' + icon + '" style="font-size:26px;"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span><div class="drawing-controls"><span class="drawing-control polygon secondary-control" id="piePlaceAreaItem' + (i+1) + '" data-category="' + cat + '" title="Place (area)"></span><span class="drawing-control main-control point" id="piePlacePointItem' + (i+1) + '" data-category="' + cat + '" title="Place (point)"></span></div></div>');
+                $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span><div class="drawing-controls"><span class="drawing-control polygon secondary-control waze-tooltip" data-toggle="tooltip" title="" data-original-title="Create Area"></span><span class="drawing-control main-control point waze-tooltip" data-toggle="tooltip" title="" data-original-title="Create Point"></span></div></div>');
             else{
+              //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive" style="' + (icon !== "" ? "padding-left:0px;" : "") + ' height:40px;" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><span class="menu-title ' + icon + '" style="font-size:26px;"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span><div class="drawing-controls"><span class="drawing-control polygon secondary-control" id="piePlaceAreaItem' + (i+1) + '" data-category="' + cat + '" title="Place (area)"></span><span class="drawing-control main-control point" id="piePlacePointItem' + (i+1) + '" data-category="' + cat + '" title="Place (point)"></span></div></div>');            else{
                 if(cat === resCategory) //force point
-                    $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive" style="padding-left:0px; height:40px;" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><span class="menu-title ' + icon + '" style="font-size:26px;"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span></div>');
+                    //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
+                    $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon + '" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span></div>');
                 else //Parking lot - force area
-                    $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive" style="padding-left:1px; height40px;" id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '"><i class="fa fa-product-hunt fa-2x" style="font-size:20px;padding-top:9px;margin-right:5px;"></i><span class="menu-title" style="flex-grow:1;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
+                    $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
+                    //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive"             id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '">                             <span class="menu-title" style="flex-grow:1;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
             }
         }
 
@@ -1394,7 +1400,7 @@ var UpdateObject, MultiAction;
                 }
                 else{
                      $NavLink = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="pieNavLink" title=""><i class="' + currLinkClass[1] + '" id="placeNavLink" aria-hidden="true"></i></div>');
-                    $('#landmark-edit-general > form > div:nth-child(1) > i').after($NavLink);
+                    $('#landmark-edit-general > form > div:nth-child(2) > i').after($NavLink);
                 }
                 $('#pieNavLink').click(function(){
                     if($('#placeNavLink').attr("class") == "fa fa-link fa-lg"){
@@ -1425,7 +1431,7 @@ var UpdateObject, MultiAction;
                 }
                 else{
                      $crosshairs = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="pieCrosshairs" title="Zoom and center on Place"><i class="fa fa-crosshairs fa-lg" id="placeCrosshair" aria-hidden="true"></i></div>');
-                    $('#landmark-edit-general > form > div:nth-child(1) > i').after($crosshairs);
+                    $('#landmark-edit-general > form > div:nth-child(2) > i').after($crosshairs);
                 }
                 $('#pieCrosshairs').click(function(){
                     CenterOnPlace(W.selectionManager.selectedItems[0].model, settings.PlaceZoom);
@@ -1457,7 +1463,7 @@ var UpdateObject, MultiAction;
                 var $PLAButton;
                 if(!(W.selectionManager.selectedItems[0].model.attributes.categories.contains("RESIDENCE_HOME") || W.selectionManager.selectedItems[0].model.attributes.categories.contains("PARKING_LOT"))){
                     $PLAButton = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="piePLAButton" title="Create a Parking Lot Area for this Place"><i class="fa fa-product-hunt fa-lg" aria-hidden="true"></i></div>');
-                    $('#landmark-edit-general > form > div:nth-child(1) > i').after($PLAButton);
+                    $('#landmark-edit-general > form > div:nth-child(2) > i').after($PLAButton);
 
                     $('#piePLAButton').click(function(){
                         if(!BusinessPLAMode){
@@ -1499,7 +1505,7 @@ var UpdateObject, MultiAction;
             if(W.selectionManager.selectedItems[0].model.type === "venue" && W.selectionManager.selectedItems[0].model.attributes.categories.includes("PARKING_LOT")){
                 var $ParkingSpotEstimatorButton;
                 $ParkingSpotEstimatorButton = $('<div style="font-size:18px; float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" class="PIEParkingSpotEstimatorButton" title="' + I18n.t('pie.prefs.PSEDisplayButtonTitle') + '">#</div>');
-                $('#landmark-edit-general > form > div:nth-child(1) > i').after($ParkingSpotEstimatorButton);
+                $('#landmark-edit-general > form > div:nth-child(2) > i').after($ParkingSpotEstimatorButton);
 
                 $('select[name="estimatedNumberOfSpots"]').before($ParkingSpotEstimatorButton.clone());
 
@@ -1889,7 +1895,7 @@ var UpdateObject, MultiAction;
                 var $PlaceCopyButton;
                 if(!W.selectionManager.selectedItems[0].model.attributes.categories.contains("RESIDENCE_HOME")){
                     $PlaceCopyButton = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" id="pieCopyPlaceButton" title="Creates a copy of this Place"><i class="fa fa-files-o fa-lg" aria-hidden="true"></i></div>');
-                    $('#landmark-edit-general > form > div:nth-child(1) > i').after($PlaceCopyButton);
+                    $('#landmark-edit-general > form > div:nth-child(2) > i').after($PlaceCopyButton);
 
                     $('#pieCopyPlaceButton').click(function(){
                         var PlaceObject = require("Waze/Feature/Vector/Landmark");
@@ -1987,8 +1993,9 @@ var UpdateObject, MultiAction;
         $('#pieSearchButton').remove();
         if(W.selectionManager.selectedItems.length > 0){
             if(W.selectionManager.selectedItems[0].model.type === "venue"){
-                var $search = $('<div style="float:left; margin-right:5px; position:relative; left:-10px; cursor:pointer;" id="pieSearchButton" title="Fills the search bar with the address"><i class="fa fa-search" aria-hidden="true"></i></div>');
-                $('.address-edit-view').before($search);
+                var $search = $('<i class="fa fa-search" id="pieSearchButton" title="Fills the search bar with the address" aria-hidden="true" style="display:inline; margin:5px;"></i>');
+                $('.address-edit-view').parent().parent().find('.control-label').attr("style", "display:inline");
+                $('.address-edit').before($search);
                 $('#pieSearchButton').click(function(){
                     var address = $('.full-address')[0].innerHTML;
                     var noCity = I18n.translations[I18n.currentLocale()].edit.address.no_city;
@@ -2019,7 +2026,7 @@ var UpdateObject, MultiAction;
     function MoveHNEntry(){
         if(W.selectionManager.selectedItems.length > 0)
             if(W.selectionManager.selectedItems[0].model.type === "venue")
-                $('.edit-button').click(function(){
+                $('.full-address').click(function(){
                     $('.street-name').parent().parent().before($('.house-number').parent().parent());
                 });
     }
@@ -2038,10 +2045,11 @@ var UpdateObject, MultiAction;
                 for(var i=0;i<categoryOptions.length;i++){
                     var name = categoryOptions[i].options[categoryOptions[i].selectedIndex].innerHTML;
                     var icon = categoryOptions[i].options[categoryOptions[i].selectedIndex].getAttribute("data-icon");
+
                     var divid = 'btnPlaceCat' + categoryOptions[i].value;
                     if(categoryOptions[i].value !== resCategory && categoryOptions[i].value !== "PARKING_LOT"){
-                        $button = $('<div>',{id:divid, title:name.replace('&amp;', '&'), style:'display:inline-block; cursor:pointer', 'data-category':categoryOptions[i].value}).click(function() { onPlaceCategoriesButtonsClick(this.id); });
-                        $button.append('<span class="'+icon+'" style="font-size:20px;"></span>');
+                        $button = $('<div>',{ class:'pie-'+icon, id:divid, title:name.replace('&amp;', '&'), style:'display:inline-block; cursor:pointer', 'data-category':categoryOptions[i].value}).click(function() { onPlaceCategoriesButtonsClick(this.id); });
+                        $button.append('<span style="font-size:20px;"></span>');
 
                         $container.append($button);
                     }
@@ -2216,131 +2224,131 @@ var UpdateObject, MultiAction;
         var $places = $("<div>");
         $places.html([
             '<select id="pieItem' + itemNumber + '">',
-            '<option value="CAR_SERVICES" data-icon="waze-icon-place-car" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.CAR_SERVICES + '</option>',
-            '<option value="GAS_STATION" data-icon="waze-icon-place-car">' + I18n.translations[I18n.currentLocale()].venues.categories.GAS_STATION + '</option>',
-            '<option value="GARAGE_AUTOMOTIVE_SHOP" data-icon="waze-icon-place-car">' + I18n.translations[I18n.currentLocale()].venues.categories.GARAGE_AUTOMOTIVE_SHOP + '</option>',
-            '<option value="CAR_WASH" data-icon="waze-icon-place-car">' + I18n.translations[I18n.currentLocale()].venues.categories.CAR_WASH + '</option>',
-            '<option value="CHARGING_STATION" data-icon="waze-icon-place-car">' + I18n.translations[I18n.currentLocale()].venues.categories.CHARGING_STATION + '</option>',
-            '<option value="TRANSPORTATION" data-icon="waze-icon-place-transportation" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.TRANSPORTATION + '</option>',
-            '<option value="AIRPORT" data-icon="waze-icon-place-transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.AIRPORT + '</option>',
-            '<option value="BUS_STATION" data-icon="waze-icon-place-transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.BUS_STATION + '</option>',
-            '<option value="FERRY_PIER" data-icon="waze-icon-place-transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.FERRY_PIER + '</option>',
-            '<option value="SEAPORT_MARINA_HARBOR" data-icon="waze-icon-place-transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.SEAPORT_MARINA_HARBOR + '</option>',
-            '<option value="SUBWAY_STATION" data-icon="waze-icon-place-transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.SUBWAY_STATION + '</option>',
-            '<option value="TRAIN_STATION" data-icon="waze-icon-place-transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.TRAIN_STATION + '</option>',
-            '<option value="BRIDGE" data-icon="waze-icon-place-transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.BRIDGE + '</option>',
-            '<option value="TUNNEL" data-icon="waze-icon-place-transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.TUNNEL + '</option>',
-            '<option value="TAXI_STATION" data-icon="waze-icon-place-transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.TAXI_STATION + '</option>',
-            '<option value="JUNCTION_INTERCHANGE" data-icon="waze-icon-place-transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.JUNCTION_INTERCHANGE + '</option>',
-            '<option value="PROFESSIONAL_AND_PUBLIC" data-icon="waze-icon-place-professional" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.PROFESSIONAL_AND_PUBLIC + '</option>',
-            '<option value="COLLEGE_UNIVERSITY" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.COLLEGE_UNIVERSITY + '</option>',
-            '<option value="SCHOOL" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.SCHOOL + '</option>',
-            '<option value="CONVENTIONS_EVENT_CENTER" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.CONVENTIONS_EVENT_CENTER + '</option>',
-            '<option value="GOVERNMENT" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.GOVERNMENT + '</option>',
-            '<option value="LIBRARY" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.LIBRARY + '</option>',
-            '<option value="CITY_HALL" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.CITY_HALL + '</option>',
-            '<option value="ORGANIZATION_OR_ASSOCIATION" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.ORGANIZATION_OR_ASSOCIATION + '</option>',
-            '<option value="PRISON_CORRECTIONAL_FACILITY" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.PRISON_CORRECTIONAL_FACILITY + '</option>',
-            '<option value="COURTHOUSE" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.COURTHOUSE + '</option>',
-            '<option value="CEMETERY" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.CEMETERY + '</option>',
-            '<option value="FIRE_DEPARTMENT" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.FIRE_DEPARTMENT + '</option>',
-            '<option value="POLICE_STATION" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.POLICE_STATION + '</option>',
-            '<option value="MILITARY" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.MILITARY + '</option>',
-            '<option value="HOSPITAL_URGENT_CARE" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.HOSPITAL_URGENT_CARE + '</option>',
-            '<option value="DOCTOR_CLINIC" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.DOCTOR_CLINIC + '</option>',
-            '<option value="OFFICES" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.OFFICES + '</option>',
-            '<option value="POST_OFFICE" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.POST_OFFICE + '</option>',
-            '<option value="RELIGIOUS_CENTER" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.RELIGIOUS_CENTER + '</option>',
-            '<option value="KINDERGARTEN" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.KINDERGARDEN + '</option>',
-            '<option value="FACTORY_INDUSTRIAL" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.FACTORY_INDUSTRIAL + '</option>',
-            '<option value="EMBASSY_CONSULATE" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.EMBASSY_CONSULATE + '</option>',
-            '<option value="INFORMATION_POINT" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.INFORMATION_POINT + '</option>',
-            '<option value="EMERGENCY_SHELTER" data-icon="waze-icon-place-professional">' + I18n.translations[I18n.currentLocale()].venues.categories.EMERGENCY_SHELTER + '</option>',
-            '<option value="SHOPPING_AND_SERVICES" data-icon="waze-icon-place-shopping" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.SHOPPING_AND_SERVICES + '</option>',
-            '<option value="ARTS_AND_CRAFTS" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.ARTS_AND_CRAFTS + '</option>',
-            '<option value="BANK_FINANCIAL" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.BANK_FINANCIAL + '</option>',
-            '<option value="SPORTING_GOODS" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.SPORTING_GOODS + '</option>',
-            '<option value="BOOKSTORE" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.BOOKSTORE + '</option>',
-            '<option value="PHOTOGRAPHY" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.PHOTOGRAPHY + '</option>',
-            '<option value="CAR_DEALERSHIP" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.CAR_DEALERSHIP + '</option>',
-            '<option value="FASHION_AND_CLOTHING" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.FASHION_AND_CLOTHING + '</option>',
-            '<option value="CONVENIENCE_STORE" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.CONVENIENCE_STORE + '</option>',
-            '<option value="PERSONAL_CARE" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.PERSONAL_CARE + '</option>',
-            '<option value="DEPARTMENT_STORE" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.DEPARTMENT_STORE + '</option>',
-            '<option value="PHARMACY" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.PHARMACY + '</option>',
-            '<option value="ELECTRONICS" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.ELECTRONICS + '</option>',
-            '<option value="FLOWERS" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.FLOWERS + '</option>',
-            '<option value="FURNITURE_HOME_STORE" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.FURNITURE_HOME_STORE + '</option>',
-            '<option value="GIFTS" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.GIFTS + '</option>',
-            '<option value="GYM_FITNESS" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.GYM_FITNESS + '</option>',
-            '<option value="SWIMMING_POOL" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.SWIMMING_POOL + '</option>',
-            '<option value="HARDWARE_STORE" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.HARDWARE_STORE + '</option>',
-            '<option value="MARKET" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.MARKET + '</option>',
-            '<option value="SUPERMARKET_GROCERY" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.SUPERMARKET_GROCERY + '</option>',
-            '<option value="JEWELRY" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.JEWELRY + '</option>',
-            '<option value="LAUNDRY_DRY_CLEAN" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.LAUNDRY_DRY_CLEAN + '</option>',
-            '<option value="SHOPPING_CENTER" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.SHOPPING_CENTER + '</option>',
-            '<option value="MUSIC_STORE" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.MUSIC_STORE + '</option>',
-            '<option value="PET_STORE_VETERINARIAN_SERVICES" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.PET_STORE_VETERINARIAN_SERVICES + '</option>',
-            '<option value="TOY_STORE" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.TOY_STORE + '</option>',
-            '<option value="TRAVEL_AGENCY" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.TRAVEL_AGENCY + '</option>',
-            '<option value="ATM" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.ATM + '</option>',
-            '<option value="CURRENCY_EXCHANGE" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.CURRENCY_EXCHANGE + '</option>',
-            '<option value="CAR_RENTAL" data-icon="waze-icon-place-shopping">' + I18n.translations[I18n.currentLocale()].venues.categories.CAR_RENTAL + '</option>',
-            '<option value="FOOD_AND_DRINK" data-icon="waze-icon-place-food-drink" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.FOOD_AND_DRINK + '</option>',
-            '<option value="RESTAURANT" data-icon="waze-icon-place-food-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.RESTAURANT + '</option>',
-            '<option value="BAKERY" data-icon="waze-icon-place-food-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.BAKERY + '</option>',
-            '<option value="DESSERT" data-icon="waze-icon-place-food-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.DESSERT + '</option>',
-            '<option value="CAFE" data-icon="waze-icon-place-food-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.CAFE + '</option>',
-            '<option value="FAST_FOOD" data-icon="waze-icon-place-food-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.FAST_FOOD + '</option>',
-            '<option value="FOOD_COURT" data-icon="waze-icon-place-food-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.FOOD_COURT + '</option>',
-            '<option value="BAR" data-icon="waze-icon-place-food-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.BAR + '</option>',
-            '<option value="ICE_CREAM" data-icon="waze-icon-place-food-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.ICE_CREAM + '</option>',
-            '<option value="CULTURE_AND_ENTERTAINEMENT" data-icon="waze-icon-place-culture" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.CULTURE_AND_ENTERTAINEMENT + '</option>',
-            '<option value="ART_GALLERY" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.ART_GALLERY + '</option>',
-            '<option value="CASINO" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.CASINO + '</option>',
-            '<option value="CLUB" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.CLUB + '</option>',
-            '<option value="TOURIST_ATTRACTION_HISTORIC_SITE" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.TOURIST_ATTRACTION_HISTORIC_SITE + '</option>',
-            '<option value="MOVIE_THEATER" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.MOVIE_THEATER + '</option>',
-            '<option value="MUSEUM" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.MUSEUM + '</option>',
-            '<option value="MUSIC_VENUE" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.MUSIC_VENUE + '</option>',
-            '<option value="PERFORMING_ARTS_VENUE" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.PERFORMING_ARTS_VENUE + '</option>',
-            '<option value="GAME_CLUB" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.GAME_CLUB + '</option>',
-            '<option value="STADIUM_ARENA" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.STADIUM_ARENA + '</option>',
-            '<option value="THEME_PARK" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.THEME_PARK + '</option>',
-            '<option value="ZOO_AQUARIUM" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.ZOO_AQUARIUM + '</option>',
-            '<option value="RACING_TRACK" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.RACING_TRACK + '</option>',
-            '<option value="THEATER" data-icon="waze-icon-place-culture">' + I18n.translations[I18n.currentLocale()].venues.categories.THEATER + '</option>',
-            '<option value="OTHER" data-icon="waze-icon-place" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.OTHER + '</option>',
+            '<option value="CAR_SERVICES" data-icon="car-services" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.CAR_SERVICES + '</option>',
+            '<option value="GAS_STATION" data-icon="car-services">' + I18n.translations[I18n.currentLocale()].venues.categories.GAS_STATION + '</option>',
+            '<option value="GARAGE_AUTOMOTIVE_SHOP" data-icon="car-services">' + I18n.translations[I18n.currentLocale()].venues.categories.GARAGE_AUTOMOTIVE_SHOP + '</option>',
+            '<option value="CAR_WASH" data-icon="car-services">' + I18n.translations[I18n.currentLocale()].venues.categories.CAR_WASH + '</option>',
+            '<option value="CHARGING_STATION" data-icon="car-services">' + I18n.translations[I18n.currentLocale()].venues.categories.CHARGING_STATION + '</option>',
+            '<option value="TRANSPORTATION" data-icon="transportation" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.TRANSPORTATION + '</option>',
+            '<option value="AIRPORT" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.AIRPORT + '</option>',
+            '<option value="BUS_STATION" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.BUS_STATION + '</option>',
+            '<option value="FERRY_PIER" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.FERRY_PIER + '</option>',
+            '<option value="SEAPORT_MARINA_HARBOR" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.SEAPORT_MARINA_HARBOR + '</option>',
+            '<option value="SUBWAY_STATION" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.SUBWAY_STATION + '</option>',
+            '<option value="TRAIN_STATION" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.TRAIN_STATION + '</option>',
+            '<option value="BRIDGE" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.BRIDGE + '</option>',
+            '<option value="TUNNEL" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.TUNNEL + '</option>',
+            '<option value="TAXI_STATION" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.TAXI_STATION + '</option>',
+            '<option value="JUNCTION_INTERCHANGE" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.JUNCTION_INTERCHANGE + '</option>',
+            '<option value="PROFESSIONAL_AND_PUBLIC" data-icon="professional-and-public" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.PROFESSIONAL_AND_PUBLIC + '</option>',
+            '<option value="COLLEGE_UNIVERSITY" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.COLLEGE_UNIVERSITY + '</option>',
+            '<option value="SCHOOL" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.SCHOOL + '</option>',
+            '<option value="CONVENTIONS_EVENT_CENTER" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.CONVENTIONS_EVENT_CENTER + '</option>',
+            '<option value="GOVERNMENT" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.GOVERNMENT + '</option>',
+            '<option value="LIBRARY" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.LIBRARY + '</option>',
+            '<option value="CITY_HALL" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.CITY_HALL + '</option>',
+            '<option value="ORGANIZATION_OR_ASSOCIATION" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.ORGANIZATION_OR_ASSOCIATION + '</option>',
+            '<option value="PRISON_CORRECTIONAL_FACILITY" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.PRISON_CORRECTIONAL_FACILITY + '</option>',
+            '<option value="COURTHOUSE" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.COURTHOUSE + '</option>',
+            '<option value="CEMETERY" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.CEMETERY + '</option>',
+            '<option value="FIRE_DEPARTMENT" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.FIRE_DEPARTMENT + '</option>',
+            '<option value="POLICE_STATION" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.POLICE_STATION + '</option>',
+            '<option value="MILITARY" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.MILITARY + '</option>',
+            '<option value="HOSPITAL_URGENT_CARE" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.HOSPITAL_URGENT_CARE + '</option>',
+            '<option value="DOCTOR_CLINIC" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.DOCTOR_CLINIC + '</option>',
+            '<option value="OFFICES" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.OFFICES + '</option>',
+            '<option value="POST_OFFICE" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.POST_OFFICE + '</option>',
+            '<option value="RELIGIOUS_CENTER" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.RELIGIOUS_CENTER + '</option>',
+            '<option value="KINDERGARTEN" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.KINDERGARDEN + '</option>',
+            '<option value="FACTORY_INDUSTRIAL" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.FACTORY_INDUSTRIAL + '</option>',
+            '<option value="EMBASSY_CONSULATE" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.EMBASSY_CONSULATE + '</option>',
+            '<option value="INFORMATION_POINT" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.INFORMATION_POINT + '</option>',
+            '<option value="EMERGENCY_SHELTER" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.EMERGENCY_SHELTER + '</option>',
+            '<option value="SHOPPING_AND_SERVICES" data-icon="shopping-and-services" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.SHOPPING_AND_SERVICES + '</option>',
+            '<option value="ARTS_AND_CRAFTS" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.ARTS_AND_CRAFTS + '</option>',
+            '<option value="BANK_FINANCIAL" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.BANK_FINANCIAL + '</option>',
+            '<option value="SPORTING_GOODS" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.SPORTING_GOODS + '</option>',
+            '<option value="BOOKSTORE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.BOOKSTORE + '</option>',
+            '<option value="PHOTOGRAPHY" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.PHOTOGRAPHY + '</option>',
+            '<option value="CAR_DEALERSHIP" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.CAR_DEALERSHIP + '</option>',
+            '<option value="FASHION_AND_CLOTHING" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.FASHION_AND_CLOTHING + '</option>',
+            '<option value="CONVENIENCE_STORE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.CONVENIENCE_STORE + '</option>',
+            '<option value="PERSONAL_CARE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.PERSONAL_CARE + '</option>',
+            '<option value="DEPARTMENT_STORE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.DEPARTMENT_STORE + '</option>',
+            '<option value="PHARMACY" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.PHARMACY + '</option>',
+            '<option value="ELECTRONICS" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.ELECTRONICS + '</option>',
+            '<option value="FLOWERS" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.FLOWERS + '</option>',
+            '<option value="FURNITURE_HOME_STORE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.FURNITURE_HOME_STORE + '</option>',
+            '<option value="GIFTS" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.GIFTS + '</option>',
+            '<option value="GYM_FITNESS" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.GYM_FITNESS + '</option>',
+            '<option value="SWIMMING_POOL" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.SWIMMING_POOL + '</option>',
+            '<option value="HARDWARE_STORE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.HARDWARE_STORE + '</option>',
+            '<option value="MARKET" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.MARKET + '</option>',
+            '<option value="SUPERMARKET_GROCERY" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.SUPERMARKET_GROCERY + '</option>',
+            '<option value="JEWELRY" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.JEWELRY + '</option>',
+            '<option value="LAUNDRY_DRY_CLEAN" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.LAUNDRY_DRY_CLEAN + '</option>',
+            '<option value="SHOPPING_CENTER" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.SHOPPING_CENTER + '</option>',
+            '<option value="MUSIC_STORE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.MUSIC_STORE + '</option>',
+            '<option value="PET_STORE_VETERINARIAN_SERVICES" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.PET_STORE_VETERINARIAN_SERVICES + '</option>',
+            '<option value="TOY_STORE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.TOY_STORE + '</option>',
+            '<option value="TRAVEL_AGENCY" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.TRAVEL_AGENCY + '</option>',
+            '<option value="ATM" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.ATM + '</option>',
+            '<option value="CURRENCY_EXCHANGE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.CURRENCY_EXCHANGE + '</option>',
+            '<option value="CAR_RENTAL" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.CAR_RENTAL + '</option>',
+            '<option value="FOOD_AND_DRINK" data-icon="food-and-drink" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.FOOD_AND_DRINK + '</option>',
+            '<option value="RESTAURANT" data-icon="food-and-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.RESTAURANT + '</option>',
+            '<option value="BAKERY" data-icon="food-and-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.BAKERY + '</option>',
+            '<option value="DESSERT" data-icon="food-and-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.DESSERT + '</option>',
+            '<option value="CAFE" data-icon="food-and-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.CAFE + '</option>',
+            '<option value="FAST_FOOD" data-icon="food-and-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.FAST_FOOD + '</option>',
+            '<option value="FOOD_COURT" data-icon="food-and-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.FOOD_COURT + '</option>',
+            '<option value="BAR" data-icon="food-and-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.BAR + '</option>',
+            '<option value="ICE_CREAM" data-icon="food-and-drink">' + I18n.translations[I18n.currentLocale()].venues.categories.ICE_CREAM + '</option>',
+            '<option value="CULTURE_AND_ENTERTAINEMENT" data-icon="culture-and-entertainement" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.CULTURE_AND_ENTERTAINEMENT + '</option>',
+            '<option value="ART_GALLERY" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.ART_GALLERY + '</option>',
+            '<option value="CASINO" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.CASINO + '</option>',
+            '<option value="CLUB" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.CLUB + '</option>',
+            '<option value="TOURIST_ATTRACTION_HISTORIC_SITE" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.TOURIST_ATTRACTION_HISTORIC_SITE + '</option>',
+            '<option value="MOVIE_THEATER" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.MOVIE_THEATER + '</option>',
+            '<option value="MUSEUM" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.MUSEUM + '</option>',
+            '<option value="MUSIC_VENUE" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.MUSIC_VENUE + '</option>',
+            '<option value="PERFORMING_ARTS_VENUE" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.PERFORMING_ARTS_VENUE + '</option>',
+            '<option value="GAME_CLUB" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.GAME_CLUB + '</option>',
+            '<option value="STADIUM_ARENA" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.STADIUM_ARENA + '</option>',
+            '<option value="THEME_PARK" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.THEME_PARK + '</option>',
+            '<option value="ZOO_AQUARIUM" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.ZOO_AQUARIUM + '</option>',
+            '<option value="RACING_TRACK" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.RACING_TRACK + '</option>',
+            '<option value="THEATER" data-icon="culture-and-entertainement">' + I18n.translations[I18n.currentLocale()].venues.categories.THEATER + '</option>',
+            '<option value="OTHER" data-icon="other" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.OTHER + '</option>',
             '<option value="CONSTRUCTION_SITE" data-icon="">' + I18n.translations[I18n.currentLocale()].venues.categories.CONSTRUCTION_SITE + '</option>',
-            '<option value="LODGING" data-icon="waze-icon-place-lodging" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.LODGING + '</option>',
-            '<option value="HOTEL" data-icon="waze-icon-place-lodging">' + I18n.translations[I18n.currentLocale()].venues.categories.HOTEL + '</option>',
-            '<option value="HOSTEL" data-icon="waze-icon-place-lodging">' + I18n.translations[I18n.currentLocale()].venues.categories.HOSTEL + '</option>',
-            '<option value="CAMPING_TRAILER_PARK" data-icon="waze-icon-place-lodging">' + I18n.translations[I18n.currentLocale()].venues.categories.CAMPING_TRAILER_PARK + '</option>',
-            '<option value="COTTAGE_CABIN" data-icon="waze-icon-place-lodging">' + I18n.translations[I18n.currentLocale()].venues.categories.COTTAGE_CABIN + '</option>',
-            '<option value="BED_AND_BREAKFAST" data-icon="waze-icon-place-lodging">' + I18n.translations[I18n.currentLocale()].venues.categories.BED_AND_BREAKFAST + '</option>',
-            '<option value="OUTDOORS" data-icon="waze-icon-place-outdoors" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.OUTDOORS + '</option>',
-            '<option value="PARK" data-icon="waze-icon-place-outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.PARK + '</option>',
-            '<option value="PLAYGROUND" data-icon="waze-icon-place-outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.PLAYGROUND + '</option>',
-            '<option value="BEACH" data-icon="waze-icon-place-outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.BEACH + '</option>',
-            '<option value="SPORTS_COURT" data-icon="waze-icon-place-outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.SPORTS_COURT + '</option>',
-            '<option value="GOLF_COURSE" data-icon="waze-icon-place-outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.GOLF_COURSE + '</option>',
-            '<option value="PLAZA" data-icon="waze-icon-place-outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.PLAZA + '</option>',
-            '<option value="PROMENADE" data-icon="waze-icon-place-outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.PROMENADE + '</option>',
-            '<option value="POOL" data-icon="waze-icon-place-outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.POOL + '</option>',
-            '<option value="SCENIC_LOOKOUT_VIEWPOINT" data-icon="waze-icon-place-outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.SCENIC_LOOKOUT_VIEWPOINT + '</option>',
-            '<option value="SKI_AREA" data-icon="waze-icon-place-outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.SKI_AREA + '</option>',
-            '<option value="NATURAL_FEATURES" data-icon="waze-icon-place-natural" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.NATURAL_FEATURES + '</option>',
-            '<option value="ISLAND" data-icon="waze-icon-place-natural">' + I18n.translations[I18n.currentLocale()].venues.categories.ISLAND + '</option>',
-            '<option value="SEA_LAKE_POOL" data-icon="waze-icon-place-natural">' + I18n.translations[I18n.currentLocale()].venues.categories.SEA_LAKE_POOL + '</option>',
-            '<option value="RIVER_STREAM" data-icon="waze-icon-place-natural">' + I18n.translations[I18n.currentLocale()].venues.categories.RIVER_STREAM + '</option>',
-            '<option value="FOREST_GROVE" data-icon="waze-icon-place-natural">' + I18n.translations[I18n.currentLocale()].venues.categories.FOREST_GROVE + '</option>',
-            '<option value="FARM" data-icon="waze-icon-place-natural">' + I18n.translations[I18n.currentLocale()].venues.categories.FARM + '</option>',
-            '<option value="CANAL" data-icon="waze-icon-place-natural">' + I18n.translations[I18n.currentLocale()].venues.categories.CANAL + '</option>',
-            '<option value="SWAMP_MARSH" data-icon="waze-icon-place-natural">' + I18n.translations[I18n.currentLocale()].venues.categories.SWAMP_MARSH + '</option>',
-            '<option value="DAM" data-icon="waze-icon-place-natural">' + I18n.translations[I18n.currentLocale()].venues.categories.DAM + '</option>',
-            '<option value="PARKING_LOT" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.PARKING_LOT + '</option>',
-            '<option value="RESIDENCE_HOME" data-icon="waze-icon-house" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.RESIDENCE_HOME + '</option>',
+            '<option value="LODGING" data-icon="lodging" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.LODGING + '</option>',
+            '<option value="HOTEL" data-icon="lodging">' + I18n.translations[I18n.currentLocale()].venues.categories.HOTEL + '</option>',
+            '<option value="HOSTEL" data-icon="lodging">' + I18n.translations[I18n.currentLocale()].venues.categories.HOSTEL + '</option>',
+            '<option value="CAMPING_TRAILER_PARK" data-icon="lodging">' + I18n.translations[I18n.currentLocale()].venues.categories.CAMPING_TRAILER_PARK + '</option>',
+            '<option value="COTTAGE_CABIN" data-icon="lodging">' + I18n.translations[I18n.currentLocale()].venues.categories.COTTAGE_CABIN + '</option>',
+            '<option value="BED_AND_BREAKFAST" data-icon="lodging">' + I18n.translations[I18n.currentLocale()].venues.categories.BED_AND_BREAKFAST + '</option>',
+            '<option value="OUTDOORS" data-icon="outdoors" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.OUTDOORS + '</option>',
+            '<option value="PARK" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.PARK + '</option>',
+            '<option value="PLAYGROUND" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.PLAYGROUND + '</option>',
+            '<option value="BEACH" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.BEACH + '</option>',
+            '<option value="SPORTS_COURT" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.SPORTS_COURT + '</option>',
+            '<option value="GOLF_COURSE" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.GOLF_COURSE + '</option>',
+            '<option value="PLAZA" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.PLAZA + '</option>',
+            '<option value="PROMENADE" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.PROMENADE + '</option>',
+            '<option value="POOL" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.POOL + '</option>',
+            '<option value="SCENIC_LOOKOUT_VIEWPOINT" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.SCENIC_LOOKOUT_VIEWPOINT + '</option>',
+            '<option value="SKI_AREA" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.SKI_AREA + '</option>',
+            '<option value="NATURAL_FEATURES" data-icon="natural-feature" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.NATURAL_FEATURES + '</option>',
+            '<option value="ISLAND" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.ISLAND + '</option>',
+            '<option value="SEA_LAKE_POOL" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.SEA_LAKE_POOL + '</option>',
+            '<option value="RIVER_STREAM" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.RIVER_STREAM + '</option>',
+            '<option value="FOREST_GROVE" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.FOREST_GROVE + '</option>',
+            '<option value="FARM" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.FARM + '</option>',
+            '<option value="CANAL" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.CANAL + '</option>',
+            '<option value="SWAMP_MARSH" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.SWAMP_MARSH + '</option>',
+            '<option value="DAM" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.DAM + '</option>',
+            '<option value="PARKING_LOT" data-icon="parking-lot" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.PARKING_LOT + '</option>',
+            '<option value="RESIDENCE_HOME" data-icon="residential" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.RESIDENCE_HOME + '</option>',
             '</select>'
             ].join(' '));
 
@@ -2369,8 +2377,21 @@ var UpdateObject, MultiAction;
             '.zmim {width:70%;}',
             '.neim {width:15%; background:url("http://i62.tinypic.com/2cqfqxf.gif")right center no-repeat;}',
             //PSE
-            '.PSESelected {border: 3px solid #ee9900;}'
-
+            '.PSESelected {border: 3px solid #ee9900;}',
+            //hijacking new WME Place icons
+            '.pie-car-services {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -29px -63px; width: 14px; height: 13px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) { .pie-car-services {background-image: url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '.pie-transportation {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -56px -63px; width: 12px; height: 12px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-transportation {background-image: url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png);background-size: 99px 87px; } }',
+            '.pie-professional-and-public {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: 0px -76px; width: 13px; height: 11px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-professional-and-public {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '.pie-shopping-and-services {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -88px 0px; width: 11px; height: 13px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-shopping-and-services {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '.pie-food-and-drink {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -65px 0px; width: 13px; height: 16px; } @mediait-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-food-and-drink {background-image:ditor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '.pie-culture-and-entertainement {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -30px -37px; width: 16px; height: 14px; }edia (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-culture-and-entertainement {background-image:ditor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '.pie-other {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: 0px -63px; width: 15px; height: 13px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-other {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '.pie-lodging {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -20px -52px; width: 17px; height: 10px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-lodging {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '.pie-outdoors {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: 0px -52px; width: 20px; height: 11px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-outdoors {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '.pie-natural-features {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -16px -21px; width: 17px; height: 15px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-natural-features {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '.pie-parking-lot {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -65px -48px; width: 13px; height: 13px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-parking-lot {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '.pie-residential {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -37px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-residential {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -37px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }'
         ].join(' ');
         $('<style type="text/css">' + css + '</style>').appendTo('head');
     }
