@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2017.10.24.04
+// @version      2017.10.25.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -19,7 +19,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2017.10.24.04";
+    var curr_ver = "2017.10.25.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -396,7 +396,7 @@ var UpdateObject, MultiAction;
         setChecked('_cbClearDescription', settings.ClearDescription);
         setChecked('_cbPlaceNameFontBold', settings.PlaceNameFontBold);
         setChecked('_cbPlaceLocatorCrosshairProdPL', settings.PlaceLocatorCrosshairProdPL);
-        setChecked('_cbMoveAddress', settings.MoveAddress);
+        //setChecked('_cbMoveAddress', settings.MoveAddress); //Native support as of 2017-10-24
         setChecked('_cbMoveHNEntry', settings.MoveHNEntry);
         setChecked('_cbShowPLSpotEstimatorButton', settings.ShowPLSpotEstimatorButton);
         setChecked('_cbShowNavPointClosestSegmentOnHover', settings.ShowNavPointClosestSegmentOnHover);
@@ -466,10 +466,11 @@ var UpdateObject, MultiAction;
             ShowClearDescription();
         }
 
-        if(settings.MoveAddress){
+        //Native support as of 2017-10-24
+        /*if(settings.MoveAddress){
             registerEvents(MoveAddress);
             MoveAddress();
-        }
+        }*/
 
         if(settings.MoveHNEntry){
             registerEvents(MoveHNEntry);
@@ -575,9 +576,30 @@ var UpdateObject, MultiAction;
 
         let extprovobserver = new MutationObserver(function(mutations) {
                mutations.forEach(function(mutation) {
-                   if ($(mutation.target).hasClass('external-providers-view'))
+
+                   /*if ($(mutation.target).hasClass('external-providers-view'))
                        if(W.loginManager.user.normalizedLevel === 1)
                            $('.external-providers-view').parent().parent().remove();
+                           */
+
+                       for (var i = 0; i < mutation.addedNodes.length; i++) {
+                           var addedNode = mutation.addedNodes[i];
+                           // Only fire up if it's a node
+                           if (addedNode.nodeType === Node.ELEMENT_NODE && $(addedNode).hasClass('address-edit-view')) {
+                               addLockButtons();
+                               updatePlaceSizeDisplay();
+                               AddPlaceCategoriesButtons();
+                               if(settings.ShowPlaceLocatorCrosshair)
+                                   ShowPlaceLocatorCrosshair();
+                               if(settings.ShowSearchButton)
+                                   ShowSearchButton();
+                                   ShowNavPointLink();
+                               if(settings.ShowParkingLotButton)
+                                   ShowParkingLotButton();
+                               if(settings.ShowCopyPlaceButton)
+                                   ShowCopyPlaceButton();
+                           }
+                       }
                });
            });
 
@@ -2107,7 +2129,7 @@ var UpdateObject, MultiAction;
     function addLockButtons() {
         if(W.selectionManager.selectedItems.length > 0){
             var item = W.selectionManager.selectedItems[0];
-            var isRPP = (item.model.type === "venue" && item.model.attributes.residential === true);
+            var isRPP = item.model.isResidential(); //(item.model.type === "venue" && item.model.attributes.residential === true);
 
             if(isRPP){
                 var attr = item.model.attributes;
@@ -2122,6 +2144,7 @@ var UpdateObject, MultiAction;
                 $div.remove();
                 $div = $('<div>',{id:'pieRPPLockButtonsContainer',style:'margin-bottom:5px;'});
                 $div.append('<label class="control-label">Lock</label>');
+                var $controls = $('<div>', {class:'waze-radio-container'});
                 var btnInfos = [];
 
                 for(var iBtn=0;iBtn<=6;iBtn++){btnInfos.push({r:iBtn,val:iBtn});}
@@ -2129,23 +2152,19 @@ var UpdateObject, MultiAction;
                     var selected = (btnInfo.val == manualRank);
                     disabled = userRank < btnInfo.val;
                     if (btnInfo.val !== 6) {
-                        $div.append(
-                            $('<div>', {
-                                class:'btn btn-lh' + (selected ? ' btn-lh-selected':'') + (btnInfo.r < 6 & (userRank < btnInfo.r || disabled) ? ' disabled' : '')
-                            })
-                            .text(btnInfo.hasOwnProperty('title') ? btnInfo.title : btnInfo.r + 1)
-                            .data('val',btnInfo.hasOwnProperty('val') ? btnInfo.val : btnInfo.r + 1)
-                            .hover(function() {})
+                        $controls.append(
+                            $(`<input type="radio" name="lockRank" value="${btnInfo.r}" id="lockRank-${btnInfo.r}" data-type="numeric" data-nullable="true" ${btnInfo.val == manualRank ? "checked" : ""}><label for="lockRank-${btnInfo.r}" value="${btnInfo.r}">${btnInfo.r+1}</label>`)
                             .click(function() {
-                                if((userRank >= $(this).data('val')) && (btnInfo.r < 6)) {
-                                    W.model.actionManager.add(new UpdateObject(item.model,{lockRank:($(this).data('val'))}));
+                                if((userRank >= parseInt($(this).attr('value'))) && (btnInfo.r < 6)) {
+                                    W.model.actionManager.add(new UpdateObject(item.model,{lockRank:(parseInt($(this).attr('value')))}));
                                     addLockButtons();
                                 }
                             })
                         );
                     }
                 });
-                $('#landmark-edit-general > div.address-edit.side-panel-section').after($div);
+                $div.append($controls);
+                $('#landmark-edit-general > form.attributes-form.side-panel-section').after($div);
             }
         }
     }
