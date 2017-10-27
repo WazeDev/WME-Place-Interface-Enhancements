@@ -1104,7 +1104,6 @@ var UpdateObject, MultiAction;
 
     var newPlaceCategory = "";
     function startPlacementMode(category, isPoint){
-        debugger;
         if(category === "PARKING_LOT"){
             if(!isChecked("layer-switcher-item_parking_places")){
                 if(!isChecked("layer-switcher-group_places"))
