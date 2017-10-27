@@ -162,7 +162,6 @@ var UpdateObject, MultiAction;
             buildItemOption(10),
             buildItemOption(11),
             '</div>'
-
         ].join(' '));
 
         UpdateObject = require("Waze/Action/UpdateObject");
