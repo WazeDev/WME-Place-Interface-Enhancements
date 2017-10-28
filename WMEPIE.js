@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2017.10.27.01
+// @version      2017.10.27.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -19,7 +19,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2017.10.27.01";
+    var curr_ver = "2017.10.27.02";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -684,7 +684,7 @@ var UpdateObject, MultiAction;
                });
            });*/
 
-        observer.observe(document.getElementById('dialog-region'), { childList: true, subtree: true });
+        //observer.observe(document.getElementById('dialog-region'), { childList: true, subtree: true });
 
         //Highlight the categories box when the old hospital category is present
         /*W.selectionManager.events.register("selectionchanged", null, highlightObsoleteHospitalCategory);
@@ -2783,7 +2783,7 @@ var UpdateObject, MultiAction;
 
 
     //Obsoleted by WME update released 2017-10-24
-    function ImageDialogEnhancement(){
+    /*function ImageDialogEnhancement(){
         $('.venue-image-dialog .details').wrap("<div id='detailsWrap'></div>");
         $('#detailsWrap').append("<div style='position:absolute;right:12px; bottom:25px;'><i class='fa fa-trash-o fa-lg' id='DeleteFromImageDialog' style='cursor:pointer;' aria-hidden='true'></i></div>");
         var dataID = $('#detailsWrap').parent().find('img')[0].src;
@@ -2828,5 +2828,5 @@ var UpdateObject, MultiAction;
                 $('div[data-id="' + dataID +'"] img').click();
             });
         }
-    }
+    }*/
 })();
