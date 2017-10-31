@@ -440,7 +440,6 @@ var UpdateObject, MultiAction;
         if(settings.ShowExternalProviderTooltip){
             //registerEvents(ShowExternalProviderTooltip);
             //ShowExternalProviderTooltip();
-
             var observer = new MutationObserver(function(mutations) {
                mutations.forEach(function(mutation) {
                    if ($(mutation.target).hasClass('select2-chosen')) ShowExternalProviderTooltip();
