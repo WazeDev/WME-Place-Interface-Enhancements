@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2017.11.10.01
+// @version      2017.11.24.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -19,7 +19,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2017.11.10.01";
+    var curr_ver = "2017.11.24.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -82,7 +82,8 @@ var UpdateObject, MultiAction;
             window.W.map &&
             window.W.model &&
             window.W.loginManager.user &&
-            $ && window.jscolor) {
+            $ && window.jscolor &&
+           WazeWrap.User) {
             init();
         } else if (tries < 1000) {
             setTimeout(function () {bootstrap(tries++);}, 200);
@@ -117,7 +118,7 @@ var UpdateObject, MultiAction;
             '<div class="controls-container pie-controls-container" id="divClearDescription" title="' + I18n.t('pie.prefs.ClearDescriptionTitle') + '" ><input type="checkbox" id="_cbClearDescription" class="pieSettingsCheckbox" /><label for="_cbClearDescription" style="white-space:pre-line;">' + I18n.t('pie.prefs.ClearDescription') + '</label></div>',
             //'<div class="controls-container pie-controls-container" id="divMoveAddress" title="' + I18n.t('pie.prefs.MoveAddressTitle') + '"><input type="checkbox" id="_cbMoveAddress" class="pieSettingsCheckbox"/><label for="_cbMoveAddress" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveAddress') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divMoveHNEntry" title="' + I18n.t('pie.prefs.MoveHNEntryTitle') + '"><input type="checkbox" id="_cbMoveHNEntry" class="pieSettingsCheckbox"/><label for="_cbMoveHNEntry" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveHNEntry') + '</label></div>',
-            '<div class="controls-container pie-controls-container" id="divNavLink" title="' + I18n.t('pie.prefs.NavLinkTitle') + '"><input type="checkbox" id="_cbNavLink" class="pieSettingsCheckbox"/><label for="_cbNavLink" style="white-space:pre-line;">' + I18n.t('pie.prefs.NavLink') + '</label></div>',
+            '<div class="controls-container pie-controls-container" id="divNavLink" title="' + I18n.t('pie.prefs.NavLinkTitle') + '"><input type="checkbox" id="_cbNavLink" class="pieSettingsCheckbox" disabled/><label for="_cbNavLink" style="white-space:pre-line;">' + I18n.t('pie.prefs.NavLink') + '</label></div>',
             '</fieldset>',
 
             '<fieldset id="fieldNewPlaces" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
@@ -670,6 +671,10 @@ var UpdateObject, MultiAction;
                                 }
                             }
                             newAttr._point = new OL.Geometry.Point(myPlaceAttr.geometry.x, myPlaceAttr.geometry.y);
+                            newAttr.__proto__.getPoint = function()
+                            {
+                                return this._point.clone();
+                            };
                             W.model.actionManager.add(new UpdateObject(W.selectionManager.selectedItems[0].model, {'entryExitPoints': [newAttr]}));
                         }
                         //NewPlace.attributes.entryExitPoints.push({entry: true, exit: true, name:"", primary: false, point: new OL.Geometry.Point(pos.lon, pos.lat)})
@@ -1414,6 +1419,7 @@ var UpdateObject, MultiAction;
     var currLinkClass = []; //We have to keep track of the current status in case the user toggled the linking due to the panel getting rebuilt after every action
     function ShowNavPointLink(){
         $('#pieNavLink').remove();
+        return;
         if(W.selectionManager.selectedItems.length > 0){
             if(W.selectionManager.selectedItems[0].model.type === "venue" && W.selectionManager.selectedItems[0].model.isPoint()){
                 if(currLinkClass.length == 0 || currLinkClass[0] != W.selectionManager.selectedItems[0].model.attributes.id){ //First time this place has been selected
