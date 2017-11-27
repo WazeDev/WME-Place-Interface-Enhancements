@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2017.11.24.01
+// @version      2017.11.27.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -19,7 +19,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2017.11.24.01";
+    var curr_ver = "2017.11.27.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -99,6 +99,13 @@ var UpdateObject, MultiAction;
         $section.html([
             '<h4 style="margin-bottom:0px;"><b>' + I18n.t('pie.prefs.title') + '</b></h4>',
             '<h6 style="margin-top:0px;">' + curr_ver + '</h6>',
+            '<fieldset id="fieldPlaceFilter" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
+            '<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>' + I18n.t('pie.filter.PlaceFilterPanel') + '</h4></legend>',
+            '<div class="controls-container pie-controls-container" id="divPlaceFilter">' + I18n.t('pie.filter.filter') + ' <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>',
+            '</br>',
+            '<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">' + I18n.t('pie.filter.Hide') + '</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">' + I18n.t('pie.filter.Show') + '</label></div>',
+            '</fieldset>',
+
             '<fieldset id="fieldPlacePanel" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
             '<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>' + I18n.t('pie.prefs.PropertiesPanel') + '</h4></legend>',
             '<div class="controls-container pie-controls-container" id="divAreaPlaceSizeControls">',
@@ -570,6 +577,9 @@ var UpdateObject, MultiAction;
         new WazeWrap.Interface.Shortcut('CreateParkingLotShortcut', 'Creates a parking lot Place', 'wmepie', 'Place Interface Enhancements', settings.CreateParkingLotShortcut, function(){startPlacementMode("PARKING_LOT", false);}, null).add();
         new WazeWrap.Interface.Shortcut('HideAreaPlacesShortcut', 'Toggle hiding area Places', 'wmepie', 'Place Interface Enhancements', settings.ToggleAreaPlacesShortcut, ToggleHideAreaPlaces, null).add();
 
+        $("#piePlaceFilter").on("propertychange keyup paste input", UpdatePlaceFilter);
+        $('input[type=radio][name=PlaceFilterToggle]').change(UpdatePlaceFilter);
+
 
         window.addEventListener("beforeunload", function() {
             saveSettings();
@@ -709,6 +719,36 @@ var UpdateObject, MultiAction;
         if(wazePL == null)
             wazePL = document.querySelector('.permalink');
         wazePL.id = 'wazePermalink';
+    }
+
+    function UpdatePlaceFilter(){
+        let index = W.map.landmarkLayer.styleMap.styles.default.rules.findIndex(function(e){ return e.name == "PIEPlaceFilter";});
+        if(index > -1)
+        {
+            W.map.landmarkLayer.styleMap.styles.default.rules.splice(index, 1);
+            W.map.landmarkLayer.redraw();
+        }
+        if($('#piePlaceFilter').val().trim() != "")
+        {
+            let myRule = new W.Rule({
+                filter: new OL.Filter.Comparison({
+                    type: '==',
+                    evaluate: function(venue) {
+                        debugger;
+                        if($("#_rbHidePlaces").prop("checked"))
+                            return (new RegExp($('#piePlaceFilter').val(), "ig").exec(venue.model.attributes.name));
+                        else
+                            return !(new RegExp($('#piePlaceFilter').val(), "ig").exec(venue.model.attributes.name));
+                    }
+                }),
+                symbolizer: {
+                    display: 'none'
+                },
+                name: "PIEPlaceFilter"
+            });
+            W.map.landmarkLayer.styleMap.styles['default'].rules.push(myRule);
+            W.map.landmarkLayer.redraw();
+        }
     }
 
     function ToggleHideAreaPlaces(){
@@ -2598,6 +2638,12 @@ var UpdateObject, MultiAction;
                     ShowClosestSegmentSelected: "Display a line from the nav point to the point on the closest segment",
                     NavLink: "Link nav point",
                     NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved"
+                },
+                filter: {
+                    PlaceFilterPanel: 'Place Filtering',
+                    filter: 'Filter',
+                    Hide: 'Hide',
+                    Show: 'Show only'
                 }
             },
             "es-419": {
@@ -2679,6 +2725,12 @@ var UpdateObject, MultiAction;
                     ShowClosestSegmentSelected: "Display a line from the nav point to the point on the closest segment",
                     NavLink: "Link nav point",
                     NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved"
+                },
+                filter: {
+                    PlaceFilterPanel: 'Place Filtering',
+                    filter: 'Filter',
+                    Hide: 'Hide',
+                    Show: 'Show only'
                 }
             },
             fr: {
@@ -2760,6 +2812,12 @@ var UpdateObject, MultiAction;
                     ShowClosestSegmentSelected: "Display a line from the nav point to the point on the closest segment",
                     NavLink: "Link nav point",
                     NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved"
+                },
+                filter: {
+                    PlaceFilterPanel: 'Place Filtering',
+                    filter: 'Filter',
+                    Hide: 'Hide',
+                    Show: 'Show only'
                 }
             }
         });
