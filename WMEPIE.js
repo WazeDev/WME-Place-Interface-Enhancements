@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2017.11.27.01
+// @version      2017.12.01.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -19,7 +19,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2017.11.27.01";
+    var curr_ver = "2017.12.01.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -825,6 +825,11 @@ var UpdateObject, MultiAction;
     }
 
     function ObjectsChanged(){
+        if(W.selectionManager.hasSelectedItems() && W.geometryEditing.activeEditor == null)
+        {
+            setTimeout(ObjectsChanged, 50);
+            return;
+        }
         if(W.map.getLayerByUniqueName('landmarks').selectedFeatures.length >0)
             if(placeIsPoint && W.geometryEditing.activeEditor.vertices.length > 0){
                 removeDragCallbacks();
@@ -870,6 +875,7 @@ var UpdateObject, MultiAction;
 
 	function findNearestSegment(navPoint) {
         'use strict';
+        debugger;
         var closestSegment = {};
         if(navPoint.element)
             navPoint = W.geometryEditing.activeEditor._navigationPointMarker.lonlat.toPoint();
@@ -885,6 +891,11 @@ var UpdateObject, MultiAction;
         'use strict';
 
         var ClosestSegmentNavPoint;
+        if(W.selectionManager.hasSelectedItems() && W.geometryEditing.activeEditor == null)
+        {
+            setTimeout(checkSelection, 50);
+            return;
+        }
 
 		if (!checkConditions()) {
 			removeDragCallbacks();
@@ -905,12 +916,14 @@ var UpdateObject, MultiAction;
                             let entryExitPoint = selectedItem.model.geometry.clone();
                             if(selectedItem.model.getNavigationPoints().length > 0)
                                 entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
+                            debugger;
 							findNearestSegment(entryExitPoint);
 						};
                         //ClosestSegmentNavPoint.events.register('drag', W.geometryEditing.activeEditor, findNearestSegment);
                         let entryExitPoint = selectedItem.model.geometry.clone();
                         if(selectedItem.model.getNavigationPoints().length > 0)
                             entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
+                        debugger;
                         findNearestSegment(entryExitPoint);
 					} else {
                         if(selectedItem.model.getNavigationPoints().length === 0)
