@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2017.12.01.01
+// @version      2017.12.06.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -19,7 +19,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2017.12.01.01";
+    var curr_ver = "2017.12.06.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -1168,6 +1168,14 @@ var UpdateObject, MultiAction;
                 if(!isChecked("layer-switcher-group_places"))
                     $("#layer-switcher-group_places").click();
                 $("#layer-switcher-item_parking_places").click();
+            }
+        }
+        else if(category === resCategory)
+        {
+            if(!isChecked("layer-switcher-item_residential_places")){
+                if(!isChecked("layer-switcher-group_places"))
+                    $("#layer-switcher-group_places").click();
+                $("#layer-switcher-item_residential_places").click();
             }
         }
         $('#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive').removeClass("open");
