@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2017.12.13.01
+// @version      2017.12.30.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -19,7 +19,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2017.12.13.01";
+    var curr_ver = "2017.12.30.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -972,7 +972,7 @@ var UpdateObject, MultiAction;
             cat = $('#pieItem' + (i+1))[0].value;
             icon = $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].getAttribute("data-icon");
             if(cat !== "PARKING_LOT" && cat !== resCategory && cat !== "GAS_STATION")
-                $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span><div class="drawing-controls"><span class="drawing-control polygon secondary-control waze-tooltip" data-toggle="tooltip" title="" id="piePlaceAreaItem" data-original-title="Create Area"></span><span class="drawing-control main-control point waze-tooltip" data-toggle="tooltip" title="" data-original-title="Create Point"></span></div></div>');
+                $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span><div class="drawing-controls"><span class="drawing-control polygon secondary-control waze-tooltip" data-toggle="tooltip" title="" id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '" data-original-title="Create Area"></span><span class="drawing-control main-control point waze-tooltip" data-toggle="tooltip" title="" data-original-title="Create Point"></span></div></div>');
             else{
               //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive" style="' + (icon !== "" ? "padding-left:0px;" : "") + ' height:40px;" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><span class="menu-title ' + icon + '" style="font-size:26px;"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span><div class="drawing-controls"><span class="drawing-control polygon secondary-control" id="piePlaceAreaItem' + (i+1) + '" data-category="' + cat + '" title="Place (area)"></span><span class="drawing-control main-control point" id="piePlacePointItem' + (i+1) + '" data-category="' + cat + '" title="Place (point)"></span></div></div>');            else{
                 if(cat === resCategory) //force point
