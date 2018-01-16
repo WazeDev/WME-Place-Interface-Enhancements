@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.01.16.03
+// @version      2018.01.16.04
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -20,7 +20,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.01.16.03";
+    var curr_ver = "2018.01.16.04";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -2305,7 +2305,7 @@ var UpdateObject, MultiAction;
                     disabled = userRank < btnInfo.val;
                     if (btnInfo.val !== 6) {
                         $controls.append(
-                            $(`<input type="radio" name="lockRank" value="${btnInfo.r}" id="lockRank-${btnInfo.r}" data-type="numeric" data-nullable="true" ${btnInfo.val == manualRank ? "checked" : ""}><label for="lockRank-${btnInfo.r}" value="${btnInfo.r}">${btnInfo.r+1}</label>`)
+                            $(`<input type="radio" name="lockRank" value="${btnInfo.r}" id="lockRank-${btnInfo.r}" data-type="numeric" data-nullable="true" ${btnInfo.val == manualRank ? "checked" : ""} ${disabled ? "disabled" : ""}><label for="lockRank-${btnInfo.r}" value="${btnInfo.r}">${btnInfo.r+1}</label>`)
                             .click(function() {
                                 if((userRank >= parseInt($(this).attr('value'))) && (btnInfo.r < 6)) {
                                     W.model.actionManager.add(new UpdateObject(item.model,{lockRank:(parseInt($(this).attr('value')))}));
