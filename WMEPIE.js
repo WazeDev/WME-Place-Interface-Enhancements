@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2017.12.30.01
+// @version      2018.01.16.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -12,6 +12,7 @@
 // @grant        none
 // @require      https://greasyfork.org/scripts/24851-wazewrap/code/WazeWrap.js?version=229392
 // @require      https://greasyfork.org/scripts/27023-jscolor/code/JSColor.js
+// @require      https://greasyfork.org/scripts/37486-wme-utils-hoursparser.js
 // @license      GPLv3
 // ==/UserScript==
 var UpdateObject, MultiAction;
@@ -19,13 +20,14 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2017.12.30.01";
+    var curr_ver = "2018.01.16.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
     var placementMode = false;
     var resCategory = "RESIDENCE_HOME";
     var wazePL;
+    let hoursparser = new HoursParser();
 
     //Layer definitions
     {
@@ -600,6 +602,7 @@ var UpdateObject, MultiAction;
                                addLockButtons();
                                updatePlaceSizeDisplay();
                                AddPlaceCategoriesButtons();
+                               AddHoursParserInterface();
                                if(settings.ShowPlaceLocatorCrosshair)
                                    ShowPlaceLocatorCrosshair();
                                if(settings.ShowSearchButton)
@@ -719,8 +722,68 @@ var UpdateObject, MultiAction;
         if(wazePL == null)
             wazePL = document.querySelector('.permalink');
         wazePL.id = 'wazePermalink';
+
+        /******** Hours Parser ************/
+        registerEvents(AddHoursParserInterface);
+        AddHoursParserInterface();
     }
 
+    function AddHoursParserInterface(){
+        if(W.selectionManager.hasSelectedItems())
+            if(W.selectionManager.selectedItems[0].model.type === "venue"){
+                var $PIEHoursParser = $("<div>", {style:"min-height:20px"});
+                if(!$('#PIEHoursParserDiv').length){
+                    $PIEHoursParser.html([
+                        '<div id="PIEHoursParserDiv" style="margin-top:5px">',
+                        '<textarea id="PIE-hourspaste" placeholder="' + I18n.t('pie.hoursParser.defaultText') + '" wrap="off" autocomplete="off" style="overflow: auto; width: 85%; max-width: 85%; min-width: 85%; font-size: 0.85em; height: 24px; min-height: 24px; max-height: 300px; padding-left: 3px; color: rgb(153, 153, 153);"></textarea>',
+                        '<input class="btn btn-default btn-xs" id="PIEAppendHours" title="' + I18n.t('pie.hoursParser.AddHoursTitle') + '" type="button" value="' + I18n.t('pie.hoursParser.AddHours') + '" style="margin-bottom:4px">',
+                        '<input class="btn btn-default btn-xs" id="PIEReplaceHours" title="' + I18n.t('pie.hoursParser.ReplaceHoursTitle') + '" type="button" value="' + I18n.t('pie.hoursParser.ReplaceHours') + '" style="margin-bottom:4px">',
+                        '<span id="PIEHoursParserError" style="display:block; color:red"></span>',
+                        '</div>'
+                    ].join(' '));
+                    $('.opening-hours > div > .add.waze-btn').parent().append($PIEHoursParser.html());
+                    $('#PIEAppendHours').click(function(){ addHours(false);});
+                    $('#PIEReplaceHours').click(function(){ addHours(true);});
+                }
+            }
+    }
+
+    function addHours(replaceAll = false) {
+        var pasteHours = $('#PIE-hourspaste').val();
+        if (pasteHours.trim() === "") {
+            return;
+        }
+
+        if(replaceAll)
+            pasteHours = pasteHours + ',' + getOpeningHours(item).join(',');
+        var parserResult = hoursparser.parseHours(pasteHours);
+        if (parserResult.hours && parserResult.overlappingHours === false && parserResult.sameOpenAndCloseTimes === false && parserResult.parseError === false) {
+            W.model.actionManager.add(new UpdateObject(W.selectionManager.selectedItems[0].model, { openingHours: parserResult.hours }));
+            $('#PIEHoursParserError').empty();
+        } else {
+            $('#PIE-hourspaste').css({'background-color':'#FDD'});//.attr({title:bannButt.noHours.getTitle(parserResult.hours)});
+            if(parserResult.overlappingHours)
+                $('#PIEHoursParserError').text(I18n.t('pie.hoursParser.errorOverlappingHours'));
+            else if(parserResult.sameOpenAndCloseTimes)
+                $('#PIEHoursParserError').text(I18n.t('pie.hoursParser.errorSameOpenClose'));
+            else
+                $('#PIEHoursParserError').text(I18n.t('pie.hoursParser.errorCannotParse'));
+        }
+    }
+
+    //******* Taken from WMEPH for hours parsing
+    // Formats "hour object" into a string.
+    function formatOpeningHour(hourEntry) {
+        var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        var hours = hourEntry.attributes.fromHour + '-' + hourEntry.attributes.toHour;
+        return hourEntry.attributes.days.map(day => dayNames[day] + ' ' + hours).join(', ');
+    }
+
+    // Pull natural text from opening hours
+    function getOpeningHours(venue) {
+        return venue && venue.getOpeningHours && venue.getOpeningHours().map(formatOpeningHour);
+    }
+    //*******/
     function UpdatePlaceFilter(){
         let index = W.map.landmarkLayer.styleMap.styles.default.rules.findIndex(function(e){ return e.name == "PIEPlaceFilter";});
         if(index > -1)
@@ -2476,7 +2539,7 @@ var UpdateObject, MultiAction;
             PlaceNameFontOutline: "#000000",
             PlaceLocatorCrosshairProdPL: true,
             MoveAddress: false,
-            MoveHNEntry: true,
+            MoveHNEntry: false,
             PLNormalSpotWidth: 3.44,
             PLAngledSpotWidth: 3,
             ShowPLSpotEstimatorButton: false,
@@ -2661,6 +2724,16 @@ var UpdateObject, MultiAction;
                     filter: 'Filter',
                     Hide: 'Hide',
                     Show: 'Show only'
+                },
+                hoursParser: {
+                    defaultText: 'Paste Hours Here',
+                    AddHours: 'Add hours',
+					AddHoursTitle: 'Add pasted hours to existing',
+                    ReplaceHours: 'Replace all hours',
+					ReplaceHoursTitle: 'Replace existing hours with pasted hours',
+                    errorSameOpenClose: 'Same open and close times detected',
+                    errorOverlappingHours: 'Overlapping hours detected',
+					errorCannotParse: 'Unable to parse the provided hours'
                 }
             },
             "es-419": {
@@ -2748,6 +2821,16 @@ var UpdateObject, MultiAction;
                     filter: 'Filter',
                     Hide: 'Hide',
                     Show: 'Show only'
+                },
+                hoursParser: {
+                    defaultText: 'Paste Hours Here',
+                    AddHours: 'Add hours',
+					AddHoursTitle: 'Add pasted hours to existing',
+                    ReplaceHours: 'Replace all hours',
+					ReplaceHoursTitle: 'Replace existing hours with pasted hours',
+                    errorSameOpenClose: 'Same open and close times detected',
+                    errorOverlappingHours: 'Overlapping hours detected',
+					errorCannotParse: 'Unable to parse the provided hours'
                 }
             },
             fr: {
@@ -2835,6 +2918,16 @@ var UpdateObject, MultiAction;
                     filter: 'Filter',
                     Hide: 'Hide',
                     Show: 'Show only'
+                },
+                hoursParser: {
+                    defaultText: 'Paste Hours Here',
+                    AddHours: 'Add hours',
+					AddHoursTitle: 'Add pasted hours to existing',
+                    ReplaceHours: 'Replace all hours',
+					ReplaceHoursTitle: 'Replace existing hours with pasted hours',
+                    errorSameOpenClose: 'Same open and close times detected',
+                    errorOverlappingHours: 'Overlapping hours detected',
+					errorCannotParse: 'Unable to parse the provided hours'
                 }
             }
         });
