@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.01.16.02
+// @version      2018.01.16.03
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -20,7 +20,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.01.16.02";
+    var curr_ver = "2018.01.16.03";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -744,6 +744,28 @@ var UpdateObject, MultiAction;
                     $('.opening-hours > div > .add.waze-btn').parent().append($PIEHoursParser.html());
                     $('#PIEAppendHours').click(function(){ addHours(false);});
                     $('#PIEReplaceHours').click(function(){ addHours(true);});
+
+                    // Enter = Add hours, shift || ctrl + Enter = new line
+                    $("#PIE-hourspaste").keydown(function(event){
+                        if (event.keyCode === 13) {
+                            if (event.ctrlKey) {
+                                // Simulate a newline event (shift + enter)
+                                var text = this.value;
+                                var selStart = this.selectionStart;
+                                this.value = text.substr(0, selStart) + '\n' + text.substr(this.selectionEnd, text.length-1);
+                                this.selectionStart = selStart+1;
+                                this.selectionEnd = selStart+1;
+                                return true;
+                            } else if(!(event.shiftKey||event.ctrlKey) && $('#PIE-hourspaste').val() !== '' ){
+                                event.stopPropagation();
+                                event.preventDefault();
+                                event.returnValue = false;
+                                event.cancelBubble = true;
+                                addHours(false);
+                                return false;
+                            }
+                        }
+                    });
                 }
             }
     }
