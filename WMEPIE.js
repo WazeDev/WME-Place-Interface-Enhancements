@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.01.16.05
+// @version      2018.01.18.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -20,7 +20,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.01.16.05";
+    var curr_ver = "2018.01.18.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -1192,14 +1192,12 @@ var UpdateObject, MultiAction;
         if(markerType !== null){
             var markerID = this.attributes["data-id"].value;
             if(W.map.getLayerByUniqueName("problems").markers[markerID].model.attributes.subType === 71){
-                var $PIECreatePLA = $("<div>", {style:"min-height:20px"});
+                var $PIECreatePLA = $('<div id="PIECreatePLA">', {style:"min-height:20px"});
                 $PIECreatePLA.html([
-                    '<div id="PIECreatePLA">',
-                    '<div class="btn btn-block" id="PIECreatePLAButton" style="color: #fff; background-color: #92c2d1; border-color: #78b0bf; margin-top:5px;">Create Suggested PLA</div>',
-                    '</div>'
+                    '<div class="btn btn-block" id="PIECreatePLAButton" style="color: #fff; background-color: #92c2d1; border-color: #78b0bf; margin-top:5px; width:67%; margin: 0 auto;">Create Suggested PLA</div>',
                 ].join(' '));
 
-                setTimeout(function(){$('#panel-container > div > div > div.body > div.actions > div > div').append($PIECreatePLA); $('#PIECreatePLAButton').click(function(){createPLAFromMP(markerID);});}, 150);
+                setTimeout(function(){$('#panel-container > div > div > div.actions > div > div > form').append($PIECreatePLA); $('#PIECreatePLAButton').click(function(){createPLAFromMP(markerID);});}, 150);
             }
         }
     }
