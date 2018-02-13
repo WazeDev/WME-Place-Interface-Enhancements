@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.01.24.01
+// @version      2018.02.13.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -13,6 +13,7 @@
 // @require      https://greasyfork.org/scripts/24851-wazewrap/code/WazeWrap.js
 // @require      https://greasyfork.org/scripts/27023-jscolor/code/JSColor.js
 // @require      https://greasyfork.org/scripts/37486-wme-utils-hoursparser.js
+// @require      https://greasyfork.org/scripts/38421-wme-utils-navigationpoint/code/WME%20Utils%20-%20NavigationPoint.js?version=251065
 // @license      GPLv3
 // ==/UserScript==
 var UpdateObject, MultiAction;
@@ -20,7 +21,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.01.24.01";
+    var curr_ver = "2018.02.13.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -1427,26 +1428,8 @@ var UpdateObject, MultiAction;
         if(category === resCategory){
             NewPlace._originalResidential = true;
             NewPlace.attributes.residential = true;
-            NewPlace.attributes.entryExitPoints.push({_entry: true, _exit: true, _name:"", _isPrimary: true, _point: new OL.Geometry.Point(pos.lon, pos.lat),
-                                                      getPoint : function(){return this._point.clone();},
-                                                      getEntry : function(){return this._entry;},
-                                                      getExit : function(){return this._exit;},
-                                                      isPrimary : function(){return this._isPrimary;},
-                                                      getName: function(){return this._name;},
-                                                      toJSON: function(){return {point: this._point,
-                                                                                 entry: this._entry,
-                                                                                 exit: this._exit,
-                                                                                 primary: this._isPrimary,
-                                                                                 name: this._name
-                                                                                }}/*,
-                                                          "with": function() {
-                                                              var e = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
-                                                              return new this.constructor((this.toJSON(), e));
-                                                          },
-                                                      clone:  function() {
-                                                          return this.with();
-                                                      }*/
-                                                     });
+            let eep = new NavigationPoint(new OL.Geometry.Point(pos.lon, pos.lat));
+            NewPlace.attributes.entryExitPoints.push(eep);
         }
         NewPlace.attributes.lockRank = Number(settings.DefaultLockLevel);
 
@@ -2087,7 +2070,6 @@ var UpdateObject, MultiAction;
                         W.model.actionManager.add(new AddPlace(NewPlace));
 
                         var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = oldPlace.getAddress();
-                        var MultiAction = require("Waze/Action/MultiAction");
                         var multiaction = new MultiAction();
                         multiaction.setModel(W.model);
 
