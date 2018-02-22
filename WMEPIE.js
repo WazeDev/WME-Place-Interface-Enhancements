@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.02.13.01
+// @version      2018.02.22.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1230,7 +1230,7 @@ var UpdateObject, MultiAction;
         NewPlace.attributes.categories.push("PARKING_LOT");
 
         W.model.actionManager.add(new AddPlace(NewPlace));
-        Waze.selectionManager.select([NewPlace]);
+        W.selectionManager.select([NewPlace]);
     }
 
     function highlightObsoleteHospitalCategory(){
@@ -1349,7 +1349,7 @@ var UpdateObject, MultiAction;
         multiaction.doSubAction(UFA);
         W.model.actionManager.add(multiaction);
 
-        Waze.selectionManager.select([NewPlace]);
+        W.selectionManager.select([NewPlace]);
     }
 
     function doneHandler(geom){
@@ -1436,7 +1436,7 @@ var UpdateObject, MultiAction;
         var closestSeg = WazeWrap.Geometry.findClosestSegment(new OL.Geometry.Point(pos.lon, pos.lat), settings.SkipPLR, settings.SkipPLR);
 
         W.model.actionManager.add(new AddPlace(NewPlace));
-        Waze.selectionManager.select([NewPlace]);
+        W.selectionManager.select([NewPlace]);
 
         if(closestSeg){ //if we were able to find a segment, try to pull the city and/or street name if the options are enabled
             var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = closestSeg.getAddress();
@@ -2092,7 +2092,7 @@ var UpdateObject, MultiAction;
                         UFA.options.updateHouseNumber = true;
                         multiaction.doSubAction(UFA);
                         W.model.actionManager.add(multiaction);
-                        Waze.selectionManager.select([NewPlace]);
+                        W.selectionManager.select([NewPlace]);
                     });
                 }
             }
@@ -2559,7 +2559,7 @@ var UpdateObject, MultiAction;
         }
 
         if(settings.ShowAreaPlaceSizeImperial === false && settings.ShowAreaPlaceSizeMetric === false)
-            if(Waze.prefs.attributes.isImperial)
+            if(W.prefs.attributes.isImperial)
                 settings.ShowAreaPlaceSizeImperial = true;
             else
                 settings.ShowAreaPlaceSizeMetric = true;
@@ -2611,24 +2611,24 @@ var UpdateObject, MultiAction;
                 ToggleAreaPlacesShortcut: settings.ToggleAreaPlacesShortcut
             };
 
-            for (var name in Waze.accelerators.Actions) {
+            for (var name in W.accelerators.Actions) {
                 var TempKeys = "";
-                if (Waze.accelerators.Actions[name].group == 'wmepie') {
-                    if (Waze.accelerators.Actions[name].shortcut) {
-                        if (Waze.accelerators.Actions[name].shortcut.altKey === true) {
+                if (W.accelerators.Actions[name].group == 'wmepie') {
+                    if (W.accelerators.Actions[name].shortcut) {
+                        if (W.accelerators.Actions[name].shortcut.altKey === true) {
                             TempKeys += 'A';
                         }
-                        if (Waze.accelerators.Actions[name].shortcut.shiftKey === true) {
+                        if (W.accelerators.Actions[name].shortcut.shiftKey === true) {
                             TempKeys += 'S';
                         }
-                        if (Waze.accelerators.Actions[name].shortcut.ctrlKey === true) {
+                        if (W.accelerators.Actions[name].shortcut.ctrlKey === true) {
                             TempKeys += 'C';
                         }
                         if (TempKeys !== "") {
                             TempKeys += '+';
                         }
-                        if (Waze.accelerators.Actions[name].shortcut.keyCode) {
-                            TempKeys += Waze.accelerators.Actions[name].shortcut.keyCode;
+                        if (W.accelerators.Actions[name].shortcut.keyCode) {
+                            TempKeys += W.accelerators.Actions[name].shortcut.keyCode;
                         }
                     } else {
                         TempKeys = "-1";
