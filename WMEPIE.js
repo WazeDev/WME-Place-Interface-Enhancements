@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.02.22.01
+// @version      2018.02.22.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -181,7 +181,7 @@ var UpdateObject, MultiAction;
         //Load settings
         loadSettings();
 
-        var style = new OpenLayers.Style({
+        var style = new OL.Style({
             pointRadius: "${pointRadius}",
             label : "${labelText}",
             fontFamily: "Tahoma, Arial, Verdana",
@@ -655,8 +655,8 @@ var UpdateObject, MultiAction;
 
         W.selectionManager.events.register("selectionchanged", null, function(){
             if(W.selectionManager.selectedItems.length > 0 && W.selectionManager.selectedItems[0].model.type === "mapComment")
-                if((W.geometryEditing.activeEditor.mode & OpenLayers.Control.ModifyFeature.RESHAPE) == 0){
-                    W.geometryEditing.activeEditor.mode |= OpenLayers.Control.ModifyFeature.RESHAPE;
+                if((W.geometryEditing.activeEditor.mode & OL.Control.ModifyFeature.RESHAPE) == 0){
+                    W.geometryEditing.activeEditor.mode |= OL.Control.ModifyFeature.RESHAPE;
                     W.geometryEditing.activeEditor.resetVertices();
                 }
         });
@@ -1152,7 +1152,7 @@ var UpdateObject, MultiAction;
                         if( (isPoint && showPoint) || (!isPoint && showArea && !venue.isParkingLot()) || (!isPoint && showPLA && venue.isParkingLot())){
                             var textLoc;
                             if(isPoint)
-                                textLoc = new OpenLayers.Geometry.Point(venue.geometry.x, venue.geometry.y);
+                                textLoc = new OL.Geometry.Point(venue.geometry.x, venue.geometry.y);
                             else
                                 textLoc = venue.geometry.getCentroid();
                             var placeName =WordWrap(venue.attributes.name.trim() + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : ''));
@@ -1224,7 +1224,7 @@ var UpdateObject, MultiAction;
         for(i=0;i<pos.components[0].components.length;i++){
             points.push(new OL.Geometry.Point(pos.components[0].components[i].x, pos.components[0].components[i].y));
         }
-        var ring = new OpenLayers.Geometry.LinearRing(points);
+        var ring = new OL.Geometry.LinearRing(points);
         NewPlace.geometry = new OL.Geometry.Polygon([ring]);
 
         NewPlace.attributes.categories.push("PARKING_LOT");
@@ -1266,14 +1266,14 @@ var UpdateObject, MultiAction;
         if(isPoint){
             $("#map").on('mousemove', MouseMoveHandler);
             $("#map").click(function(){endPlacementMode(category, isPoint);});
-            /*drawPoly = new OpenLayers.Control.DrawFeature(newPlaceLayer, OpenLayers.Handler.Polygon, polyDrawFeatureOptions);
+            /*drawPoly = new OL.Control.DrawFeature(newPlaceLayer, OL.Handler.Polygon, polyDrawFeatureOptions);
             W.map.addControl(drawPoly);
             drawPoly.activate();*/
         }
         else{
             if(drawPoly != null && drawPoly.events != null)
                 drawPoly.deactivate();
-            drawPoly = new OpenLayers.Control.DrawFeature(newPlaceLayer, OpenLayers.Handler.Polygon, polyDrawFeatureOptions);
+            drawPoly = new OL.Control.DrawFeature(newPlaceLayer, OL.Handler.Polygon, polyDrawFeatureOptions);
             W.map.addControl(drawPoly);
             drawPoly.activate();
 
@@ -1284,7 +1284,7 @@ var UpdateObject, MultiAction;
     var businessPLAPlaceName, businessPLAPlaceAddress;//, businessPLAPlacePhone, businessPLAPlaceURL;
     function startBusinessPLAPlacementMode(){
         var polyDrawFeatureOptions = {callbacks : {"done": doneHandlerBusinessPLAPlace}};
-        drawPoly = new OpenLayers.Control.DrawFeature(newPlaceLayer, OpenLayers.Handler.Polygon, polyDrawFeatureOptions);
+        drawPoly = new OL.Control.DrawFeature(newPlaceLayer, OL.Handler.Polygon, polyDrawFeatureOptions);
         W.map.addControl(drawPoly);
         drawPoly.activate();
         document.addEventListener('keyup', keyUpHandler, false);
@@ -1310,7 +1310,7 @@ var UpdateObject, MultiAction;
         for(i=0;i<geom.components[0].components.length;i++){
             points.push(new OL.Geometry.Point(geom.components[0].components[i].x, geom.components[0].components[i].y));
         }
-        var ring = new OpenLayers.Geometry.LinearRing(points);
+        var ring = new OL.Geometry.LinearRing(points);
         NewPlace.geometry = new OL.Geometry.Polygon([ring]);
         NewPlace.attributes.categories.push("PARKING_LOT");
 
@@ -1419,7 +1419,7 @@ var UpdateObject, MultiAction;
             for(i=0;i<pos.components[0].components.length;i++){
                 points.push(new OL.Geometry.Point(pos.components[0].components[i].x, pos.components[0].components[i].y));
             }
-            var ring = new OpenLayers.Geometry.LinearRing(points);
+            var ring = new OL.Geometry.LinearRing(points);
             NewPlace.geometry = new OL.Geometry.Polygon([ring]);
 
         }
@@ -1678,7 +1678,7 @@ var UpdateObject, MultiAction;
     function startPLSpotEstimatorDrawMode(){
         let polyDrawFeatureOptions = {callbacks : {"done": PLSpotEstimatordoneHandler, "point": pointHandler}};
 
-        PLSpotEstimatordrawControl = new OpenLayers.Control.DrawFeature(PLSpotEstimatorLayer, OpenLayers.Handler.Path, polyDrawFeatureOptions);
+        PLSpotEstimatordrawControl = new OL.Control.DrawFeature(PLSpotEstimatorLayer, OL.Handler.Path, polyDrawFeatureOptions);
         W.map.addControl(PLSpotEstimatordrawControl);
         PLSpotEstimatordrawControl.activate();
 
@@ -1688,7 +1688,7 @@ var UpdateObject, MultiAction;
     function startPLSpotEstimatorCalibrationMode(){
         let polyDrawFeatureOptions = {callbacks : {"done": PLSpotEstimatorCalibrationdoneHandler, "point": pointHandler}};
 
-        PLSpotEstimatorCalibrationdrawControl = new OpenLayers.Control.DrawFeature(PLSpotEstimatorCalibrationLayer, OpenLayers.Handler.Path, polyDrawFeatureOptions);
+        PLSpotEstimatorCalibrationdrawControl = new OL.Control.DrawFeature(PLSpotEstimatorCalibrationLayer, OL.Handler.Path, polyDrawFeatureOptions);
         W.map.addControl(PLSpotEstimatorCalibrationdrawControl);
         PLSpotEstimatorCalibrationdrawControl.activate();
 
