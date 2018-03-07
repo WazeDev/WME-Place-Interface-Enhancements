@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.02.22.02
+// @version      2018.03.07.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -229,6 +229,17 @@ var UpdateObject, MultiAction;
 
         injectCss();
         new WazeWrap.Interface.Tab('PIE', $section.html(), init2);
+    }
+
+    function getActiveEditor(tries = 1) {
+        return new Promise((resolve, reject) => {
+            if (W.geometryEditing.activeEditor) {
+                resolve(W.geometryEditing.activeEditor);
+            } else {
+                if(tries <= 10)
+                    setTimeout(() => resolve(getActiveEditor()), 100);
+            }
+        });
     }
 
     function init2(){
@@ -654,11 +665,14 @@ var UpdateObject, MultiAction;
         });
 
         W.selectionManager.events.register("selectionchanged", null, function(){
-            if(W.selectionManager.selectedItems.length > 0 && W.selectionManager.selectedItems[0].model.type === "mapComment")
-                if((W.geometryEditing.activeEditor.mode & OL.Control.ModifyFeature.RESHAPE) == 0){
-                    W.geometryEditing.activeEditor.mode |= OL.Control.ModifyFeature.RESHAPE;
-                    W.geometryEditing.activeEditor.resetVertices();
-                }
+            let selectedItems = W.selectionManager.selectedItems;
+            if(selectedItems.length > 0 && selectedItems[0].model.type === "mapComment")
+                getActiveEditor().then(val => {
+                    if((val.mode & OL.Control.ModifyFeature.ROTATE) == 0){
+                        val.mode |= OL.Control.ModifyFeature.ROTATE;
+                        val.resetVertices();
+                    }
+                });
         });
 
         //Always display the link when a point Place is selected, but default to un-linked
@@ -912,16 +926,13 @@ var UpdateObject, MultiAction;
     }
 
     function ObjectsChanged(){
-        if(W.selectionManager.hasSelectedItems() && W.geometryEditing.activeEditor == null)
-        {
-            setTimeout(ObjectsChanged, 50);
-            return;
-        }
         if(W.map.getLayerByUniqueName('landmarks').selectedFeatures.length >0)
-            if(placeIsPoint && W.geometryEditing.activeEditor.vertices.length > 0){
-                removeDragCallbacks();
-                checkSelection();
-            }
+            getActiveEditor().then(val => {
+                if(placeIsPoint && val.vertices.length > 0){
+                    removeDragCallbacks();
+                    checkSelection();
+                }
+            });
     }
 
     function handleNavPointOffScreen() {
@@ -977,47 +988,43 @@ var UpdateObject, MultiAction;
         'use strict';
 
         var ClosestSegmentNavPoint;
-        if(W.selectionManager.hasSelectedItems() && W.geometryEditing.activeEditor == null)
-        {
-            setTimeout(checkSelection, 50);
-            return;
-        }
 
-		if (!checkConditions()) {
-			removeDragCallbacks();
-		} else {
-            ClosestSegmentNavPoint = W.geometryEditing.activeEditor._navigationPointMarker;
-			if (W.selectionManager.hasSelectedItems()) {
-				let selectedItem = W.selectionManager.selectedItems[0];
+        if (!checkConditions()) {
+            removeDragCallbacks();
+        } else {
+            getActiveEditor().then(val => {
+                ClosestSegmentNavPoint = val._navigationPointMarker;
+                if (W.selectionManager.hasSelectedItems()) {
+                    let selectedItem = W.selectionManager.selectedItems[0];
 
-                if ('venue' !== selectedItem.model.type) {
-					removeDragCallbacks();
-					clearClosesetSegmentLayerFeatures();
-				} else {
-                    placeIsPoint = selectedItem.model.isPoint();
-					if (placeIsPoint) {
-                        //Event when the Place is moved
-						W.geometryEditing.activeEditor.dragControl.onDrag = function (e, t) {
-							W.geometryEditing.activeEditor.dragVertex.apply(W.geometryEditing.activeEditor, [e, t]);
+                    if ('venue' !== selectedItem.model.type) {
+                        removeDragCallbacks();
+                        clearClosesetSegmentLayerFeatures();
+                    } else {
+                        placeIsPoint = selectedItem.model.isPoint();
+                        if (placeIsPoint) {
+                            //Event when the Place is moved
+                            val.dragControl.onDrag = function (e, t) {
+                                val.dragVertex.apply(val, [e, t]);
+                                let entryExitPoint = selectedItem.model.geometry.clone();
+                                if(selectedItem.model.getNavigationPoints().length > 0)
+                                    entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
+                                findNearestSegment(entryExitPoint);
+                            };
+                            //ClosestSegmentNavPoint.events.register('drag', W.geometryEditing.activeEditor, findNearestSegment);
                             let entryExitPoint = selectedItem.model.geometry.clone();
                             if(selectedItem.model.getNavigationPoints().length > 0)
                                 entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
-							findNearestSegment(entryExitPoint);
-						};
-                        //ClosestSegmentNavPoint.events.register('drag', W.geometryEditing.activeEditor, findNearestSegment);
-                        let entryExitPoint = selectedItem.model.geometry.clone();
-                        if(selectedItem.model.getNavigationPoints().length > 0)
-                            entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
-                        findNearestSegment(entryExitPoint);
-					} else {
-                        if(selectedItem.model.getNavigationPoints().length === 0)
-                            findNearestSegment(selectedItem.model.geometry.getCentroid());
-                        else{
-                            for(let i=0;i<selectedItem.model.getNavigationPoints().length;i++){
-                                findNearestSegment(selectedItem.model.getNavigationPoints()[i]._point);
+                            findNearestSegment(entryExitPoint);
+                        } else {
+                            if(selectedItem.model.getNavigationPoints().length === 0)
+                                findNearestSegment(selectedItem.model.geometry.getCentroid());
+                            else{
+                                for(let i=0;i<selectedItem.model.getNavigationPoints().length;i++){
+                                    findNearestSegment(selectedItem.model.getNavigationPoints()[i]._point);
+                                }
                             }
-                        }
-						/*if (null !== typeof ClosestSegmentNavPoint) {
+                            /*if (null !== typeof ClosestSegmentNavPoint) {
                             //Event when the nav point is moved
 							//ClosestSegmentNavPoint.events.register('drag', W.geometryEditing.activeEditor, findNearestSegment);
 							if (WazeWrap.Geometry.isGeometryInMapExtent(ClosestSegmentNavPoint.lonlat.toPoint())) {
@@ -1026,12 +1033,13 @@ var UpdateObject, MultiAction;
 								W.map.events.register('moveend', window, handleNavPointOffScreen);
 							}
 						}*/
-					}
-				}
-			} else {
-				removeDragCallbacks();
-				clearClosesetSegmentLayerFeatures();
-			}
+                        }
+                    }
+                } else {
+                    removeDragCallbacks();
+                    clearClosesetSegmentLayerFeatures();
+                }
+            });
 		}
 	}
 
