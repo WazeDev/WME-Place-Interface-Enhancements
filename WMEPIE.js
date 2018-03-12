@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.03.07.01
+// @version      2018.03.12.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -14,6 +14,7 @@
 // @require      https://greasyfork.org/scripts/27023-jscolor/code/JSColor.js
 // @require      https://greasyfork.org/scripts/37486-wme-utils-hoursparser.js
 // @require      https://greasyfork.org/scripts/38421-wme-utils-navigationpoint/code/WME%20Utils%20-%20NavigationPoint.js?version=251065
+// @require      https://greasyfork.org/scripts/39208-wme-utils-google-link-enhancer/code/WME%20Utils%20-%20Google%20Link%20Enhancer.js?version=257587
 // @license      GPLv3
 // ==/UserScript==
 var UpdateObject, MultiAction;
@@ -21,7 +22,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.03.07.01";
+    var curr_ver = "2018.03.12.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -29,6 +30,7 @@ var UpdateObject, MultiAction;
     var resCategory = "RESIDENCE_HOME";
     var wazePL;
     let hoursparser = new HoursParser();
+    let GLE;
 
     //Layer definitions
     {
@@ -97,6 +99,7 @@ var UpdateObject, MultiAction;
 
     function init(){
         loadTranslations();
+        GLE = new GoogleLinkEnhancer();
 
         var $section = $("<div>", {style:"padding:8px 16px", id:"WMEPIESettings"});
         $section.html([
@@ -158,6 +161,7 @@ var UpdateObject, MultiAction;
             '<div id="divShowPLSpotEstimatorButton" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.PSEShowPSEButtonTitle') + '"><input type="checkbox" id="_cbShowPLSpotEstimatorButton" class="pieSettingsCheckbox" /><label for="_cbShowPLSpotEstimatorButton" style="white-space:pre-line;">' + I18n.t('pie.prefs.PSEShowPSEButton') + '</label></div>',
             '<div id="divShowNavPointClosestSegmentOnHover" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowNavPointClosestSegmentOnHover" class="pieSettingsCheckbox" /><label for="_cbShowNavPointClosestSegmentOnHover" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowNavPointClosestSegmentOnHover') + '</label></div>',
             '<div id="divShowClosestSegmentSelected" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowClosestSegmentSelected" class="pieSettingsCheckbox" /><label for="_cbShowClosestSegmentSelected" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowClosestSegmentSelected') + '</label></div>',
+            '<div id="divEnableGLE" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EnableGLETitle') + '"><input type="checkbox" id="_cbEnableGLE" class="pieSettingsCheckbox"/><label for="_cbEnableGLE" style="white-space:pre-line;">' + I18n.t('pie.prefs.EnableGLE') + '</label></div>',
             '</fieldset>',
             '<div class="controls-container" id="divPlaceMenuCustomization">',
             '<b>' + I18n.t('pie.prefs.PlaceMenuCustomization') + '</b></br>',
@@ -226,6 +230,15 @@ var UpdateObject, MultiAction;
         var myLayer = W.map.getLayersByName('PIEPlaceNameLayer')[0];
         ctlLayers.push(myLayer);
         ctl.setLayer(ctlLayers);
+
+        //***** Set Google Link Enhancer translations *****
+        GLE.strings.closedPlace = I18n.t('pie.GLE.closedPlace');
+        GLE.strings.multiLinked = I18n.t('pie.GLE.multiLinked');
+        GLE.strings.linkedToThisPlace = I18n.t('pie.GLE.linkedToThisPlace');
+        GLE.strings.linkedNearby = I18n.t('pie.GLE.linkedNearby');
+        GLE.strings.linkedToXPlaces = I18n.t('pie.GLE.linkedToXPlaces');
+        GLE.strings.badLink = I18n.t('pie.GLE.badLink');
+        GLE.strings.tooFar = I18n.t('pie.GLE.tooFar');
 
         injectCss();
         new WazeWrap.Interface.Tab('PIE', $section.html(), init2);
@@ -393,6 +406,13 @@ var UpdateObject, MultiAction;
             }
         });
 
+        $('#_cbEnableGLE').change(function(){
+            if(this.checked)
+                GLE.enable();
+            else
+                GLE.disable();
+        });
+
         //Load settings to interface
         setChecked('_cbShowAreaPlaceSize', settings.ShowAreaPlaceSize);
         setChecked('_cbShowAreaPlaceSizeImperial', settings.ShowAreaPlaceSizeImperial);
@@ -423,6 +443,7 @@ var UpdateObject, MultiAction;
         setChecked('_cbShowNavPointClosestSegmentOnHover', settings.ShowNavPointClosestSegmentOnHover);
         setChecked('_cbShowClosestSegmentSelected', settings.ShowClosestSegmentSelected);
         setChecked('_cbNavLink', settings.NavLink);
+        setChecked('_cbEnableGLE', settings.EnableGLE);
         if(settings.ShowPlaceNames){
             $('#_cbShowPlaceNamesPoint')[0].disabled = false;
             $('#_cbShowPlaceNamesArea')[0].disabled = false;
@@ -513,6 +534,10 @@ var UpdateObject, MultiAction;
             W.model.actionManager.events.register('afteraction', this, checkSelection);
             W.selectionManager.events.register('selectionchanged', this, checkSelection);
             W.model.venues.on('objectschanged', ObjectsChanged);
+        }
+
+        if(settings.EnableGLE){
+            GLE.enable();
         }
 
         $('.pieSettingsCheckbox').change(function() {
@@ -2558,7 +2583,8 @@ var UpdateObject, MultiAction;
             ShowNavPointClosestSegmentOnHover: true,
             ShowClosestSegmentSelected: false,
             NavLink: false,
-            ToggleAreaPlacesShortcut: 'CS+a'
+            ToggleAreaPlacesShortcut: 'CS+a',
+            EnableGLE: true
         };
         settings = loadedSettings ? loadedSettings : defaultSettings;
         for (var prop in defaultSettings) {
@@ -2616,7 +2642,8 @@ var UpdateObject, MultiAction;
                 ShowNavPointClosestSegmentOnHover: settings.ShowNavPointClosestSegmentOnHover,
                 ShowClosestSegmentSelected: settings.ShowClosestSegmentSelected,
                 NavLink: settings.NavLink,
-                ToggleAreaPlacesShortcut: settings.ToggleAreaPlacesShortcut
+                ToggleAreaPlacesShortcut: settings.ToggleAreaPlacesShortcut,
+                EnableGLE: settings.EnableGLE
             };
 
             for (var name in W.accelerators.Actions) {
@@ -2729,7 +2756,9 @@ var UpdateObject, MultiAction;
                     ShowNavPointClosestSegmentOnHover: "Display the nav point and closest segment line on hover",
                     ShowClosestSegmentSelected: "Display a line from the nav point to the point on the closest segment",
                     NavLink: "Link nav point",
-                    NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved"
+                    NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved",
+                    EnableGLE: "Enable Google Link Enhancer",
+                    EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in yellow, already linked POI in gray (autocomplete menu)"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -2746,6 +2775,15 @@ var UpdateObject, MultiAction;
                     errorSameOpenClose: 'Same open and close times detected',
                     errorOverlappingHours: 'Overlapping hours detected',
 					errorCannotParse: 'Unable to parse the provided hours'
+                },
+                GLE:{
+                    closedPlace: 'Google indicates this place is permanently closed.\nVerify with other sources or your editor community before deleting.',
+                    multiLinked: 'Linked more than once already. Please find and remove multiple links.',
+                    linkedToThisPlace: 'Already linked to this place',
+                    linkedNearby: 'Already linked to a nearby place',
+                    linkedToXPlaces: 'This is linked to {0} places',
+                    badLink: 'Invalid Google link.  Please remove it.',
+                    tooFar: 'The Google linked place is more than {0} meters from the Waze place.  Please verify the link is correct.'
                 }
             },
             "es-419": {
@@ -2826,7 +2864,9 @@ var UpdateObject, MultiAction;
                     ShowNavPointClosestSegmentOnHover: "Display the nav point and closest segment line on hover",
                     ShowClosestSegmentSelected: "Display a line from the nav point to the point on the closest segment",
                     NavLink: "Link nav point",
-                    NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved"
+                    NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved",
+                    EnableGLE: "Habilitar mejoras en links de Google",
+                    EnableGLETitle: "Resalta los GPIDs a lugares cerrados en rojo, GPIDs a mas de 400m del lugar en Waze en verde azulado, GPIDs no válidos en magenta, GPIDs vinculados varias veces en amarillo, GPIDs ya vinculados en gris (menú de autocompletar)"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -2843,6 +2883,15 @@ var UpdateObject, MultiAction;
                     errorSameOpenClose: 'Same open and close times detected',
                     errorOverlappingHours: 'Overlapping hours detected',
 					errorCannotParse: 'Unable to parse the provided hours'
+                },
+                GLE:{
+                    closedPlace: 'Google indica que este lugar está permanentemente cerrado. Verifica con otras fuentes o tu comunidad de edición antes de eliminar.',
+                    multiLinked: 'Vinculado más de una vez. Encuentra y elimina enlaces múltiples.',
+                    linkedToThisPlace: 'Ya vinculado a este lugar',
+                    linkedNearby: 'Ya vinculado a un lugar cercano',
+                    linkedToXPlaces: 'Esto está vinculado a {0} lugares',
+                    badLink: 'Enlace de Google no válido. Por favor elimínalo.',
+                    tooFar: 'El lugar vinculado a Google está a más de {0} metros del lugar de Waze. Verifica que el enlace sea correcto.'
                 }
             },
             fr: {
@@ -2923,7 +2972,9 @@ var UpdateObject, MultiAction;
                     ShowNavPointClosestSegmentOnHover: "Affiche une ligne entre le point d'entrée et le segment le plus proche",
                     ShowClosestSegmentSelected: "Display a line from the nav point to the point on the closest segment",
                     NavLink: "Link nav point",
-                    NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved"
+                    NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved",
+                    EnableGLE: "Enable Google Link Enhancer",
+                    EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in yellow, already linked POI in gray (autocomplete menu)"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -2940,6 +2991,15 @@ var UpdateObject, MultiAction;
                     errorSameOpenClose: 'Same open and close times detected',
                     errorOverlappingHours: 'Overlapping hours detected',
 					errorCannotParse: 'Unable to parse the provided hours'
+                },
+                GLE:{
+                    closedPlace: 'Google indicates this place is permanently closed.\nVerify with other sources or your editor community before deleting.',
+                    multiLinked: 'Linked more than once already. Please find and remove multiple links.',
+                    linkedToThisPlace: 'Already linked to this place',
+                    linkedNearby: 'Already linked to a nearby place',
+                    linkedToXPlaces: 'This is linked to {0} places',
+                    badLink: 'Invalid Google link.  Please remove it.',
+                    tooFar: 'The Google linked place is more than {0} meters from the Waze place.  Please verify the link is correct.'
                 }
             }
         });
