@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.03.13.01
+// @version      2018.03.14.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -22,7 +22,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.03.13.01";
+    var curr_ver = "2018.03.14.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -2758,7 +2758,7 @@ var UpdateObject, MultiAction;
                     NavLink: "Link nav point",
                     NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved",
                     EnableGLE: "Enable Google Link Enhancer",
-                    EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in yellow, already linked POI in gray (autocomplete menu)"
+                    EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in orange, already linked POI in gray (autocomplete menu)"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -2866,7 +2866,7 @@ var UpdateObject, MultiAction;
                     NavLink: "Link nav point",
                     NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved",
                     EnableGLE: "Habilitar mejoras en links de Google",
-                    EnableGLETitle: "Resalta los GPIDs a lugares cerrados en rojo, GPIDs a mas de 400m del lugar en Waze en verde azulado, GPIDs no válidos en magenta, GPIDs vinculados varias veces en amarillo, GPIDs ya vinculados en gris (menú de autocompletar)"
+                    EnableGLETitle: "Resalta los GPIDs a lugares cerrados en rojo, GPIDs a mas de 400m del lugar en Waze en verde azulado, GPIDs no válidos en magenta, GPIDs vinculados varias veces en naranja, GPIDs ya vinculados en gris (menú de autocompletar)"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -2974,7 +2974,7 @@ var UpdateObject, MultiAction;
                     NavLink: "Link nav point",
                     NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved",
                     EnableGLE: "Enable Google Link Enhancer",
-                    EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in yellow, already linked POI in gray (autocomplete menu)"
+                    EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in orange, already linked POI in gray (autocomplete menu)"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
