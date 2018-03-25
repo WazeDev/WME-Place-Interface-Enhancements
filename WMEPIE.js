@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.03.16.02
+// @version      2018.03.25.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -14,7 +14,7 @@
 // @require      https://greasyfork.org/scripts/27023-jscolor/code/JSColor.js
 // @require      https://greasyfork.org/scripts/37486-wme-utils-hoursparser.js
 // @require      https://greasyfork.org/scripts/38421-wme-utils-navigationpoint/code/WME%20Utils%20-%20NavigationPoint.js?version=251065
-// @require      https://greasyfork.org/scripts/39208-wme-utils-google-link-enhancer/code/WME%20Utils%20-%20Google%20Link%20Enhancer.js?version=259278
+// @require      https://greasyfork.org/scripts/39208-wme-utils-google-link-enhancer/code/WME%20Utils%20-%20Google%20Link%20Enhancer.js?version=261176
 // @license      GPLv3
 // ==/UserScript==
 var UpdateObject, MultiAction;
