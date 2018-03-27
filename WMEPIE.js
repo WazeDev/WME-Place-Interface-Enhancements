@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.03.25.01
+// @version      2018.03.27.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -22,7 +22,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.03.16.02";
+    var curr_ver = "2018.03.27.02";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -640,6 +640,7 @@ var UpdateObject, MultiAction;
                                updatePlaceSizeDisplay();
                                AddPlaceCategoriesButtons();
                                AddHoursParserInterface();
+                               AddEEPJumpButtons();
                                if(settings.ShowPlaceLocatorCrosshair)
                                    ShowPlaceLocatorCrosshair();
                                if(settings.ShowSearchButton)
@@ -768,6 +769,9 @@ var UpdateObject, MultiAction;
         /******** Hours Parser ************/
         registerEvents(AddHoursParserInterface);
         AddHoursParserInterface();
+
+        registerEvents(AddEEPJumpButtons);
+        AddEEPJumpButtons();
     }
 
     function AddHoursParserInterface(){
@@ -2172,6 +2176,14 @@ var UpdateObject, MultiAction;
                 $('.full-address').click(function(){
                     $('.street-name').parent().parent().before($('.house-number').parent().parent());
                 });
+    }
+
+    function AddEEPJumpButtons(){
+        $('.navigation-point-list-item').find('.buttons').prepend('<div><i id="EEPCrosshair" class="fa fa-crosshairs" style="color:#2f799b" aria-hidden="true"></i></div>');
+        $('#EEPCrosshair').click(function(){
+            let point = W.selectionManager.selectedItems[0].model.attributes.entryExitPoints[0]._point;
+            W.map.setCenter([point.x, point.y], W.map.zoom);
+        });
     }
 
     function AddPlaceCategoriesButtons(){
