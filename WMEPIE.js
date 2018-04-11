@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.04.10.02
+// @version      2018.04.10.03
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.04.10.02";
+    var curr_ver = "2018.04.10.03";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -413,10 +413,10 @@ var UpdateObject, MultiAction;
         });
 
         $('#_cbEnableGLE').change(function(){
-            /*if(this.checked)
+            if(this.checked)
                 GLE.enable();
             else
-                GLE.disable();*/
+                GLE.disable();
         });
 
         //Load settings to interface
@@ -543,7 +543,7 @@ var UpdateObject, MultiAction;
         }
 
         if(settings.EnableGLE){
-            //GLE.enable();
+            GLE.enable();
         }
 
         $('.pieSettingsCheckbox').change(function() {
