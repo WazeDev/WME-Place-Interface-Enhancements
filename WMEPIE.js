@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.04.10.01
+// @version      2018.04.10.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.04.10.01";
+    var curr_ver = "2018.04.10.02";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -103,7 +103,7 @@ var UpdateObject, MultiAction;
 
     function init(){
         loadTranslations();
-        //GLE = new GoogleLinkEnhancer();
+        GLE = new GoogleLinkEnhancer();
 
         var $section = $("<div>", {style:"padding:8px 16px", id:"WMEPIESettings"});
         $section.html([
@@ -238,13 +238,13 @@ var UpdateObject, MultiAction;
         ctl.setLayer(ctlLayers);
 
         //***** Set Google Link Enhancer translations *****
-        /*GLE.strings.closedPlace = I18n.t('pie.GLE.closedPlace');
+        GLE.strings.closedPlace = I18n.t('pie.GLE.closedPlace');
         GLE.strings.multiLinked = I18n.t('pie.GLE.multiLinked');
         GLE.strings.linkedToThisPlace = I18n.t('pie.GLE.linkedToThisPlace');
         GLE.strings.linkedNearby = I18n.t('pie.GLE.linkedNearby');
         GLE.strings.linkedToXPlaces = I18n.t('pie.GLE.linkedToXPlaces');
         GLE.strings.badLink = I18n.t('pie.GLE.badLink');
-        GLE.strings.tooFar = I18n.t('pie.GLE.tooFar');*/
+        GLE.strings.tooFar = I18n.t('pie.GLE.tooFar');
 
         injectCss();
         new WazeWrap.Interface.Tab('PIE', $section.html(), init2);
