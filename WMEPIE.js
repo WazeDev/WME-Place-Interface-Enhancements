@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.04.12.01
+// @version      2018.04.16.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.04.12.01";
+    var curr_ver = "2018.04.16.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -166,8 +166,7 @@ var UpdateObject, MultiAction;
             '<div id="divShowNavPointClosestSegmentOnHover" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowNavPointClosestSegmentOnHover" class="pieSettingsCheckbox" /><label for="_cbShowNavPointClosestSegmentOnHover" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowNavPointClosestSegmentOnHover') + '</label></div>',
             '<div id="divShowClosestSegmentSelected" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowClosestSegmentSelected" class="pieSettingsCheckbox" /><label for="_cbShowClosestSegmentSelected" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowClosestSegmentSelected') + '</label></div>',
             '<div id="divEnableGLE" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EnableGLETitle') + '"><input type="checkbox" id="_cbEnableGLE" class="pieSettingsCheckbox"/><label for="_cbEnableGLE" style="white-space:pre-line;">' + I18n.t('pie.prefs.EnableGLE') + '</label></div>',
-            //'<div id="divOpenPUR" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbOpenPUR" class="pieSettingsCheckbox"/>',
-            //$('.place-update[data-id="180683148.1807093620.5406064"').click()
+            '<div id="divOpenPUR" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.OpenPURTitle') + '"><input type="checkbox" id="_cbOpenPUR" class="pieSettingsCheckbox"/><label for="_cbOpenPUR" style="white-space:pre-line;">' + I18n.t('pie.prefs.OpenPUR') + '</label></div>',
             '</fieldset>',
             '<div class="controls-container" id="divPlaceMenuCustomization">',
             '<b>' + I18n.t('pie.prefs.PlaceMenuCustomization') + '</b></br>',
@@ -412,6 +411,15 @@ var UpdateObject, MultiAction;
             }
         });
 
+        $('#_cbOpenPUR').change(function(){
+            if(this.checked){
+                W.selectionManager.events.register('selectionchanged', this, openPUR);
+            }
+            else{
+                W.selectionManager.events.unregister('selectionchanged', this, openPUR);
+            }
+        });
+
         $('#_cbEnableGLE').change(function(){
             if(this.checked)
                 GLE.enable();
@@ -450,6 +458,7 @@ var UpdateObject, MultiAction;
         setChecked('_cbShowClosestSegmentSelected', settings.ShowClosestSegmentSelected);
         setChecked('_cbNavLink', settings.NavLink);
         setChecked('_cbEnableGLE', settings.EnableGLE);
+        setChecked('_cbOpenPUR', settings.OpenPUR);
         if(settings.ShowPlaceNames){
             $('#_cbShowPlaceNamesPoint')[0].disabled = false;
             $('#_cbShowPlaceNamesArea')[0].disabled = false;
@@ -540,6 +549,10 @@ var UpdateObject, MultiAction;
             W.model.actionManager.events.register('afteraction', this, checkSelection);
             W.selectionManager.events.register('selectionchanged', this, checkSelection);
             W.model.venues.on('objectschanged', ObjectsChanged);
+        }
+
+        if(settings.OpenPUR){
+            W.selectionManager.events.register('selectionchanged', this, openPUR);
         }
 
         if(settings.EnableGLE){
@@ -1616,6 +1629,12 @@ var UpdateObject, MultiAction;
             currLinkClass = [];
     }
 
+    function openPUR(){
+        if(WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
+            W.commands.execute("place_updates:list", WazeWrap.getSelectedFeatures()[0].model); // W.model.venues.get(WazeWrap.getSelectedFeatures()[0].model.attributes.id)
+        }
+    }
+
     function ShowPlaceLocatorCrosshair(){
         $('#pieCrosshairs').remove();
         if(WazeWrap.getSelectedFeatures().length > 0){
@@ -2599,7 +2618,8 @@ var UpdateObject, MultiAction;
             ShowClosestSegmentSelected: false,
             NavLink: false,
             ToggleAreaPlacesShortcut: 'CS+a',
-            EnableGLE: true
+            EnableGLE: true,
+            OpenPUR: true
         };
         settings = loadedSettings ? loadedSettings : defaultSettings;
         for (var prop in defaultSettings) {
@@ -2658,7 +2678,8 @@ var UpdateObject, MultiAction;
                 ShowClosestSegmentSelected: settings.ShowClosestSegmentSelected,
                 NavLink: settings.NavLink,
                 ToggleAreaPlacesShortcut: settings.ToggleAreaPlacesShortcut,
-                EnableGLE: settings.EnableGLE
+                EnableGLE: settings.EnableGLE,
+                OpenPUR: settings.OpenPUR
             };
 
             for (var name in W.accelerators.Actions) {
@@ -2773,7 +2794,9 @@ var UpdateObject, MultiAction;
                     NavLink: "Link nav point",
                     NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved",
                     EnableGLE: "Enable Google Link Enhancer",
-                    EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in orange, already linked POI in gray (autocomplete menu)"
+                    EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in orange, already linked POI in gray (autocomplete menu)",
+                    OpenPUR: "Automatically open PUR",
+                    OpenPURTitle: "Automatically opens the PUR associated with the selected Place"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -2881,7 +2904,9 @@ var UpdateObject, MultiAction;
                     NavLink: "Link nav point",
                     NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved",
                     EnableGLE: "Habilitar mejoras en links de Google",
-                    EnableGLETitle: "Resalta los GPIDs a lugares cerrados en rojo, GPIDs a mas de 400m del lugar en Waze en verde azulado, GPIDs no válidos en magenta, GPIDs vinculados varias veces en naranja, GPIDs ya vinculados en gris (menú de autocompletar)"
+                    EnableGLETitle: "Resalta los GPIDs a lugares cerrados en rojo, GPIDs a mas de 400m del lugar en Waze en verde azulado, GPIDs no válidos en magenta, GPIDs vinculados varias veces en naranja, GPIDs ya vinculados en gris (menú de autocompletar)",
+                    OpenPUR: "Automatically open PUR",
+                    OpenPURTitle: "Automatically opens the PUR associated with the selected Place"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -2989,7 +3014,9 @@ var UpdateObject, MultiAction;
                     NavLink: "Link nav point",
                     NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved",
                     EnableGLE: "Enable Google Link Enhancer",
-                    EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in orange, already linked POI in gray (autocomplete menu)"
+                    EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in orange, already linked POI in gray (autocomplete menu)",
+                    OpenPUR: "Automatically open PUR",
+                    OpenPURTitle: "Automatically opens the PUR associated with the selected Place"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
