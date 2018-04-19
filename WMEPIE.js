@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.04.16.01
+// @version      2018.04.19.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.04.16.01";
+    var curr_ver = "2018.04.19.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -1631,7 +1631,8 @@ var UpdateObject, MultiAction;
 
     function openPUR(){
         if(WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
-            W.commands.execute("place_updates:list", WazeWrap.getSelectedFeatures()[0].model); // W.model.venues.get(WazeWrap.getSelectedFeatures()[0].model.attributes.id)
+            if(typeof W.selectionManager.selectedItems[0].model.state === 'undefined' || W.selectionManager.selectedItems[0].model.state === null)
+                W.commands.execute("place_updates:list", WazeWrap.getSelectedFeatures()[0].model); // W.model.venues.get(WazeWrap.getSelectedFeatures()[0].model.attributes.id)
         }
     }
 
