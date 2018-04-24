@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.04.24.01
+// @version      2018.04.24.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.04.24.01";
+    var curr_ver = "2018.04.24.02";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -1283,7 +1283,7 @@ var UpdateObject, MultiAction;
         NewPlace.attributes.categories.push("PARKING_LOT");
 
         W.model.actionManager.add(new AddPlace(NewPlace));
-        W.selectionManager.select([NewPlace]);
+        W.selectionManager.setSelectedModels([NewPlace]);
     }
 
     function highlightObsoleteHospitalCategory(){
@@ -1402,7 +1402,7 @@ var UpdateObject, MultiAction;
         multiaction.doSubAction(UFA);
         W.model.actionManager.add(multiaction);
 
-        W.selectionManager.select([NewPlace]);
+        W.selectionManager.setSelectedModels([NewPlace]);
     }
 
     function doneHandler(geom){
@@ -1489,7 +1489,7 @@ var UpdateObject, MultiAction;
         var closestSeg = WazeWrap.Geometry.findClosestSegment(new OL.Geometry.Point(pos.lon, pos.lat), settings.SkipPLR, settings.SkipPLR);
 
         W.model.actionManager.add(new AddPlace(NewPlace));
-        W.selectionManager.select([NewPlace]);
+        W.selectionManager.setSelectedModels([NewPlace]);
 
         if(closestSeg){ //if we were able to find a segment, try to pull the city and/or street name if the options are enabled
             var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = closestSeg.getAddress();
@@ -2152,7 +2152,7 @@ var UpdateObject, MultiAction;
                         UFA.options.updateHouseNumber = true;
                         multiaction.doSubAction(UFA);
                         W.model.actionManager.add(multiaction);
-                        W.selectionManager.select([NewPlace]);
+                        W.selectionManager.setSelectedModels([NewPlace]);
                     });
                 }
             }
