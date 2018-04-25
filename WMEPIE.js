@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.04.24.02
+// @version      2018.04.25.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.04.24.02";
+    var curr_ver = "2018.04.25.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -1038,7 +1038,6 @@ var UpdateObject, MultiAction;
             removeDragCallbacks();
         } else {
             getActiveEditor().then(val => {
-                ClosestSegmentNavPoint = val._navigationPointMarker;
                 if (WazeWrap.hasSelectedFeatures()) {
                     let selectedItem = WazeWrap.getSelectedFeatures()[0];
 
@@ -1049,14 +1048,14 @@ var UpdateObject, MultiAction;
                         placeIsPoint = selectedItem.model.isPoint();
                         if (placeIsPoint) {
                             //Event when the Place is moved
+                            /*
                             val.dragControl.onDrag = function (e, t) {
                                 val.dragVertex.apply(val, [e, t]);
                                 let entryExitPoint = selectedItem.model.geometry.clone();
                                 if(selectedItem.model.getNavigationPoints().length > 0)
                                     entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
                                 findNearestSegment(entryExitPoint);
-                            };
-                            //ClosestSegmentNavPoint.events.register('drag', W.geometryEditing.activeEditor, findNearestSegment);
+                            };*/
                             let entryExitPoint = selectedItem.model.geometry.clone();
                             if(selectedItem.model.getNavigationPoints().length > 0)
                                 entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
@@ -1069,15 +1068,6 @@ var UpdateObject, MultiAction;
                                     findNearestSegment(selectedItem.model.getNavigationPoints()[i]._point);
                                 }
                             }
-                            /*if (null !== typeof ClosestSegmentNavPoint) {
-                            //Event when the nav point is moved
-							//ClosestSegmentNavPoint.events.register('drag', W.geometryEditing.activeEditor, findNearestSegment);
-							if (WazeWrap.Geometry.isGeometryInMapExtent(ClosestSegmentNavPoint.lonlat.toPoint())) {
-								findNearestSegment(ClosestSegmentNavPoint.lonlat.toPoint());
-							} else {
-								W.map.events.register('moveend', window, handleNavPointOffScreen);
-							}
-						}*/
                         }
                     }
                 } else {
@@ -1317,8 +1307,8 @@ var UpdateObject, MultiAction;
         newPlaceCategory = category;
         var polyDrawFeatureOptions = {callbacks : {"done": doneHandler}};
         if(isPoint){
-            $("#map").on('mousemove', MouseMoveHandler);
-            $("#map").click(function(){endPlacementMode(category, isPoint);});
+            $(".olMapViewport").on('mousemove', MouseMoveHandler);
+            $(".olMapViewport").click(function(){endPlacementMode(category, isPoint);});
             /*drawPoly = new OL.Control.DrawFeature(newPlaceLayer, OL.Handler.Polygon, polyDrawFeatureOptions);
             W.map.addControl(drawPoly);
             drawPoly.activate();*/
@@ -1426,8 +1416,8 @@ var UpdateObject, MultiAction;
     }
 
     function disablePlacementMode(){
-        $("#map").off('click');//, endPlacementMode);
-        $("#map").off('mousemove', MouseMoveHandler);
+        $(".olMapViewport").off('click');//, endPlacementMode);
+        $(".olMapViewport").off('mousemove', MouseMoveHandler);
         clearLayer();
         document.removeEventListener('keyup', keyUpHandler);
     }
