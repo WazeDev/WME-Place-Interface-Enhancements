@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.04.25.01
+// @version      2018.04.26.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.04.25.01";
+    var curr_ver = "2018.04.26.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -1371,16 +1371,16 @@ var UpdateObject, MultiAction;
         if(address){
             var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress');
             newAttributes = {
-                countryID: address.country.id,
-                stateID: address.state.id,
-                emptyCity: address.city.attributes.name ? null : true,
-                emptyStreet: address.street.name ? null : true,
-                houseNumber: address.houseNumber
+                countryID: address.attributes.country.id,
+                stateID: address.attributes.state.id,
+                emptyCity: address.attributes.city.attributes.name ? null : true,
+                emptyStreet: address.attributes.street.name ? null : true,
+                houseNumber: address.attributes.houseNumber
             };
 
-                newAttributes.streetName = address.street.name;
+                newAttributes.streetName = address.attributes.street.name;
 
-                var cityName = address.city.attributes.name;
+                var cityName = address.attributes.city.attributes.name;
 
                 if(cityName !== "")
                     newAttributes.emptyCity = null;
@@ -1485,22 +1485,22 @@ var UpdateObject, MultiAction;
             var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = closestSeg.getAddress();
 
             newAttributes = {
-                countryID: address.country.id,
-                stateID: address.state.id,
-                emptyCity: address.city.attributes.name ? null : true,
-                emptyStreet: address.street.name ? null : true
+                countryID: address.attributes.country.id,
+                stateID: address.attributes.state.id,
+                emptyCity: address.attributes.city.attributes.name ? null : true,
+                emptyStreet: address.attributes.street.name ? null : true
             };
 
             if(settings.UseStreetFromClosestSeg)
-                newAttributes.streetName = address.street.name;
+                newAttributes.streetName = address.attributes.street.name;
             else
                 newAttributes.emptyStreet = true;
 
             if(settings.UseCityFromClosestSeg){
-                var cityName = address.city.attributes.name;
+                var cityName = address.attributes.city.attributes.name;
 
                 if(settings.UseAltCity && cityName === ""){
-                    if(address.altStreets.length > 0){ //segment has alt names
+                    if(address.attributes.altStreets.length > 0){ //segment has alt names
                         for(var j=0;j<closestSeg.attributes.streetIDs.length;j++){
                             var altCity = W.model.cities.get(W.model.streets.get(closestSeg.attributes.streetIDs[j]).cityID).attributes;
 
