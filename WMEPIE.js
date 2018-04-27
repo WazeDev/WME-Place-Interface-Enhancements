@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.04.26.02
+// @version      2018.04.27.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.04.26.02";
+    var curr_ver = "2018.04.27.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -1366,27 +1366,28 @@ var UpdateObject, MultiAction;
         NewPlace.attributes.categoryAttributes.PARKING_LOT.lotType = ["STREET_LEVEL"];
         NewPlace.attributes.categoryAttributes.PARKING_LOT.costType = "FREE";
 
-        W.model.actionManager.add(new AddPlace(NewPlace));
-
         if(address){
             var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress');
             newAttributes = {
-                countryID: address.attributes.country.id,
-                stateID: address.attributes.state.id,
-                emptyCity: address.attributes.city.attributes.name ? null : true,
-                emptyStreet: address.attributes.street.name ? null : true,
-                houseNumber: address.attributes.houseNumber
+                countryID: address.country.id,
+                stateID: address.state.id,
+                emptyCity: address.city.attributes.name ? null : true,
+                emptyStreet: address.street.name ? null : true,
+                houseNumber: address.houseNumber
             };
 
-                newAttributes.streetName = address.attributes.street.name;
+                newAttributes.streetName = address.street.name;
 
-                var cityName = address.attributes.city.attributes.name;
+                var cityName = address.city.attributes.name;
 
                 if(cityName !== "")
                     newAttributes.emptyCity = null;
                 newAttributes.cityName = cityName;
-
         }
+
+
+        W.model.actionManager.add(new AddPlace(NewPlace));
+
         var UFA = new UpdateFeatureAddress(NewPlace, newAttributes);
         UFA.options.updateHouseNumber = true;
         multiaction.doSubAction(UFA);
@@ -1677,6 +1678,7 @@ var UpdateObject, MultiAction;
                         if(!BusinessPLAMode){
                             BusinessPLAMode = true;
                             businessPLAPlaceName = WazeWrap.getSelectedFeatures()[0].model.attributes.name;
+                            debugger;
                             businessPLAPlaceAddress = WazeWrap.getSelectedFeatures()[0].model.getAddress().attributes;
                             //businessPLAPlacePhone = WazeWrap.getSelectedFeatures()[0].model.attributes.phone;
                             //businessPLAPlaceURL = WazeWrap.getSelectedFeatures()[0].model.attributes.url;
@@ -2059,6 +2061,7 @@ var UpdateObject, MultiAction;
                     $('#landmark-edit-general > form > div:nth-child(2) > i').after($PlaceCopyButton);
 
                     $('#pieCopyPlaceButton').click(function(){
+                        debugger;
                         var PlaceObject = require("Waze/Feature/Vector/Landmark");
                         var AddPlace = require("Waze/Action/AddLandmark");
 
