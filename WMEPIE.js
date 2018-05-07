@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.05.06.01
+// @version      2018.05.07.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1621,7 +1621,7 @@ var UpdateObject, MultiAction;
     }
 
     function openPUR(){
-        if(WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
+        if(WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].model.type === "venue" && $('.pending-changes-alert').length > 0){
             if(typeof WazeWrap.getSelectedFeatures()[0].model.state === 'undefined' || WazeWrap.getSelectedFeatures()[0].model.state === null)
                 W.commands.execute("place_updates:list", WazeWrap.getSelectedFeatures()[0].model); // W.model.venues.get(WazeWrap.getSelectedFeatures()[0].model.attributes.id)
         }
