@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.04.27.01
+// @version      2018.05.06.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.04.27.01";
+    var curr_ver = "2018.05.01.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -230,11 +230,11 @@ var UpdateObject, MultiAction;
         W.map.addLayer(closestSegmentLayer);
         closestSegmentLayer.setVisibility(true);
 
-        var ctl = W.map.controls.find(function(ctrl) { return ctrl.displayClass ==="WazeControlSelectHighlightFeature"; });
+        /*var ctl = W.map.controls.find(function(ctrl) { return ctrl.displayClass ==="WazeControlSelectHighlightFeature"; });
         var ctlLayers = [].concat(ctl.layers);
         var myLayer = W.map.getLayersByName('PIEPlaceNameLayer')[0];
         ctlLayers.push(myLayer);
-        ctl.setLayer(ctlLayers);
+        ctl.setLayer(ctlLayers);*/
 
         //***** Set Google Link Enhancer translations *****
         GLE.strings.closedPlace = I18n.t('pie.GLE.closedPlace');
