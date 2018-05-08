@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.05.08.01
+// @version      2018.05.08.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.05.08.01";
+    var curr_ver = "2018.05.08.02";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -2203,8 +2203,7 @@ var UpdateObject, MultiAction;
             if($('#landmark-edit-general > form > div:nth-child(1) > div > div > div > ul > li').length > 0){
                 var $button = $('<div>', {class:'makePrimary'}).text("Make primary").click(function(){
                     let obj = WazeWrap.getSelectedFeatures()[0].model;
-                    let that = this;
-                    let toPrimary = $(that).prev().prev().val()
+                    let toPrimary = $(this).prev().prev().val()
                     let aliases = obj.attributes.aliases.filter(function(i) {
                         return i != toPrimary;
                     });
