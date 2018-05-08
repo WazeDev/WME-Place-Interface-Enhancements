@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.05.07.01
+// @version      2018.05.08.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.05.01.01";
+    var curr_ver = "2018.05.08.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -660,6 +660,7 @@ var UpdateObject, MultiAction;
                                AddPlaceCategoriesButtons();
                                AddHoursParserInterface();
                                AddEEPJumpButtons();
+                               AddMakePrimaryButtons();
                                if(settings.ShowPlaceLocatorCrosshair)
                                    ShowPlaceLocatorCrosshair();
                                if(settings.ShowSearchButton)
@@ -792,6 +793,9 @@ var UpdateObject, MultiAction;
 
         registerEvents(AddEEPJumpButtons);
         AddEEPJumpButtons();
+
+        registerEvents(AddMakePrimaryButtons);
+        AddMakePrimaryButtons();
     }
 
     function AddHoursParserInterface(){
@@ -2194,6 +2198,28 @@ var UpdateObject, MultiAction;
                 });
     }
 
+    function AddMakePrimaryButtons(){
+        if(WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
+            if($('#landmark-edit-general > form > div:nth-child(1) > div > div > div > ul > li').length > 0){
+                var $button = $('<div>', {class:'makePrimary'}).text("Make primary").click(function(){
+                    let obj = WazeWrap.getSelectedFeatures()[0].model;
+                    let that = this;
+                    let toPrimary = $(that).prev().prev().val()
+                    let aliases = obj.attributes.aliases.filter(function(i) {
+                        return i != toPrimary;
+                    });
+                    aliases.push(obj.attributes.name);
+                    var multiaction = new MultiAction();
+                    multiaction.setModel(W.model);
+                    multiaction.doSubAction(new UpdateObject(obj, {aliases: aliases}));
+                    multiaction.doSubAction(new UpdateObject(obj, {name: toPrimary}));
+                    W.model.actionManager.add(multiaction);
+                });
+                $('#landmark-edit-general > form > div:nth-child(1) > div > div > div > ul > li').find('.delete').after($button);
+            }
+        }
+    }
+
     function AddEEPJumpButtons(){
         $('.navigation-point-list-item').find('.buttons').prepend('<div><i id="EEPCrosshair" class="fa fa-crosshairs" style="color:#2f799b" aria-hidden="true"></i></div>');
         $('#EEPCrosshair').click(function(){
@@ -2559,7 +2585,9 @@ var UpdateObject, MultiAction;
             '.pie-natural-features {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -16px -21px; width: 17px; height: 15px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-natural-features {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
             '.pie-parking-lot {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -65px -48px; width: 13px; height: 13px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-parking-lot {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
             '.pie-residential {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -37px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-residential {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
-            '#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -37px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }'
+            '#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -37px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '.makePrimary {border:1px solid gray; display:inline-block; cursor:pointer; margin-left:5px; border-radius:5px; padding:0px 4px 0px 4px; user-select: none; font-size:11px;}',
+            '.makePrimary:hover {border-color: #26bae8; color: #26bae8}'
         ].join(' ');
         $('<style type="text/css">' + css + '</style>').appendTo('head');
     }
