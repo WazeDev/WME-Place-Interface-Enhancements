@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.05.08.02
+// @version      2018.05.14.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.05.08.02";
+    var curr_ver = "2018.05.14.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -136,6 +136,7 @@ var UpdateObject, MultiAction;
             //'<div class="controls-container pie-controls-container" id="divMoveAddress" title="' + I18n.t('pie.prefs.MoveAddressTitle') + '"><input type="checkbox" id="_cbMoveAddress" class="pieSettingsCheckbox"/><label for="_cbMoveAddress" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveAddress') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divMoveHNEntry" title="' + I18n.t('pie.prefs.MoveHNEntryTitle') + '"><input type="checkbox" id="_cbMoveHNEntry" class="pieSettingsCheckbox"/><label for="_cbMoveHNEntry" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveHNEntry') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divNavLink" title="' + I18n.t('pie.prefs.NavLinkTitle') + '"><input type="checkbox" id="_cbNavLink" class="pieSettingsCheckbox" disabled/><label for="_cbNavLink" style="white-space:pre-line;">' + I18n.t('pie.prefs.NavLink') + '</label></div>',
+            '<div class="controls-container pie-controls-container" id="divHidePaymentType" title="' + I18n.t('pie.prefs.HidePaymentTypeTitle') + '"><input type="checkbox" id="_cbHidePaymentType" class="pieSettingsCheckbox" /><label for="_cbHidePaymentType" style="white-space:pre-line;">' + I18n.t('pie.prefs.HidePaymentType') + '</label></div>',
             '</fieldset>',
 
             '<fieldset id="fieldNewPlaces" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
@@ -427,6 +428,15 @@ var UpdateObject, MultiAction;
                 GLE.disable();
         });
 
+        $('#_cbHidePaymentType').change(function(){
+            if(this.checked){
+                registerEvents(HidePaymentTypePlaceSelected);
+            }
+            else{
+                unregisterEvents(HidePaymentTypePlaceSelected);
+            }
+        });
+
         //Load settings to interface
         setChecked('_cbShowAreaPlaceSize', settings.ShowAreaPlaceSize);
         setChecked('_cbShowAreaPlaceSizeImperial', settings.ShowAreaPlaceSizeImperial);
@@ -459,6 +469,7 @@ var UpdateObject, MultiAction;
         setChecked('_cbNavLink', settings.NavLink);
         setChecked('_cbEnableGLE', settings.EnableGLE);
         setChecked('_cbOpenPUR', settings.OpenPUR);
+        setChecked('_cbHidePaymentType', settings.HidePaymentType);
         if(settings.ShowPlaceNames){
             $('#_cbShowPlaceNamesPoint')[0].disabled = false;
             $('#_cbShowPlaceNamesArea')[0].disabled = false;
@@ -557,6 +568,11 @@ var UpdateObject, MultiAction;
 
         if(settings.EnableGLE){
             GLE.enable();
+        }
+
+        if(settings.HidePaymentType){
+            registerEvents(HidePaymentTypePlaceSelected);
+            HidePaymentTypePlaceSelected();
         }
 
         $('.pieSettingsCheckbox').change(function() {
@@ -665,11 +681,15 @@ var UpdateObject, MultiAction;
                                    ShowPlaceLocatorCrosshair();
                                if(settings.ShowSearchButton)
                                    ShowSearchButton();
-                                   ShowNavPointLink();
+                               ShowNavPointLink();
                                if(settings.ShowParkingLotButton)
                                    ShowParkingLotButton();
                                if(settings.ShowCopyPlaceButton)
                                    ShowCopyPlaceButton();
+                           }
+                           else if(addedNode.nodeType === Node.ELEMENT_NODE && $(addedNode).hasClass('payment-checkbox')){
+                               if(settings.HidePaymentType)
+                                   _hidePaymentType();
                            }
                        }
                });
@@ -1629,6 +1649,25 @@ var UpdateObject, MultiAction;
             if(typeof WazeWrap.getSelectedFeatures()[0].model.state === 'undefined' || WazeWrap.getSelectedFeatures()[0].model.state === null)
                 W.commands.execute("place_updates:list", WazeWrap.getSelectedFeatures()[0].model); // W.model.venues.get(WazeWrap.getSelectedFeatures()[0].model.attributes.id)
         }
+    }
+
+    function _hidePaymentType(){
+        if(WazeWrap.hasSelectedFeatures() && _.contains(WazeWrap.getSelectedFeatures()[0].model.attributes.categories, "PARKING_LOT")){
+            let attr = WazeWrap.getSelectedFeatures()[0].model.attributes;
+            if(attr.categoryAttributes.PARKING_LOT.costType && attr.categoryAttributes.PARKING_LOT.costType === "FREE"){
+                if(!$('#landmark-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').hasClass("collapse"))
+                    $('#landmark-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').addClass("collapse");
+            }
+            else{
+                if($('#landmark-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').hasClass("collapse"))
+                    $('#landmark-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').removeClass("collapse");
+            }
+        }
+    }
+
+    function HidePaymentTypePlaceSelected(){
+        if(WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].model.type === "venue")
+            _hidePaymentType();
     }
 
     function ShowPlaceLocatorCrosshair(){
@@ -2640,7 +2679,8 @@ var UpdateObject, MultiAction;
             NavLink: false,
             ToggleAreaPlacesShortcut: 'CS+a',
             EnableGLE: true,
-            OpenPUR: true
+            OpenPUR: true,
+            HidePaymentType: false
         };
         settings = loadedSettings ? loadedSettings : defaultSettings;
         for (var prop in defaultSettings) {
@@ -2700,7 +2740,8 @@ var UpdateObject, MultiAction;
                 NavLink: settings.NavLink,
                 ToggleAreaPlacesShortcut: settings.ToggleAreaPlacesShortcut,
                 EnableGLE: settings.EnableGLE,
-                OpenPUR: settings.OpenPUR
+                OpenPUR: settings.OpenPUR,
+                HidePaymentType: settings.HidePaymentType
             };
 
             for (var name in W.accelerators.Actions) {
@@ -2817,7 +2858,9 @@ var UpdateObject, MultiAction;
                     EnableGLE: "Enable Google Link Enhancer",
                     EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in orange, already linked POI in gray (autocomplete menu)",
                     OpenPUR: "Automatically open PUR",
-                    OpenPURTitle: "Automatically opens the PUR associated with the selected Place"
+                    OpenPURTitle: "Automatically opens the PUR associated with the selected Place",
+                    HidePaymentType: "Hide payment type",
+                    HidePaymentTypeTitle: "Hide the Payment Type section when the cost is set to Free"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -2927,7 +2970,9 @@ var UpdateObject, MultiAction;
                     EnableGLE: "Habilitar mejoras en links de Google",
                     EnableGLETitle: "Resalta los GPIDs a lugares cerrados en rojo, GPIDs a mas de 400m del lugar en Waze en verde azulado, GPIDs no válidos en magenta, GPIDs vinculados varias veces en naranja, GPIDs ya vinculados en gris (menú de autocompletar)",
                     OpenPUR: "Automatically open PUR",
-                    OpenPURTitle: "Automatically opens the PUR associated with the selected Place"
+                    OpenPURTitle: "Automatically opens the PUR associated with the selected Place",
+                    HidePaymentType: "Hide payment type",
+                    HidePaymentTypeTitle: "Hide the Payment Type section when the cost is set to Free"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -3037,7 +3082,9 @@ var UpdateObject, MultiAction;
                     EnableGLE: "Enable Google Link Enhancer",
                     EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in orange, already linked POI in gray (autocomplete menu)",
                     OpenPUR: "Automatically open PUR",
-                    OpenPURTitle: "Automatically opens the PUR associated with the selected Place"
+                    OpenPURTitle: "Automatically opens the PUR associated with the selected Place",
+                    HidePaymentType: "Hide payment type",
+                    HidePaymentTypeTitle: "Hide the Payment Type section when the cost is set to Free"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
