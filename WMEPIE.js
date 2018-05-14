@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.05.14.01
+// @version      2018.05.14.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.05.14.01";
+    var curr_ver = "2018.05.14.02";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -136,6 +136,7 @@ var UpdateObject, MultiAction;
             //'<div class="controls-container pie-controls-container" id="divMoveAddress" title="' + I18n.t('pie.prefs.MoveAddressTitle') + '"><input type="checkbox" id="_cbMoveAddress" class="pieSettingsCheckbox"/><label for="_cbMoveAddress" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveAddress') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divMoveHNEntry" title="' + I18n.t('pie.prefs.MoveHNEntryTitle') + '"><input type="checkbox" id="_cbMoveHNEntry" class="pieSettingsCheckbox"/><label for="_cbMoveHNEntry" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveHNEntry') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divNavLink" title="' + I18n.t('pie.prefs.NavLinkTitle') + '"><input type="checkbox" id="_cbNavLink" class="pieSettingsCheckbox" disabled/><label for="_cbNavLink" style="white-space:pre-line;">' + I18n.t('pie.prefs.NavLink') + '</label></div>',
+	    '<br>',
             '<div class="controls-container pie-controls-container" id="divHidePaymentType" title="' + I18n.t('pie.prefs.HidePaymentTypeTitle') + '"><input type="checkbox" id="_cbHidePaymentType" class="pieSettingsCheckbox" /><label for="_cbHidePaymentType" style="white-space:pre-line;">' + I18n.t('pie.prefs.HidePaymentType') + '</label></div>',
             '</fieldset>',
 
