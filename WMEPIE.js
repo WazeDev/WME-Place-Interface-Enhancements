@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.05.18.01
+// @version      2018.05.19.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.05.18.01";
+    var curr_ver = "2018.05.19.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -662,6 +662,8 @@ var UpdateObject, MultiAction;
 
         new WazeWrap.Interface.Shortcut('CreateParkingLotShortcut', 'Creates a parking lot Place', 'wmepie', 'Place Interface Enhancements', settings.CreateParkingLotShortcut, function(){startPlacementMode("PARKING_LOT", false);}, null).add();
         new WazeWrap.Interface.Shortcut('HideAreaPlacesShortcut', 'Toggle hiding area Places', 'wmepie', 'Place Interface Enhancements', settings.ToggleAreaPlacesShortcut, ToggleHideAreaPlaces, null).add();
+        debugger;
+        new WazeWrap.Interface.Shortcut('OrthogonalizeShortcut', 'Orthogonalize Area Place', 'wmepie', 'Place Interface Enhancements', settings.OrthogonalizeShortcut, OrthogonalizePlace, null).add();
 
         $("#piePlaceFilter").on("propertychange keyup paste input", UpdatePlaceFilter);
         $('input[type=radio][name=PlaceFilterToggle]').change(UpdatePlaceFilter);
@@ -1684,6 +1686,21 @@ var UpdateObject, MultiAction;
             _hidePaymentType();
     }
 
+    function OrthogonalizePlace(){
+        if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].model.geometry.toString().match(/^POLYGON/)){
+            let selected = WazeWrap.getSelectedFeatures()[0].model;
+            var newGeom = WazeWrap.Util.OrthogonalizeGeometry(selected.geometry.clone().components[0].components);
+            var UFG = require("Waze/Action/UpdateFeatureGeometry");
+            var originalGeometry = selected.geometry.clone();
+
+            selected.geometry.components[0].components = [].concat(newGeom);
+            selected.geometry.components[0].clearBounds();
+
+            var action = new UFG(selected, W.model.venues, originalGeometry, selected.geometry);
+            W.model.actionManager.add(action);
+        }
+    }
+
     function InsertGeometryMods(){
         $('#pieGeometryMods').remove();
         if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].model.geometry.toString().match(/^POLYGON/)){
@@ -1691,16 +1708,7 @@ var UpdateObject, MultiAction;
             $('#landmark-edit-general > form > div:nth-child(7)').after($GeomMods);
 
             $('#pieorthogonalize').click(function(){
-                let selected = WazeWrap.getSelectedFeatures()[0].model;
-                var newGeom = WazeWrap.Util.OrthogonalizeGeometry(selected.geometry.clone().components[0].components);
-                var UFG = require("Waze/Action/UpdateFeatureGeometry");
-                var originalGeometry = selected.geometry.clone();
-
-                selected.geometry.components[0].components = [].concat(newGeom);
-                selected.geometry.components[0].clearBounds();
-
-                var action = new UFG(selected, W.model.venues, originalGeometry, selected.geometry);
-                W.model.actionManager.add(action);
+                OrthogonalizePlace();
             });
 
             $('#pierotate').click(function(){
@@ -2763,7 +2771,8 @@ var UpdateObject, MultiAction;
             HidePaymentType: false,
             GeometryMods: true,
             Rotate: false,
-            Resize: false
+            Resize: false,
+            OrthogonalizeShortcut: ''
         };
         settings = loadedSettings ? loadedSettings : defaultSettings;
         for (var prop in defaultSettings) {
@@ -2827,7 +2836,8 @@ var UpdateObject, MultiAction;
                 HidePaymentType: settings.HidePaymentType,
                 GeometryModes: settings.GeometryMods,
                 Rotate: settings.Rotate,
-                Resize: settings.Resize
+                Resize: settings.Resize,
+                OrthogonalizeShortcut: settings.OrthogonalizeShortcut
             };
 
             for (var name in W.accelerators.Actions) {
