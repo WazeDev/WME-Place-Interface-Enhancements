@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.06.05.01
+// @version      2018.06.06.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.05.22.01";
+    var curr_ver = "2018.06.06.01";
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -140,6 +140,7 @@ var UpdateObject, MultiAction;
 	    '<br>',
             '<div class="controls-container pie-controls-container" id="divHidePaymentType" title="' + I18n.t('pie.prefs.HidePaymentTypeTitle') + '"><input type="checkbox" id="_cbHidePaymentType" class="pieSettingsCheckbox" /><label for="_cbHidePaymentType" style="white-space:pre-line;">' + I18n.t('pie.prefs.HidePaymentType') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divGeometryMods" title="' + I18n.t('pie.prefs.GeometryModsTitle') + '"><input type="checkbox" id="_cbGeometryMods" class="pieSettingsCheckbox" /><label for="_cbGeometryMods" style="white-space:pre-line;">' + I18n.t('pie.prefs.GeometryMods') + '</label></div>',
+            `<div class="controls-container pie-controls-container" id="divSimplifyFactor" style="padding-left:20px;" title=""> ${I18n.t("pie.prefs.SimplifyFactor")} <input type="text" size="1" id="pieSimplifyFactor"></div>`,
             '</fieldset>',
 
             '<fieldset id="fieldNewPlaces" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
@@ -155,10 +156,10 @@ var UpdateObject, MultiAction;
             '<fieldset id="fieldMapMods" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
             '<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>' + I18n.t('pie.prefs.MapChanges') + '</h4></legend>',
             '<div id="divShowNames" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.ShowPlaceNames') + '"><input type="checkbox" id="_cbShowPlaceNames" class="pieSettingsCheckbox" /><label for="_cbShowPlaceNames">' + I18n.t('pie.prefs.ShowPlaceNames') + '</label></div>',
-            '<div id="divShowNamesPoint"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowPointNamesTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesPoint" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesPoint">' + I18n.t('pie.prefs.ShowPointNames') + '</label></div>',
+            '<br><div id="divShowNamesPoint"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowPointNamesTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesPoint" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesPoint">' + I18n.t('pie.prefs.ShowPointNames') + '</label></div>',
             '<div id="divShowNamesArea"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowAreaNamesTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesArea" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesArea">' + I18n.t('pie.prefs.ShowAreaNames') + '</label></div>',
-            '<div id="divShowNamesPLA"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowPLANameTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesPLA" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesPLA">' + I18n.t('pie.prefs.ShowPLAName') + '</label></div>',
-            '<div id="divShowNamesLock"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowLockLevelTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesLock" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesLock">' + I18n.t('pie.prefs.ShowLockLevel') + '</label></div>',
+            '<br><div id="divShowNamesPLA"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowPLANameTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesPLA" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesPLA">' + I18n.t('pie.prefs.ShowPLAName') + '</label></div>',
+            '<br><div id="divShowNamesLock"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowLockLevelTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesLock" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesLock">' + I18n.t('pie.prefs.ShowLockLevel') + '</label></div>',
             '<div id="divPlaceNamesFontCustomization" class="controls-container pie-controls-container" style="padding-left:20px;">',
             I18n.t('pie.prefs.FontSize') + ' <input type="text" size="1" id="piePlaceNameFontSize"/>px</br>',
             I18n.t('pie.prefs.FontColor') + ' <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFont"></button></br>',
@@ -658,11 +659,26 @@ var UpdateObject, MultiAction;
         //coming back from the HN edit mode now rebuilds the Place menu.
         W.editingMediator.on('change:editingHouseNumbers', buildNewPlaceList);
 
+        /********* SHORTCUTS *********/
         new WazeWrap.Interface.Shortcut('CreateResidentialPlaceShortcut', 'Creates a resdiential Place point', 'wmepie', 'Place Interface Enhancements', settings.CreateResidentialPlaceShortcut, function(){startPlacementMode(resCategory, true);}, null).add();
 
         new WazeWrap.Interface.Shortcut('CreateParkingLotShortcut', 'Creates a parking lot Place', 'wmepie', 'Place Interface Enhancements', settings.CreateParkingLotShortcut, function(){startPlacementMode("PARKING_LOT", false);}, null).add();
         new WazeWrap.Interface.Shortcut('HideAreaPlacesShortcut', 'Toggle hiding area Places', 'wmepie', 'Place Interface Enhancements', settings.ToggleAreaPlacesShortcut, ToggleHideAreaPlaces, null).add();
         new WazeWrap.Interface.Shortcut('OrthogonalizeShortcut', 'Orthogonalize Area Place', 'wmepie', 'Place Interface Enhancements', settings.OrthogonalizeShortcut, OrthogonalizePlace, null).add();
+        new WazeWrap.Interface.Shortcut('SimplifyPlaceShortcut', 'Simplify Area Place', 'wmepie', 'Place Interface Enhancements', settings.SimplifyPlaceShortcut, SimplifyPlace, null).add();
+
+
+        new WazeWrap.Interface.Shortcut('CreateItem1Shortcut', 'Create Item 1', 'wmepie', 'Place Interface Enhancements', settings.CreateItem1Shortcut, function(){PlaceMenuShortcut(1);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem2Shortcut', 'Create Item 2', 'wmepie', 'Place Interface Enhancements', settings.CreateItem2Shortcut, function(){PlaceMenuShortcut(2);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem3Shortcut', 'Create Item 3', 'wmepie', 'Place Interface Enhancements', settings.CreateItem3Shortcut, function(){PlaceMenuShortcut(3);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem4Shortcut', 'Create Item 4', 'wmepie', 'Place Interface Enhancements', settings.CreateItem4Shortcut, function(){PlaceMenuShortcut(4);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem5Shortcut', 'Create Item 5', 'wmepie', 'Place Interface Enhancements', settings.CreateItem5Shortcut, function(){PlaceMenuShortcut(5);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem6Shortcut', 'Create Item 6', 'wmepie', 'Place Interface Enhancements', settings.CreateItem6Shortcut, function(){PlaceMenuShortcut(6);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem7Shortcut', 'Create Item 7', 'wmepie', 'Place Interface Enhancements', settings.CreateItem7Shortcut, function(){PlaceMenuShortcut(7);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem8Shortcut', 'Create Item 8', 'wmepie', 'Place Interface Enhancements', settings.CreateItem8Shortcut, function(){PlaceMenuShortcut(8);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem9Shortcut', 'Create Item 9', 'wmepie', 'Place Interface Enhancements', settings.CreateItem9Shortcut, function(){PlaceMenuShortcut(9);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem10Shortcut', 'Create Item 10', 'wmepie', 'Place Interface Enhancements', settings.CreateItem10Shortcut, function(){PlaceMenuShortcut(10);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem11Shortcut', 'Create Item 11', 'wmepie', 'Place Interface Enhancements', settings.CreateItem11Shortcut, function(){PlaceMenuShortcut(11);}, null).add();
 
         $("#piePlaceFilter").on("propertychange keyup paste input", UpdatePlaceFilter);
         $('input[type=radio][name=PlaceFilterToggle]').change(UpdatePlaceFilter);
@@ -831,6 +847,28 @@ var UpdateObject, MultiAction;
 
         registerEvents(AddMakePrimaryButtons);
         AddMakePrimaryButtons();
+    }
+
+    function PlaceMenuShortcut(itemNum){
+        if(WazeWrap.hasPlaceSelected()){ //add the category to the Place
+            let selected = WazeWrap.getSelectedFeatures()[0].model;
+            let newCategories = [].concat(selected.attributes.categories);
+            let catToAdd;
+            if($(`#piePlaceMainItem${itemNum}`).length > 0)
+                catToAdd = $(`#piePlaceMainItem${itemNum}`)[0].getAttribute("data-category")
+            else
+                catToAdd = $(`#piePlaceAreaItem${itemNum}`)[0].getAttribute("data-category")
+            if(selected.attributes.categories.indexOf(catToAdd) === -1){ //if the category isn't already on the Place, add it
+                newCategories.push(catToAdd);
+                W.model.actionManager.add(new UpdateObject(selected, {categories: newCategories}));
+            }
+        }
+        else{ //start new Place placement mode
+            if($(`#piePlaceMainItem${itemNum}`).length > 0)
+                $(`#piePlaceMainItem${itemNum}`).click();
+            else if($(`#piePlaceAreaItem${itemNum}`).length > 0)
+                $(`#piePlaceAreaItem${itemNum}`).click();
+        }
     }
 
     function AddHoursParserInterface(){
@@ -1700,27 +1738,46 @@ var UpdateObject, MultiAction;
         }
     }
 
+    function SimplifyPlace(){
+        if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].model.geometry.toString().match(/^POLYGON/)){
+            let selected = WazeWrap.getSelectedFeatures()[0].model;
+            let originalGeometry = selected.geometry.clone();
+            let ls = new OL.Geometry.LineString(originalGeometry.components[0].components);
+            ls = ls.simplify(5);
+            let newGeometry = new OL.Geometry.Polygon(new OL.Geometry.LinearRing(ls.components));
+
+            if (newGeometry.components[0].components.length < originalGeometry.components[0].components.length) {
+                let UFG = require("Waze/Action/UpdateFeatureGeometry");
+                W.model.actionManager.add(new UFG(selected, W.model.venues, originalGeometry, newGeometry));
+            }
+        }
+    }
+
     function InsertGeometryMods(){
         $('#pieGeometryMods').remove();
         if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].model.geometry.toString().match(/^POLYGON/)){
-            var $GeomMods = $(`<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls"><i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Rotate ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieresize" title="Allow resizing the Place. While enabled the geometry cannot be modified" class="fa fa-expand fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Resize ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieClearGeom" title="Clear geometry" class="fa fa-times fa-2x" aria-hidden="true" style="cursor:pointer; color:red;"></i></div></div>`);
+            let $GeomMods = $(`<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls"><i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="piesimplifyplace" title="Simplify" class="fa fa-magic fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Rotate ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieresize" title="Allow resizing the Place. While enabled the geometry cannot be modified" class="fa fa-expand fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Resize ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieClearGeom" title="Clear geometry" class="fa fa-times fa-2x" aria-hidden="true" style="cursor:pointer; color:red;"></i></div></div>`);
             $('#landmark-edit-general > form > div:nth-child(7)').after($GeomMods);
 
             $('#pieorthogonalize').click(function(){
                 OrthogonalizePlace();
             });
 
+            $('#piesimplifyplace').click(function(){
+                SimplifyPlace();
+            });
+
             $('#pieClearGeom').click(function(){
                 let selected = WazeWrap.getSelectedFeatures()[0].model;
                 let centerLonLat = selected.geometry.bounds.getCenterLonLat();
-                var newGeom = OL.Geometry.Polygon.createRegularPolygon(new OL.Geometry.Point(centerLonLat.lon, centerLonLat.lat), 20, 4, null).components[0].components;
-                var UFG = require("Waze/Action/UpdateFeatureGeometry");
-                var originalGeometry = selected.geometry.clone();
+                let newGeom = OL.Geometry.Polygon.createRegularPolygon(new OL.Geometry.Point(centerLonLat.lon, centerLonLat.lat), 20, 4, null).components[0].components;
+                let UFG = require("Waze/Action/UpdateFeatureGeometry");
+                let originalGeometry = selected.geometry.clone();
 
                 selected.geometry.components[0].components = [].concat(newGeom);
                 selected.geometry.components[0].clearBounds();
 
-                var action = new UFG(selected, W.model.venues, originalGeometry, selected.geometry);
+                let action = new UFG(selected, W.model.venues, originalGeometry, selected.geometry);
                 W.model.actionManager.add(action);
 
             });
@@ -2786,7 +2843,20 @@ var UpdateObject, MultiAction;
             GeometryMods: true,
             Rotate: false,
             Resize: false,
-            OrthogonalizeShortcut: ''
+            OrthogonalizeShortcut: '',
+            SimplifyFactor: 5,
+            SimplifyPlaceShortcut: '',
+            CreateItem1Shortcut: '',
+            CreateItem2Shortcut: '',
+            CreateItem3Shortcut: '',
+            CreateItem4Shortcut: '',
+            CreateItem5Shortcut: '',
+            CreateItem6Shortcut: '',
+            CreateItem7Shortcut: '',
+            CreateItem8Shortcut: '',
+            CreateItem9Shortcut: '',
+            CreateItem10Shortcut: '',
+            CreateItem11Shortcut: ''
         };
         settings = loadedSettings ? loadedSettings : defaultSettings;
         for (var prop in defaultSettings) {
@@ -2851,7 +2921,20 @@ var UpdateObject, MultiAction;
                 GeometryModes: settings.GeometryMods,
                 Rotate: settings.Rotate,
                 Resize: settings.Resize,
-                OrthogonalizeShortcut: settings.OrthogonalizeShortcut
+                OrthogonalizeShortcut: settings.OrthogonalizeShortcut,
+                SimplifyFactor: settings.SimplifyFactor,
+                SimplifyPlaceShortcut: settings.SimplifyPlaceShortcut,
+                CreateItem1Shortcut: settings.CreateItem1Shortcut,
+                CreateItem2Shortcut: settings.CreateItem2Shortcut,
+                CreateItem3Shortcut: settings.CreateItem3Shortcut,
+                CreateItem4Shortcut: settings.CreateItem4Shortcut,
+                CreateItem5Shortcut: settings.CreateItem5Shortcut,
+                CreateItem6Shortcut: settings.CreateItem6Shortcut,
+                CreateItem7Shortcut: settings.CreateItem7Shortcut,
+                CreateItem8Shortcut: settings.CreateItem8Shortcut,
+                CreateItem9Shortcut: settings.CreateItem9Shortcut,
+                CreateItem10Shortcut: settings.CreateItem10Shortcut,
+                CreateItem11Shortcut: settings.CreateItem11Shortcut
             };
 
             for (var name in W.accelerators.Actions) {
@@ -2972,7 +3055,8 @@ var UpdateObject, MultiAction;
                     HidePaymentType: "Hide payment type",
                     HidePaymentTypeTitle: "Hide the Payment Type section when the cost is set to Free",
                     GeometryMods: "Enable geometry modification options",
-                    GeometryModsTitle: "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places"
+                    GeometryModsTitle: "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places",
+                    SimplifyFactor: "Simplify Factor"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -3086,7 +3170,8 @@ var UpdateObject, MultiAction;
                     HidePaymentType: "Hide payment type",
                     HidePaymentTypeTitle: "Hide the Payment Type section when the cost is set to Free",
                     GeometryMods: "Enable geometry modification options",
-                    GeometryModsTitle: "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places"
+                    GeometryModsTitle: "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places",
+                    SimplifyFactor: "Simplify Factor"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -3200,7 +3285,8 @@ var UpdateObject, MultiAction;
                     HidePaymentType: "Hide payment type",
                     HidePaymentTypeTitle: "Hide the Payment Type section when the cost is set to Free",
                     GeometryMods: "Enable geometry modification options",
-                    GeometryModsTitle: "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places"
+                    GeometryModsTitle: "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places",
+                    SimplifyFactor: "Simplify Factor"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
