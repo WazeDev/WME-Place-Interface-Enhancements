@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.06.06.01
+// @version      2018.06.07.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -28,7 +28,7 @@ var UpdateObject, MultiAction;
 (function() {
     'use strict';
 
-    var curr_ver = "2018.06.06.01";
+    var curr_ver = GM_info.script.version;
     var settings = {};
     var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
@@ -137,10 +137,10 @@ var UpdateObject, MultiAction;
             //'<div class="controls-container pie-controls-container" id="divMoveAddress" title="' + I18n.t('pie.prefs.MoveAddressTitle') + '"><input type="checkbox" id="_cbMoveAddress" class="pieSettingsCheckbox"/><label for="_cbMoveAddress" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveAddress') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divMoveHNEntry" title="' + I18n.t('pie.prefs.MoveHNEntryTitle') + '"><input type="checkbox" id="_cbMoveHNEntry" class="pieSettingsCheckbox"/><label for="_cbMoveHNEntry" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveHNEntry') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divNavLink" title="' + I18n.t('pie.prefs.NavLinkTitle') + '"><input type="checkbox" id="_cbNavLink" class="pieSettingsCheckbox" disabled/><label for="_cbNavLink" style="white-space:pre-line;">' + I18n.t('pie.prefs.NavLink') + '</label></div>',
-	    '<br>',
+            '<br>',
             '<div class="controls-container pie-controls-container" id="divHidePaymentType" title="' + I18n.t('pie.prefs.HidePaymentTypeTitle') + '"><input type="checkbox" id="_cbHidePaymentType" class="pieSettingsCheckbox" /><label for="_cbHidePaymentType" style="white-space:pre-line;">' + I18n.t('pie.prefs.HidePaymentType') + '</label></div>',
-            '<div class="controls-container pie-controls-container" id="divGeometryMods" title="' + I18n.t('pie.prefs.GeometryModsTitle') + '"><input type="checkbox" id="_cbGeometryMods" class="pieSettingsCheckbox" /><label for="_cbGeometryMods" style="white-space:pre-line;">' + I18n.t('pie.prefs.GeometryMods') + '</label></div>',
-            `<div class="controls-container pie-controls-container" id="divSimplifyFactor" style="padding-left:20px;" title=""> ${I18n.t("pie.prefs.SimplifyFactor")} <input type="text" size="1" id="pieSimplifyFactor"></div>`,
+            `<div class="controls-container pie-controls-container" id="divGeometryMods" title="${I18n.t('pie.prefs.GeometryModsTitle')}"><input type="checkbox" id="_cbGeometryMods" class="pieSettingsCheckbox" /><label for="_cbGeometryMods" style="white-space:pre-line;">${I18n.t('pie.prefs.GeometryMods')}</label></div>`,
+            `<div class="controls-container pie-controls-container" id="divSimplifyFactor" style="padding-left:20px;" title="${I18n.t("pie.prefs.SimplifyFactorTitle")}"> ${I18n.t("pie.prefs.SimplifyFactor")} <input type="number" min="0" max="10" step=".5" style="width:45px; height:20px;" id="pieSimplifyFactor"></div>`,
             '</fieldset>',
 
             '<fieldset id="fieldNewPlaces" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
@@ -488,6 +488,7 @@ var UpdateObject, MultiAction;
         $('#pieDefaultLockLevel')[0].value = settings.DefaultLockLevel;
         $('#piePlaceNameFontSize')[0].value = settings.PlaceNameFontSize;
         $('#piePlaceNameFontOutlineWidth')[0].value = settings.PlaceNameFontOutlineWidth;
+        $('#pieSimplifyFactor')[0].value = settings.SimplifyFactor;
 
         if(settings.ShowNavPointClosestSegmentOnHover){
             W.map.events.register("mousemove", null, drawNavPointClosestSegmentLines);
@@ -638,6 +639,17 @@ var UpdateObject, MultiAction;
         $('#piePlaceNameFontOutlineWidth').keypress(function(event) {
             if ((event.which < 48 || event.which > 57))
                 event.preventDefault();
+        });
+
+        $('#pieSimplifyFactor').focusout(function(){
+            let factor = $(this)[0].value;
+            if(factor == "")
+                $(this)[0].value = 5;
+            if(factor > 10)
+                factor = 10;
+            if(factor<0)
+                factor = 0;
+            settings[$(this)[0].id.substr(3)] = factor;
         });
 
         var i;
@@ -1739,11 +1751,12 @@ var UpdateObject, MultiAction;
     }
 
     function SimplifyPlace(){
+        debugger;
         if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].model.geometry.toString().match(/^POLYGON/)){
             let selected = WazeWrap.getSelectedFeatures()[0].model;
             let originalGeometry = selected.geometry.clone();
             let ls = new OL.Geometry.LineString(originalGeometry.components[0].components);
-            ls = ls.simplify(5);
+            ls = ls.simplify(settings.SimplifyFactor);
             let newGeometry = new OL.Geometry.Polygon(new OL.Geometry.LinearRing(ls.components));
 
             if (newGeometry.components[0].components.length < originalGeometry.components[0].components.length) {
@@ -3056,7 +3069,8 @@ var UpdateObject, MultiAction;
                     HidePaymentTypeTitle: "Hide the Payment Type section when the cost is set to Free",
                     GeometryMods: "Enable geometry modification options",
                     GeometryModsTitle: "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places",
-                    SimplifyFactor: "Simplify Factor"
+                    SimplifyFactor: "Simplify Factor",
+                    SimplifyFactorTitle: "The larger the simplification factor the more nodes will be removed"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -3171,7 +3185,8 @@ var UpdateObject, MultiAction;
                     HidePaymentTypeTitle: "Hide the Payment Type section when the cost is set to Free",
                     GeometryMods: "Enable geometry modification options",
                     GeometryModsTitle: "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places",
-                    SimplifyFactor: "Simplify Factor"
+                    SimplifyFactor: "Simplify Factor",
+                    SimplifyFactorTitle: "The larger the simplification factor the more nodes will be removed"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -3286,7 +3301,8 @@ var UpdateObject, MultiAction;
                     HidePaymentTypeTitle: "Hide the Payment Type section when the cost is set to Free",
                     GeometryMods: "Enable geometry modification options",
                     GeometryModsTitle: "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places",
-                    SimplifyFactor: "Simplify Factor"
+                    SimplifyFactor: "Simplify Factor",
+                    SimplifyFactorTitle: "The larger the simplification factor the more nodes will be removed"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
