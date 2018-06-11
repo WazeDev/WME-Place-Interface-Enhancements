@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.06.07.01
+// @version      2018.06.11.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -2931,7 +2931,7 @@ var UpdateObject, MultiAction;
                 EnableGLE: settings.EnableGLE,
                 OpenPUR: settings.OpenPUR,
                 HidePaymentType: settings.HidePaymentType,
-                GeometryModes: settings.GeometryMods,
+                GeometryMods: settings.GeometryMods,
                 Rotate: settings.Rotate,
                 Resize: settings.Resize,
                 OrthogonalizeShortcut: settings.OrthogonalizeShortcut,
