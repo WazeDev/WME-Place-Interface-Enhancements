@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.06.11.01
+// @version      2018.06.13.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1377,6 +1377,9 @@ var UpdateObject, MultiAction;
 
     var newPlaceCategory = "";
     function startPlacementMode(category, isPoint){
+        if(W.editingMediator.attributes.editingHouseNumbers) //don't allow creating Places in HN edit mode
+            return;
+
         if(category === "PARKING_LOT"){
             if(!isChecked("layer-switcher-item_parking_places")){
                 if(!isChecked("layer-switcher-group_places"))
