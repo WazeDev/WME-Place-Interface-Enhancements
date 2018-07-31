@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.07.22.02
+// @version      2018.07.31.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -992,6 +992,7 @@ var UpdateObject, MultiAction;
     }
 
     function ToggleHideAreaPlaces(){
+        debugger;
         let index = W.map.landmarkLayer.styleMap.styles.default.rules.findIndex(function(e){ return e.name == "PIEHide";});
         if(index === -1)
         {
@@ -1278,7 +1279,7 @@ var UpdateObject, MultiAction;
         if(showNames){
             var isPoint;
             for (var placeID in W.model.venues.objects) {
-                var venue = W.model.venues.get(placeID);
+                var venue = W.model.venues.getObjectById(placeID);
                 isPoint = venue.isPoint();
                 if((isPoint && W.map.zoom >= 5) || (!isPoint && W.map.zoom >= 3)){
                     if(WazeWrap.Geometry.isGeometryInMapExtent(venue.geometry)){
@@ -1596,7 +1597,7 @@ var UpdateObject, MultiAction;
                 if(settings.UseAltCity && cityName === ""){
                     if(address.attributes.altStreets.length > 0){ //segment has alt names
                         for(var j=0;j<closestSeg.attributes.streetIDs.length;j++){
-                            var altCity = W.model.cities.get(W.model.streets.get(closestSeg.attributes.streetIDs[j]).cityID).attributes;
+                            var altCity = W.model.cities.getObjectById(W.model.streets.getObjectById(closestSeg.attributes.streetIDs[j]).cityID).attributes;
 
                             if(altCity.englishName !== null && altCity.englishName !== "")
                                 cityName = altCity.englishName;
