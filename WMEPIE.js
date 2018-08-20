@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.08.20.01
+// @version      2018.08.20.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1781,15 +1781,15 @@ var UpdateObject, MultiAction;
             '<div style="width:100%; height:18px;"><i class="fa fa-window-close" aria-hidden="true" style="float:right; cursor:pointer;" id="pieGeomClose"></i></div>',
             '<div style="float:left; margin-right:20px;"><h3>Standard (lat, lon)</h3>',
             '<div><textarea rows="7" cols="40" id="piePlaceGeomStandard" style="height:auto;"></textarea></div>',
-            //'<button>Apply</button>',
+            '<button id="pieBtnApplyStandardGeom">Apply</button>',
             '</div>',
             '<div style="float:left; margin-right:20px;"><h3>Waze (lon lat)</h3>',
             '<div><textarea rows="7" cols="40" id="piePlaceGeomWaze" style="height:auto;"></textarea></div>',
-            //'<button>Apply</button>',
+            '<button id="pieBtnApplyWazeGeom">Apply</button>',
             '</div>',
             '<div style="float:left;"><h3>WKT</h3>',
             '<div><textarea rows="7" cols="45" id="piePlaceGeomWKT" style="height:auto;"></textarea></div>',
-            //'<button>Apply</button>',
+            '<button id="pieBtnApplyWKTGeom">Apply</button>',
             '</div>',
             '</div>', //end content div
             '</div>' //end main div
@@ -1797,17 +1797,88 @@ var UpdateObject, MultiAction;
 
         $("#WazeMap").append($section.html());
 
+        updateGeometryInputs();
+
+        $('#pieBtnApplyStandardGeom').click(function(){
+            let lines = $('#piePlaceGeomStandard').val().split('\n');
+
+            for(var i = 0;i < lines.length;i++){
+                if(! /^(-?\d*(?:\.\d*)?),\s?(-?\d*(?:\.\d*))$/.test(lines[i])){
+                    alert("Incorrectly formatted coordinates");
+                    return;
+                }
+                let coords = lines[i].match(/^(-?\d*(?:\.\d*)?),\s?(-?\d*(?:\.\d*))$/);
+                let pt = WazeWrap.Geometry.ConvertTo900913(coords[2], coords[1]);
+                lines[i] = new OL.Geometry.Point(pt.lon, pt.lat);
+            }
+
+            saveNewPlaceGeometry(lines);
+            updateGeometryInputs();
+        });
+
+        $('#pieBtnApplyWazeGeom').click(function(){
+            let lines = $('#piePlaceGeomWaze').val().split('\n');
+
+            for(var i = 0;i < lines.length;i++){
+                if(! /^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/.test(lines[i])){
+                    alert("Incorrectly formatted coordinates");
+                    return;
+                }
+                let coords = lines[i].match(/^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/);
+                let pt = WazeWrap.Geometry.ConvertTo900913(coords[1], coords[2]);
+                lines[i] = new OL.Geometry.Point(pt.lon, pt.lat);
+            }
+
+            saveNewPlaceGeometry(lines);
+            updateGeometryInputs();
+        });
+
+        $('#pieBtnApplyWKTGeom').click(function(){
+            let lines = $('#piePlaceGeomWKT').val().match(/POLYGON\(\((.*)\)\)/)[1].split(',');
+
+            for(var i = 0;i < lines.length;i++){
+                if(! /^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/.test(lines[i].trim())){
+                    alert("Incorrectly formatted coordinates");
+                    return;
+                }
+                let coords = lines[i].trim().match(/^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/);
+                let pt = WazeWrap.Geometry.ConvertTo900913(coords[1], coords[2]);
+                lines[i] = new OL.Geometry.Point(pt.lon, pt.lat);
+            }
+
+            saveNewPlaceGeometry(lines);
+            updateGeometryInputs();
+        });
+
+        $('#pieGeomClose').click(function(){
+            $('#pieViewEditGeom').remove();
+        });
+    }
+
+    function saveNewPlaceGeometry(newGeom){
+        let selected = WazeWrap.getSelectedFeatures()[0].model;
+        let originalGeometry = selected.geometry.clone();
+        let ls = new OL.Geometry.LineString(newGeom);
+        let newGeometry = new OL.Geometry.Polygon(new OL.Geometry.LinearRing(ls.components));
+
+        let UFG = require("Waze/Action/UpdateFeatureGeometry");
+        W.model.actionManager.add(new UFG(selected, W.model.venues, originalGeometry, newGeometry));
+    }
+
+    function updateGeometryInputs(){
         let currPlace = W.selectionManager.getSelectedFeatures()[0];
         let currPlaceGeom = currPlace.model.geometry.components[0].clone().components;
         let standardGeom = "", WMEGeom = "", WKTGeom = "";
         WKTGeom = "POLYGON(";
-        debugger;
+
         let coord;
         for(let i=0; i<currPlaceGeom.length;i++){
             if(i > 0){
                 WKTGeom += ", ";
-                standardGeom += "\n";
-                WMEGeom += "\n";
+                if(i < currPlaceGeom.length - 1){
+                    standardGeom += "\n";
+                    WMEGeom += "\n";
+                }
             }
             coord = currPlaceGeom[i];
             if(i < currPlaceGeom.length-1){
@@ -1818,13 +1889,9 @@ var UpdateObject, MultiAction;
             WKTGeom += `${coord.x} ${coord.y}`;
         }
         WKTGeom += ")";
-        $('#piePlaceGeomWKT').text(WKTGeom);
-        $('#piePlaceGeomStandard').text(standardGeom);
-        $('#piePlaceGeomWaze').text(WMEGeom);
-
-        $('#pieGeomClose').click(function(){
-            $('#pieViewEditGeom').remove();
-        });
+        $('#piePlaceGeomWKT').val(WKTGeom);
+        $('#piePlaceGeomStandard').val(standardGeom);
+        $('#piePlaceGeomWaze').val(WMEGeom);
     }
 
     function InsertGeometryMods(){
