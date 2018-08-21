@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.08.20.02
+// @version      2018.08.21.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -713,7 +713,7 @@ var UpdateObject, MultiAction;
                        for (var i = 0; i < mutation.addedNodes.length; i++) {
                            var addedNode = mutation.addedNodes[i];
                            // Only fire up if it's a node
-                           if (addedNode.nodeType === Node.ELEMENT_NODE && $(addedNode).hasClass('address-edit-view')) {
+                           if (addedNode.nodeType === Node.ELEMENT_NODE && ($(addedNode).hasClass('address-edit-view') || $(addedNode).hasClass('conversation-view'))) {
                                addLockButtons();
                                updatePlaceSizeDisplay();
                                AddPlaceCategoriesButtons();
@@ -993,7 +993,6 @@ var UpdateObject, MultiAction;
     }
 
     function ToggleHideAreaPlaces(){
-        debugger;
         let index = W.map.landmarkLayer.styleMap.styles.default.rules.findIndex(function(e){ return e.name == "PIEHide";});
         if(index === -1)
         {
@@ -1757,7 +1756,6 @@ var UpdateObject, MultiAction;
     }
 
     function SimplifyPlace(){
-        debugger;
         if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].model.geometry.toString().match(/^POLYGON/)){
             let selected = WazeWrap.getSelectedFeatures()[0].model;
             let originalGeometry = selected.geometry.clone();
@@ -1781,15 +1779,15 @@ var UpdateObject, MultiAction;
             '<div style="width:100%; height:18px;"><i class="fa fa-window-close" aria-hidden="true" style="float:right; cursor:pointer;" id="pieGeomClose"></i></div>',
             '<div style="float:left; margin-right:20px;"><h3>Standard (lat, lon)</h3>',
             '<div><textarea rows="7" cols="40" id="piePlaceGeomStandard" style="height:auto;"></textarea></div>',
-            '<button id="pieBtnApplyStandardGeom">Apply</button>',
+            !WazeWrap.hasMapCommentSelected() ? '<button id="pieBtnApplyStandardGeom">Apply</button>' : '',
             '</div>',
             '<div style="float:left; margin-right:20px;"><h3>Waze (lon lat)</h3>',
             '<div><textarea rows="7" cols="40" id="piePlaceGeomWaze" style="height:auto;"></textarea></div>',
-            '<button id="pieBtnApplyWazeGeom">Apply</button>',
+            !WazeWrap.hasMapCommentSelected() ? '<button id="pieBtnApplyWazeGeom">Apply</button>' : '',
             '</div>',
             '<div style="float:left;"><h3>WKT</h3>',
             '<div><textarea rows="7" cols="45" id="piePlaceGeomWKT" style="height:auto;"></textarea></div>',
-            '<button id="pieBtnApplyWKTGeom">Apply</button>',
+            !WazeWrap.hasMapCommentSelected() ? '<button id="pieBtnApplyWKTGeom">Apply</button>' : '',
             '</div>',
             '</div>', //end content div
             '</div>' //end main div
@@ -1897,9 +1895,12 @@ var UpdateObject, MultiAction;
     function InsertGeometryMods(){
         $('#pieGeometryMods').remove();
         $('#pieViewEditGeom').remove(); //remove the Place geometry window when the option is disabled or a Place is de-selected
-        if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].model.geometry.toString().match(/^POLYGON/)){
-            let $GeomMods = $(`<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls"><i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="piesimplifyplace" title="Simplify" class="fa fa-magic fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Rotate ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieresize" title="Allow resizing the Place. While enabled the geometry cannot be modified" class="fa fa-expand fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Resize ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieEditGeom" class="fa fa-pencil-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pieClearGeom" title="Clear geometry" class="fa fa-times fa-2x" aria-hidden="true" style="cursor:pointer; color:red;"></i></div></div>`);
-            $('#landmark-edit-general > form > div:nth-child(7)').after($GeomMods);
+        if((WazeWrap.hasPlaceSelected() || WazeWrap.hasMapCommentSelected()) && WazeWrap.getSelectedFeatures()[0].model.geometry.toString().match(/^POLYGON/)){
+            let $GeomMods = $(`<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls">${!WazeWrap.hasMapCommentSelected() ? '<i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="piesimplifyplace" title="Simplify" class="fa fa-magic fa-2x" aria-hidden="true" style="cursor:pointer;"></i>' : ''} <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Rotate ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieresize" title="Allow resizing the Place. While enabled the geometry cannot be modified" class="fa fa-expand fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Resize ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieEditGeom" class="fa fa-pencil-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pieClearGeom" title="Clear geometry" class="fa fa-times fa-2x" aria-hidden="true" style="cursor:pointer; color:red;"></i></div></div>`);
+            if(W.selectionManager.getSelectedFeatures()[0].model.type === "mapComment")
+                $('#edit-panel > div > div > div.tab-content > form > div:nth-child(3)').after($GeomMods);
+            else
+                $('#landmark-edit-general > form > div:nth-child(7)').after($GeomMods);
 
             $('#pieorthogonalize').click(function(){
                 OrthogonalizePlace();
