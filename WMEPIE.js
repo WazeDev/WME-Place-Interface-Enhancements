@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.08.21.01
+// @version      2018.08.22.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -20,10 +20,18 @@
 // @license      GPLv3
 // ==/UserScript==
 
-/* jshint esnext:true*/
-/* jshint esversion:6*/
-/* globals W */
-/* globals WazeWrap */
+/* global W */
+/* global OL */
+/* ecmaVersion 2017 */
+/* global $ */
+/* global jscolor */
+/* global I18n */
+/* global _ */
+/* global WazeWrap */
+/* global GoogleLinkEnhancer */
+/* global HoursParser */
+/* global require */
+/* eslint curly: ["warn", "multi-or-nest"] */
 
 var UpdateObject, MultiAction;
 
@@ -94,11 +102,10 @@ var UpdateObject, MultiAction;
             W.model &&
             W.loginManager.user &&
             $ && jscolor &&
-           WazeWrap.Ready) {
+            WazeWrap.Ready)
             init();
-        } else if (tries < 1000) {
+        else if (tries < 1000)
             setTimeout(function () {bootstrap(tries++);}, 200);
-        }
     }
 
     bootstrap();
@@ -258,9 +265,9 @@ var UpdateObject, MultiAction;
 
     function getActiveEditor(tries = 1) {
         return new Promise((resolve, reject) => {
-            if (W.geometryEditing.activeEditor) {
+            if (W.geometryEditing.activeEditor)
                 resolve(W.geometryEditing.activeEditor);
-            } else {
+            else {
                 if(tries <= 10)
                     setTimeout(() => resolve(getActiveEditor()), 100);
             }
@@ -492,9 +499,8 @@ var UpdateObject, MultiAction;
         $('#piePlaceNameFontOutlineWidth')[0].value = settings.PlaceNameFontOutlineWidth;
         $('#pieSimplifyFactor')[0].value = settings.SimplifyFactor;
 
-        if(settings.ShowNavPointClosestSegmentOnHover){
+        if(settings.ShowNavPointClosestSegmentOnHover)
             W.map.events.register("mousemove", null, drawNavPointClosestSegmentLines);
-        }
 
         if(settings.ShowAreaPlaceSize){
             $('#_cbShowAreaPlaceSizeImperial')[0].disabled = false;
@@ -573,13 +579,11 @@ var UpdateObject, MultiAction;
             W.model.venues.on('objectschanged', ObjectsChanged);
         }
 
-        if(settings.OpenPUR){
+        if(settings.OpenPUR)
             W.selectionManager.events.register('selectionchanged', null, openPUR);
-        }
 
-        if(settings.EnableGLE){
+        if(settings.EnableGLE)
             GLE.enable();
-        }
 
         if(settings.HidePaymentType){
             registerEvents(HidePaymentTypePlaceSelected);
@@ -657,9 +661,9 @@ var UpdateObject, MultiAction;
         var i;
         //Whenever a Place item is changed, read the settings and save to localStorage
         $('[id^="pieItem"]').change(function(){
-            for(i=0;i<11;i++){
+            for(i=0;i<11;i++)
                 settings.NewPlacesList[i] = $('#pieItem'+(i+1))[0].value;
-            }
+
             saveSettings();
             buildNewPlaceList();
         });
@@ -813,8 +817,7 @@ var UpdateObject, MultiAction;
                                 }
                             }
                             newAttr._point = new OL.Geometry.Point(myPlaceAttr.geometry.x, myPlaceAttr.geometry.y);
-                            newAttr.__proto__.getPoint = function()
-                            {
+                            newAttr.__proto__.getPoint = function(){
                                 return this._point.clone();
                             };
                             W.model.actionManager.add(new UpdateObject(WazeWrap.getSelectedFeatures()[0].model, {'entryExitPoints': [newAttr]}));
@@ -929,9 +932,8 @@ var UpdateObject, MultiAction;
 
     function addHours(replaceAll = false) {
         var pasteHours = $('#PIE-hourspaste').val();
-        if (pasteHours.trim() === "") {
+        if (pasteHours.trim() === "")
             return;
-        }
 
         if(!replaceAll)
             pasteHours = pasteHours + ',' + getOpeningHours(WazeWrap.getSelectedFeatures()[0].model).join(',');
@@ -1094,11 +1096,10 @@ var UpdateObject, MultiAction;
 			d = !$('#map-lightbox > div').is(':visible'),//$('#map-lightbox > div').length === 0,/* Check for HN editing */
             e = (WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].model.type !== "bigJunction");
 
-		if (a && b && c && d && e) {
+		if (a && b && c && d && e)
 			return true;
-		} else {
+		else
 			return false;
-		}
 	}
 
 	function drawLine(start, end, lStyle, pStyle) {
@@ -1114,7 +1115,7 @@ var UpdateObject, MultiAction;
         if(navPoint.element)
             navPoint = W.geometryEditing.activeEditor._navigationPointMarker.lonlat.toPoint();
 
-        closestSegment =  WazeWrap.Geometry.findClosestSegment(navPoint,false, false);
+        closestSegment = WazeWrap.Geometry.findClosestSegment(navPoint,false, false);
 
         clearClosesetSegmentLayerFeatures();
         drawLine(navPoint, closestSegment.closestPoint, lineStyleToClosestSeg, pointStyle);
@@ -1125,9 +1126,9 @@ var UpdateObject, MultiAction;
 
         var ClosestSegmentNavPoint;
 
-        if (!checkConditions()) {
+        if (!checkConditions())
             removeDragCallbacks();
-        } else {
+        else {
             getActiveEditor().then(val => {
                 if (WazeWrap.hasSelectedFeatures()) {
                     let selectedItem = WazeWrap.getSelectedFeatures()[0];
@@ -1155,9 +1156,8 @@ var UpdateObject, MultiAction;
                             if(selectedItem.model.getNavigationPoints().length === 0)
                                 findNearestSegment(selectedItem.model.geometry.getCentroid());
                             else{
-                                for(let i=0;i<selectedItem.model.getNavigationPoints().length;i++){
+                                for(let i=0;i<selectedItem.model.getNavigationPoints().length;i++)
                                     findNearestSegment(selectedItem.model.getNavigationPoints()[i]._point);
-                                }
                             }
                         }
                     }
@@ -1230,9 +1230,8 @@ var UpdateObject, MultiAction;
             $('#colorPickerFontOutline')[0].jscolor.onChange = jscolorChanged;
 
 
-        } else if (tries < 1000) {
+        } else if (tries < 1000)
             setTimeout(function () {initColorPicker(tries++);}, 200);
-        }
     }
 
     function jscolorChanged(){
@@ -1306,9 +1305,8 @@ var UpdateObject, MultiAction;
 
         if(text !== ""){
             var splitName = text.match(/(.{1,35})(?:\s|$)/g);
-            for(var i=0;i<splitName.length;i++){
+            for(var i=0;i<splitName.length;i++)
                 newName += splitName[i] + (i != splitName.length-1 ? '\n' : '');
-            }
         }
         console.log();
         return newName;
@@ -1355,9 +1353,9 @@ var UpdateObject, MultiAction;
 
         var points = [];
         var i;
-        for(i=0;i<pos.components[0].components.length;i++){
+        for(i=0;i<pos.components[0].components.length;i++)
             points.push(new OL.Geometry.Point(pos.components[0].components[i].x, pos.components[0].components[i].y));
-        }
+
         var ring = new OL.Geometry.LinearRing(points);
         NewPlace.geometry = new OL.Geometry.Polygon([ring]);
 
@@ -1444,9 +1442,9 @@ var UpdateObject, MultiAction;
         var NewPlace = new PlaceObject();
         var points = [];
         var i;
-        for(i=0;i<geom.components[0].components.length;i++){
+        for(i=0;i<geom.components[0].components.length;i++)
             points.push(new OL.Geometry.Point(geom.components[0].components[i].x, geom.components[0].components[i].y));
-        }
+
         var ring = new OL.Geometry.LinearRing(points);
         NewPlace.geometry = new OL.Geometry.Polygon([ring]);
         NewPlace.attributes.categories.push("PARKING_LOT");
@@ -1648,9 +1646,9 @@ var UpdateObject, MultiAction;
 
     function buildLockLevelsList(){
         var $lockLevels = $("<div>");
-        for(var i=0;i<WazeWrap.User.Rank();i++){
+        for(var i=0;i<WazeWrap.User.Rank();i++)
             $lockLevels.append("<option value=" + i + ">" + (i+1) + "</option>");
-        }
+
         return $lockLevels.html();
     }
 
@@ -2712,7 +2710,8 @@ var UpdateObject, MultiAction;
                 var $controls = $('<div>', {class:'waze-radio-container'});
                 var btnInfos = [];
 
-                for(var iBtn=0;iBtn<=6;iBtn++){btnInfos.push({r:iBtn,val:iBtn});}
+                for(var iBtn=0;iBtn<=6;iBtn++)
+                    btnInfos.push({r:iBtn,val:iBtn});
                 btnInfos.forEach(function(btnInfo){
                     var selected = (btnInfo.val == manualRank);
                     disabled = userRank < btnInfo.val;
@@ -2894,7 +2893,7 @@ var UpdateObject, MultiAction;
     }
 
     function injectCss() {
-        var css =  [
+        var css = [
             // Lock button formatting
             '.btn-lh {cursor:pointer;padding:1px 6px;height:22px;border:solid 1px #c1c1c1;margin-right:3px;}',
             '.btn.btn-lh.btn-lh-selected {background-color:#6999ae;color:white}',
@@ -3088,21 +3087,16 @@ var UpdateObject, MultiAction;
                 var TempKeys = "";
                 if (W.accelerators.Actions[name].group == 'wmepie') {
                     if (W.accelerators.Actions[name].shortcut) {
-                        if (W.accelerators.Actions[name].shortcut.altKey === true) {
+                        if (W.accelerators.Actions[name].shortcut.altKey === true)
                             TempKeys += 'A';
-                        }
-                        if (W.accelerators.Actions[name].shortcut.shiftKey === true) {
+                        if (W.accelerators.Actions[name].shortcut.shiftKey === true)
                             TempKeys += 'S';
-                        }
-                        if (W.accelerators.Actions[name].shortcut.ctrlKey === true) {
+                        if (W.accelerators.Actions[name].shortcut.ctrlKey === true)
                             TempKeys += 'C';
-                        }
-                        if (TempKeys !== "") {
+                        if (TempKeys !== "")
                             TempKeys += '+';
-                        }
-                        if (W.accelerators.Actions[name].shortcut.keyCode) {
+                        if (W.accelerators.Actions[name].shortcut.keyCode)
                             TempKeys += W.accelerators.Actions[name].shortcut.keyCode;
-                        }
                     } else {
                         TempKeys = "-1";
                     }
@@ -3480,13 +3474,12 @@ var UpdateObject, MultiAction;
 
     function listPlaces(){
         var category = "";
-        for(i=0; i<W.Config.venues.categories.length; i++){
+        for(let i=0; i<W.Config.venues.categories.length; i++){
             category = W.Config.venues.categories[i];
             console.log(category + " Main");
             var subCategories = W.Config.venues.subcategories[category];
-            for(var j=0; j<subCategories.length;j++){
+            for(var j=0; j<subCategories.length;j++)
                 console.log(subCategories[j]);
-            }
         }
     }
 
