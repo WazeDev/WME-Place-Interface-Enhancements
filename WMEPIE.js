@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.08.22.01
+// @version      2018.10.08.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1745,12 +1745,38 @@ var UpdateObject, MultiAction;
             var UFG = require("Waze/Action/UpdateFeatureGeometry");
             var originalGeometry = selected.geometry.clone();
 
-            selected.geometry.components[0].components = [].concat(newGeom);
-            selected.geometry.components[0].clearBounds();
+            if(!GeomArraysEqual(originalGeometry.components[0].components, newGeom)){
+                selected.geometry.components[0].components = [].concat(newGeom);
+                selected.geometry.components[0].clearBounds();
 
-            var action = new UFG(selected, W.model.venues, originalGeometry, selected.geometry);
-            W.model.actionManager.add(action);
+                var action = new UFG(selected, W.model.venues, originalGeometry, selected.geometry);
+                W.model.actionManager.add(action);
+            }
         }
+    }
+
+    function GeomArraysEqual(geom1, geom2){
+        if(geom1.length != geom2.length)
+            return false;
+
+        for(let i=0; i<geom1.length; i++){
+            if(different(geom1[i].x, geom2[i].x, .1) || different(geom1[i].y, geom2[i].y, .1))
+                return false;
+        }
+        return true;
+    }
+
+    function different(num1, num2, deltaLimit){
+        if(Math.abs(num1) - Math.abs(num2) > Math.abs(deltaLimit))
+            return true;
+        return false;
+    }
+
+    function round(val, decimals){
+        let multiplier = 1;
+        for(let i=0; i<decimals; i++)
+            multiplier *= 10;
+        return Math.round(val * multiplier) / multiplier;
     }
 
     function SimplifyPlace(){
