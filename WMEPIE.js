@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.10.08.01
+// @version      2018.11.24.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -3371,7 +3371,7 @@ var UpdateObject, MultiAction;
             fr: {
                 prefs: {
                     title: 'Place Interface Enhancements',
-                    ShowAreaPlaceSize: 'Afficher la tallie de la place',
+                    ShowAreaPlaceSize: 'Afficher la taille de la place',
                     ShowImperial: 'Afficher en imperial',
                     ShowMetric: 'Afficher en métrique',
                     ShowRPPLockButtons: 'Afficher les boutons de lock pour les résidentiels',
@@ -3444,44 +3444,44 @@ var UpdateObject, MultiAction;
                     PSEShowPSEButtonTitle: "Affiche un bouton pour lancer le simulateur de places de stationnement",
                     PSEDisplayButtonTitle: "Ouvre le simulateur de places de stationnement",
                     ShowNavPointClosestSegmentOnHover: "Affiche une ligne entre le point d'entrée et le segment le plus proche",
-                    ShowClosestSegmentSelected: "Display a line from the nav point to the point on the closest segment",
-                    NavLink: "Link nav point",
-                    NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved",
-                    EnableGLE: "Enable Google Link Enhancer",
-                    EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in orange, already linked POI in gray (autocomplete menu)",
-                    OpenPUR: "Automatically open PUR",
-                    OpenPURTitle: "Automatically opens the PUR associated with the selected Place",
-                    HidePaymentType: "Hide payment type",
-                    HidePaymentTypeTitle: "Hide the Payment Type section when the cost is set to Free",
-                    GeometryMods: "Enable geometry modification options",
-                    GeometryModsTitle: "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places",
-                    SimplifyFactor: "Simplify Factor",
-                    SimplifyFactorTitle: "The larger the simplification factor the more nodes will be removed"
+                    ShowClosestSegmentSelected: "Affiche une ligne depuis le point d'entrée vers le point sur le segment le plus proche",
+                    NavLink: "Lier le point d'entrée",
+                    NavLinkTitle: "Active le lien de point d'entrée sur tous les lieux. Lorsqu'il est lié, le point de navigation se déplacera à l'emplacement du point Lieu lorsque le lieu est déplacé",
+                    EnableGLE: "Activer le lien Google amélioré",
+                    EnableGLETitle: "Met en évidence les liens Google fermés en rouge, les points d'intérêt Google liés se trouvant à plus de 400 m du Lieu Waze en bleu ciel, les liens Google non valides en magenta, les points d'intérêt Google liés plusieurs fois en orange, les points d'intérêt déjà liés en gris (menu de saisie semi-automatique)",
+                    OpenPUR: "Ouverture automatique des PUR",
+                    OpenPURTitle: "Ouvre automatiquement les PUR associés au lieu sélectionné",
+                    HidePaymentType: "Masquer les modes de paiement",
+                    HidePaymentTypeTitle: "Masque la section des modes de paiement lorsque le coût est défini comme gratuit",
+                    GeometryMods: "Activer les options de modification de géométrie",
+                    GeometryModsTitle: "Active les options pour modifier la géométrie telle que : orthogonalisation, possibilité de faire pivoter ou de redimensionner la zone (redimensionnement)",
+                    SimplifyFactor: "Facteur de simplification",
+                    SimplifyFactorTitle: "Plus le facteur de simplification est grand, plus de nœuds seront supprimés"
                 },
                 filter: {
-                    PlaceFilterPanel: 'Place Filtering',
-                    filter: 'Filter',
-                    Hide: 'Hide',
-                    Show: 'Show only'
+                    PlaceFilterPanel: "Filtre des lieux",
+                    filter: "Filtre",
+                    Hide: "Masquer",
+                    Show: "Montrer uniquement"
                 },
                 hoursParser: {
-                    defaultText: 'Paste Hours Here',
-                    AddHours: 'Add hours',
-					AddHoursTitle: 'Add pasted hours to existing',
-                    ReplaceHours: 'Replace all hours',
-					ReplaceHoursTitle: 'Replace existing hours with pasted hours',
-                    errorSameOpenClose: 'Same open and close times detected',
-                    errorOverlappingHours: 'Overlapping hours detected',
-					errorCannotParse: 'Unable to parse the provided hours'
+                    defaultText: "Coller les horaires ici",
+                    AddHours: "Ajouter des horaires",
+                    AddHoursTitle: "Ajouter les horaires collés à l'existant",
+                    ReplaceHours: "Remplacer tous les horaires",
+                    ReplaceHoursTitle: "Remplacer les horaires existants par les horaires collés",
+                    errorSameOpenClose: "Même temps d'ouverture et de fermeture détectés",
+                    errorOverlappingHours: "Chevauchement des horaires détecté",
+                    errorCannotParse: "Impossible d'analyser les horaires fournis"
                 },
                 GLE:{
-                    closedPlace: 'Google indicates this place is permanently closed.\nVerify with other sources or your editor community before deleting.',
-                    multiLinked: 'Linked more than once already. Please find and remove multiple links.',
-                    linkedToThisPlace: 'Already linked to this place',
-                    linkedNearby: 'Already linked to a nearby place',
-                    linkedToXPlaces: 'This is linked to {0} places',
-                    badLink: 'Invalid Google link.  Please remove it.',
-                    tooFar: 'The Google linked place is more than {0} meters from the Waze place.  Please verify the link is correct.'
+                    closedPlace: "Google indique que cet endroit est définitivement fermé. \ NVérifiez avec d'autres sources ou avec votre communauté d'éditeurs avant de le supprimer.",
+                    multiLinked: "Déjà lié plus d'une fois. S'il vous plaît trouvez et supprimez plusieurs liens.",
+                    linkedToThisPlace: "Déjà lié à ce Lieu",
+                    linkedNearby: "Déjà lié à ce Lieu à proximité",
+                    linkedToXPlaces: "Ceci est lié à {0} Lieux",
+                    badLink: "Lien Google non valide. Veuillez l'enlever.",
+                    tooFar: "Le Lieu lié à Google se trouve à plus de {0} mètres du lieu Waze. Veuillez vérifier que le lien est correct."
                 }
             }
         });
