@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.11.24.01
+// @version      2018.11.27.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -47,6 +47,7 @@ var UpdateObject, MultiAction;
     var wazePL;
     let hoursparser;
     let GLE;
+    var catalog = [];
 
     //Layer definitions
     {
@@ -181,6 +182,7 @@ var UpdateObject, MultiAction;
             '<div id="divShowClosestSegmentSelected" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowClosestSegmentSelected" class="pieSettingsCheckbox" /><label for="_cbShowClosestSegmentSelected" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowClosestSegmentSelected') + '</label></div>',
             '<div id="divEnableGLE" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EnableGLETitle') + '"><input type="checkbox" id="_cbEnableGLE" class="pieSettingsCheckbox"/><label for="_cbEnableGLE" style="white-space:pre-line;">' + I18n.t('pie.prefs.EnableGLE') + '</label></div>',
             '<div id="divOpenPUR" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.OpenPURTitle') + '"><input type="checkbox" id="_cbOpenPUR" class="pieSettingsCheckbox"/><label for="_cbOpenPUR" style="white-space:pre-line;">' + I18n.t('pie.prefs.OpenPUR') + '</label></div>',
+            '<div id="divEnablePhotoViewer" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.PhotoViewerTite') + '"><input type="checkbox" id="_cbEnablePhotoViewer" class="pieSettingsCheckbox"/><label for="_cbEnablePhotoViewer" style="white-space:pre-line;">' + I18n.t('pie.prefs.PhotoViewer') + '</label></div>',
             '</fieldset>',
             '<div class="controls-container" id="divPlaceMenuCustomization">',
             '<b>' + I18n.t('pie.prefs.PlaceMenuCustomization') + '</b></br>',
@@ -439,6 +441,15 @@ var UpdateObject, MultiAction;
                 GLE.disable();
         });
 
+        $('#_cbEnablePhotoViewer').change(function(){
+            if(this.checked)
+                $('#launchDiv').css('display', 'block');
+            else{
+                hide_visio();
+                $('#launchDiv').css('display', 'none');
+            }
+        });
+
         $('#_cbHidePaymentType').change(function(){
             if(this.checked)
                 registerEvents(HidePaymentTypePlaceSelected);
@@ -487,6 +498,7 @@ var UpdateObject, MultiAction;
         setChecked('_cbOpenPUR', settings.OpenPUR);
         setChecked('_cbHidePaymentType', settings.HidePaymentType);
         setChecked('_cbGeometryMods', settings.GeometryMods);
+        setChecked('_cbEnablePhotoViewer', settings.EnablePhotoViewer);
         if(settings.ShowPlaceNames){
             $('#_cbShowPlaceNamesPoint')[0].disabled = false;
             $('#_cbShowPlaceNamesArea')[0].disabled = false;
@@ -584,6 +596,9 @@ var UpdateObject, MultiAction;
 
         if(settings.EnableGLE)
             GLE.enable();
+
+        //if(settings.EnablePhotoViewer)
+        SetupPhotoViewer();
 
         if(settings.HidePaymentType){
             registerEvents(HidePaymentTypePlaceSelected);
@@ -864,6 +879,400 @@ var UpdateObject, MultiAction;
 
         registerEvents(AddMakePrimaryButtons);
         AddMakePrimaryButtons();
+    }
+
+    function SetupPhotoViewer(){
+        //Black background
+        let mainDiv=document.createElement('div');
+        mainDiv.id='photoViewerMainDiv';
+        $(mainDiv).css({'float':'right','position':'absolute','left':'0px','top':'0px','width':'100%','height':'100%','background-color':'rgb(0, 0, 0, 0.85)','z-index':'1005','overflow-y':'auto','display':'none'});
+        $('#map').append(mainDiv);
+
+        //Div options
+        let optDiv=document.createElement('div');
+        optDiv.id='options';
+        $(optDiv).css({'position':'absolute','top':'0','width':'100%','height':'100%','z-index':'1011','background-color':'rgb(0, 0, 0, 0.85)', 'display':'none'});
+        /*optDiv.onclick = function(){
+             $(optDiv).css('display', 'none');
+        };*/
+        $('#map').append(optDiv);
+
+        let optDiv2=document.createElement('div');
+        $(optDiv2).css({'text-align':'center','width':'300px', 'position':'relative', 'top':'30px', 'background-color':'black', 'color':'white', 'margin':'0 auto', 'border':'1px solid white', 'border-radius':'12px', 'padding':'10px'});
+        optDiv2.innerHTML = '<div>Sort by <select id="sortBy"><option value="sortbyname">Name</option><option value="sortbylockRank">Lock level</option><option value="sortbyImageCount">Image count</option></select></div>' +
+            '<div>Sort order<select id="sortOrder"><option value="sortAsc">Ascending</option><option value="sortDesc">Descending</option></select></div>' +
+            '<div style="margin-top:15px;"><button type="button" id="photoViewerSave">Save</button><button type="button" id="photoViewerCancel">Cancel</button></div>';
+        optDiv.appendChild(optDiv2);
+
+        $('#photoViewerCancel').click(function(){
+            $(optDiv).css('display', 'none');
+        });
+
+        let topbar = document.createElement('div');
+        $(topbar).css({'position':'sticky', 'top':'0px', 'width':'100%', 'height':'23px'});
+        mainDiv.appendChild(topbar);
+
+        //Button to quit
+        let quit=document.createElement('button');
+        quit.innerHTML=I18n.translations[I18n.currentLocale()].toolbar.cancel;
+        $(quit).css({'float':'right','height':'23px','line-height':'23px','margin':'3px','padding':'0 10px','background-color':'#26bae8','color':'white','border':'0','border-radius':'13px'});
+        quit.onclick = hide_visio;
+        topbar.appendChild(quit);
+
+        //Button for script options
+        let param=document.createElement('button');
+        param.innerHTML='<i style="color:#ccc;" class="fa fa-gear"></i>';
+        $(param).css({'float':'right','height':'22px','line-height':'22px','margin':'3px','background-color':'#354148','color':'white','border':'0','border-radius':'11px'});
+        param.onclick=(function(){
+            $(optDiv).css('display', 'block');
+        });
+        topbar.appendChild(param);
+
+        //Quantity
+        let quantities=document.createElement('div');
+        $(quantities).css({'float':'right','height':'22px','line-height':'22px','margin':'3px','padding':'0 8px','background-color':'#354148','color':'white','border':'0','border-radius':'11px'});
+        let placeqty = document.createElement('div');
+        $(placeqty).css({'color':'white','display':'inline-block', 'margin-right':'5px'});
+        placeqty.innerHTML='<i class="fa fa-map-marker" style="color:red;" title="Total Places found with images"></i> <span id="placessqty"></span>';
+        quantities.appendChild(placeqty);
+        let imageqty = document.createElement('div');
+        $(imageqty).css({'display':'inline-block'});
+        imageqty.innerHTML='<i class="fa fa-file-image-o" title="Total images found"></i> <span id="imagesqty"></span>';
+        quantities.appendChild(imageqty);
+        topbar.appendChild(quantities);
+
+        //Refresh
+        let refresh=document.createElement('div');
+        refresh.innerHTML='<i class="fa fa-refresh"></i>';
+        $(refresh).css({'float':'right','height':'22px','line-height':'22px','margin':'3px','padding':'0 8px','background-color':'#354148','color':'white','border':'0','border-radius':'11px', 'cursor':'pointer'});
+        refresh.id="refreshScan";
+        $(refresh).click(Photos_scan);
+        topbar.appendChild(refresh);
+
+        let showDiv=document.createElement('div');
+        showDiv.id='showDiv';
+        showDiv.style.padding='5px';
+        mainDiv.appendChild(showDiv);
+
+        //Icon near chat
+        let launchDiv=document.createElement('div');
+        launchDiv.id='launchDiv';
+        $(launchDiv).css({'z-index':'10000 !important', 'title':'test','bottom':'26px','left':'70px','position':'absolute','font-weight':'400', 'display': (settings.EnablePhotoViewer ? 'block' : 'none')});
+        let tmpdiv=document.createElement('div');
+        $(tmpdiv).css({'height':'40px','position':'absolute','bottom':'0px','transition':'all 0.3s'});
+        tmpdiv.onmouseenter=togglePhotoViewerMouseEvent;
+        launchDiv.appendChild(tmpdiv);
+        let launchButton=document.createElement('button');
+        $(launchButton).css({'filter':'filter:grayscale(100%)','border':'none','background-color':'white','border-radius':'5px 5px 0px 0px','width':'43px','height':'40px'});
+        launchButton.innerHTML='<i style="color:#666;font-size:20px;" class="fa fa-image"></i>';
+        launchButton.id = "photoViewerButton";
+        tmpdiv.appendChild(launchButton);
+        $('#map').append(launchDiv);
+
+        $('#sortBy')[0].value = settings.sortBy;
+        $('#sortOrder')[0].value = settings.sortOrder;
+
+        $('#photoViewerSave').click(function(){
+            settings.sortBy = $('#sortBy')[0].value;
+            settings.sortOrder = $('#sortOrder')[0].value;
+            saveSettings();
+            $(optDiv).css('display', 'none');
+            Photos_scan();
+        });
+    }
+
+    function togglePhotoViewerMouseEvent(){
+        //if the Places category is not enabled or all of the Place options are not enabled, don't allow opening the viewer - nothing will display.
+        if(!isChecked("layer-switcher-group_places") || (!isChecked("layer-switcher-item_parking_places") && !isChecked("layer-switcher-item_residential_places") && !isChecked('layer-switcher-item_venues'))){
+           $('#photoViewerButton').css('cursor', 'not-allowed');
+            $('#photoViewerButton').attr('title','Enable the Places layers to use this tool');
+            $('#photoViewerButton').off();
+        }
+        else{
+            $('#photoViewerButton').css('cursor', 'pointer');
+            $('#photoViewerButton').attr('title','');
+            $('#photoViewerButton').click(show_visio);
+        }
+    }
+
+    function hide_visio() {
+        $("#photoViewerMainDiv").css('display', 'none');
+        $("#chat-overlay").css('display', 'block');
+        $("#launchDiv").css('display', 'inline-block');
+        $('#photoViewerZoom').remove();
+    }
+    function show_visio() {
+
+
+        $('.save-popover-container').css('z-index', 1011);
+        $('.changes-log-region').css('z-index', 1012);
+        $("#photoViewerMainDiv").css('display', 'block');
+        $("#chat-overlay").css('display', 'none');
+        $("#launchDiv").css('display', 'none');
+        Photos_scan();
+    }
+
+    function dynamicSort(property) {
+        var sortOrder = 1;
+        if(property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+
+        return function (a,b) {
+            if(sortOrder == -1){
+                if(property === "name")
+                    return b.attributes[property].localeCompare(a.attributes[property]);
+                else if(property === "ImageCount")
+                    return (parseInt(b.attributes.images.length) - parseInt(a.attributes.images.length));
+                else
+                    return (parseInt(b.attributes[property]) - parseInt(a.attributes[property]));
+            }
+            else{
+                if(property === "name")
+                    return a.attributes[property].localeCompare(b.attributes[property]);
+                else if(property === "ImageCount")
+                    return (parseInt(a.attributes.images.length) - parseInt(b.attributes.images.length));
+                else
+                    return (parseInt(a.attributes[property]) - parseInt(b.attributes[property]));
+            }
+        }
+    }
+
+    function Photos_scan(){
+        catalog=[];
+        let venues = [];
+        for (let poi in W.model.venues.objects)
+            venues.push(W.model.venues.getObjectById(poi));
+
+        venues.sort(dynamicSort((settings.sortOrder === "sortDesc" ? "-" : "") + settings.sortBy.substr(6)));
+        for (let i=0; i<venues.length; i++) {
+            let venue = venues[i]
+            let vattr = venue.attributes;
+            if (typeof (venue) ==='undefined' || vattr.id === null || venue.isSelected()) continue;
+
+            if (vattr.images.length != 0 && onScreen(venue))
+                catalog.push(vattr.id);
+        }
+        Photos_show();
+    }
+
+    function Photos_show(){
+        $("#showDiv").html('');
+        let c=0;
+        let picCount=0;
+        for (var i=0; catalog[i]; i++) {
+            let ls = JSON.parse(localStorage.poiCheked);
+            if (ls.toSource().indexOf(catalog[i]) != -1) //Check if the POI is hidden (green check button)
+                continue;
+            let venue = W.model.venues.getObjectById(catalog[i]);
+            let vattr= venue.attributes;
+
+            let venueDiv=document.createElement('div');
+            $(venueDiv).css({'float':'left','min-width':'200px','height':'220px','margin':'0 10px 10px 0','padding':'5px','border-radius':'10px','background-color':'black','color':'white', 'overflow-y':'auto'});
+            if (vattr.approved) {
+                venueDiv.style.border='1px solid #26bae8';
+                //venueDiv.title='This POI is approved';
+            } else {
+                venueDiv.style.border='1px solid #b50';
+                venueDiv.title='This POI is not approved';
+            }
+            if (vattr.adLocked) {
+                venueDiv.style.backgroundColor='#600';
+                venueDiv.title=I18n.translations[I18n.currentLocale()].objects.venue.fields.adLocked;
+                //continue; Hide POI if it's adloacked (option)
+            }
+            $('#showDiv').append(venueDiv);
+
+            // POI's Name
+            let venueName =document.createElement('span');
+            venueName.style.float='left';
+            venueName.innerHTML=vattr.name;// + ` (${parseInt(vattr.lockRank) + 1})`;
+            if(vattr.categories[0] === "RESIDENCE_HOME"){
+                let address = venue.getAddress();
+                venueName.innerHTML=`${address.attributes.houseNumber} ${address.attributes.street.name}`;
+            }
+            venueDiv.appendChild(venueName);
+
+            // Check to valid POI (no come back)
+            let venueCheck=document.createElement('span');
+            venueCheck.style.float='right';
+            venueCheck.style.marginRight='5px';
+            venueCheck.style.cursor='pointer';
+            venueCheck.innerHTML='<i style="color:#0f0;" class="fa fa-check" title="This POI is OK !"></i>';
+            venueCheck.addEventListener("click", function (id, venueDiv) {
+                return function () {
+                    let ls = JSON.parse(localStorage.poiCheked);
+                    if (ls.toSource().indexOf(id) === -1) {
+                        ls.push(id);
+                        localStorage.setItem('poiCheked', JSON.stringify(ls));
+                        venueDiv.style.display='none';
+                        $("#placessqty").html($("#placessqty").html()-1);
+                    }
+                }
+            }(catalog[i], venueDiv), false);
+            //venueDiv.appendChild(venueCheck);
+
+            // Check to localize POI
+            let venuePos=document.createElement('span');
+            venuePos.style.float='right';
+            venuePos.style.margin='0 5px';
+            venuePos.style.cursor='pointer';
+            venuePos.innerHTML='<i style="color:#aaa;" class="fa fa-crosshairs" title="Geolocate and Select"></i>'; // title="'+ I18n.translations[I18n.currentLocale()].geolocation.focus-btn +'"
+            venuePos.id=catalog[i];
+            venuePos.addEventListener("click", function (geo, id) {
+                return function () {
+                    hide_visio();
+                    let lon=(((geo.left+geo.right)/2)+geo.right)/2;
+                    let lat=(((geo.bottom+geo.top)/2)+geo.bottom)/2;
+                    let geoXY=new OL.LonLat(lon, lat).transform('EPSG:3857', 'EPSG:4326');
+                    let xy = OL.Layer.SphericalMercator.forwardMercator(geoXY.lon,geoXY.lat);
+                    W.map.setCenter(xy, 5);
+                    W.selectionManager.unselectAll();
+                    let venueList = [];
+                    venueList.push(W.model.venues.objects[id]);
+                    W.selectionManager.setSelectedModels(venueList);
+                }
+            }(vattr.geometry.bounds, catalog[i]), false);
+            venueDiv.appendChild(venuePos);
+            let tmp=document.createElement('div'); tmp.style.clear='both';venueDiv.appendChild(tmp);
+
+            let venueLock = document.createElement('div');
+            venueLock.innerHTML = `<span style="font-size:10px; color:#aaa;">${I18n.translations[I18n.currentLocale()].edit.segment.fields.lock}: ${vattr.lockRank+1}</span>`;
+            venueDiv.appendChild(venueLock);
+            //Show differents categories
+            let venueCat=document.createElement('div');
+            for (var j=0; I18n.translations[I18n.currentLocale()].venues.categories[vattr.categories[j]]; j++)
+                venueCat.innerHTML += `<span style="font-size:10px;color:#aaa;">${I18n.translations[I18n.currentLocale()].venues.categories[vattr.categories[j]]}${j < vattr.categories.length-1 ? ',' : ''} </span>`;
+
+            venueCat.innerHTML+='<div style="clear:both;"></div>';
+            venueDiv.appendChild(venueCat);
+
+            //Show differents images
+            for (var k=0; vattr.images[k]; k++) {
+                let imgSpan = document.createElement('div');
+                imgSpan.id = vattr.images[k].attributes.id;
+                $(imgSpan).css({'float': 'left', 'padding-right':'3px'});
+                if(k > 0)
+                    $(imgSpan).css('margin-left', '5px');
+                let venueImg=document.createElement('img');
+                $(venueImg).css({'float':'left','max-width':'180px','height':'140px','margin':'5px','cursor':'pointer'});
+                venueImg.src='https://venue-image.waze.com/thumbs/thumb347_'+vattr.images[k].attributes.id;
+                if (vattr.images[k].attributes.approved===true) {
+                    imgSpan.style.border='1px solid #0f0';
+                    imgSpan.title='This image is approved';
+                } else {
+                    imgSpan.style.border='1px solid #f00';
+                    imgSpan.title='This image is not approved';
+                }
+                venueImg.addEventListener("click", function (imageid, venue, approved) {
+                    return function () {
+                        Photos_zoom(venue, imageid, approved);
+                        W.selectionManager.unselectAll();
+                        //Disabling selecting the Place when viewing the expanded picture
+                        //let venueList = [];
+                        //venueList.push(W.model.venues.objects[idvenue]);
+                        //W.selectionManager.setSelectedModels(venueList);
+                        $("#landmark-edit-photos").css('display', 'block');
+                        $("#landmark-edit-general").css('display', 'none');
+                    }
+                }(vattr.images[k].attributes.id, venue, vattr.images[k].attributes.approved), false);
+
+                if(vattr.images[k].attributes.approved){ //Add a trash can icon to delete a picture if the picture is approved on the Place (not a PUR)
+                    let deleteImg = document.createElement('i');
+                    $(deleteImg).addClass('fa fa-trash-o');
+                    $(deleteImg).css({'float':'right', 'cursor':'pointer', 'title':'Delete photo'});
+                    $(deleteImg).prop({ 'data-id': vattr.id, 'data-imageID': vattr.images[k].attributes.id});
+                    $(deleteImg).click(function(){
+                        let imageID = $(this).prop('data-imageID');
+                        DeleteImage(venue, imageID);
+                    });
+                    imgSpan.appendChild(deleteImg);
+                }
+                picCount++;
+                imgSpan.appendChild(venueImg);
+                venueDiv.appendChild(imgSpan);
+            }
+            c++;
+        }
+        $("#placessqty").html(c);
+        $("#imagesqty").html(picCount);
+    }
+
+    function DeleteImage(venue, imageID){
+        let UpdateObject= require("Waze/Action/UpdateObject");
+        let newimages = [].concat(venue.attributes.images);
+        for(let i=newimages.length-1; i >= 0; i--){
+            if(newimages[i].id === imageID)
+                newimages.splice(i,1);
+        }
+        W.model.actionManager.add(new UpdateObject(venue,{images:newimages}));
+        if(newimages.length > 0){
+            $(`#${imageID}`).remove();
+            $("#imagesqty").html($("#imagesqty").html()-1);
+        }
+        else{
+            $(`#${imageID}`).parent().remove();
+            $("#placessqty").html($("#placessqty").html()-1);
+            $("#imagesqty").html($("#imagesqty").html()-1);
+        }
+    }
+
+    function onScreen(obj) {
+        if (obj.geometry)
+            return(W.map.getExtent().intersectsBounds(obj.geometry.getBounds()));
+        return(false);
+    }
+
+    function Photos_zoom(venue, id, approved){
+        let zoom = document.createElement('div');
+        let zoomPicIndex = null;
+        let images = venue.attributes.images;
+        for(let i=0;i<images.length;i++){
+            if(images[i].id === id){
+                zoomPicIndex = i;
+                break;
+            }
+        }
+        zoom.id = "photoViewerZoom";
+        $(zoom).css({'position':'absolute','top':'0','width':'100%','height':'100%','z-index':'1011','background-color':'rgb(0, 0, 0, 0.85)'});
+        let imageDIV = document.createElement('div');
+        $(imageDIV).css({'text-align':'center', 'position':'relative', 'top':'30px'});
+        imageDIV.innerHTML=`<img id="zoomImage" style="border-radius:12px; border:2px solid ${approved ? '#0f0' : '#f00'};" src="https://venue-image.waze.com/thumbs/thumb700_${id}" />${approved ? '<i id="zoomDelete" class="fa fa-trash-o fa-lg" style="cursor:pointer; color:white; position:absolute; top:0; margin-left:7px;"></i>' : ''}`;
+        zoom.appendChild(imageDIV);
+
+        if(venue.attributes.images.length > 1){
+            let zoomNavDiv = document.createElement('div');
+            $(zoomNavDiv).css({'text-align':'center', 'position':'relative', 'top':'30px'});
+            zoomNavDiv.innerHTML = '<a href="#" id="zoomPrev" style="text-decoration: none; display: inline-block; background-color: #ddd; padding: 8px 16px; font-size:18px;">&#8249;</a><a href="#" id="zoomNext" style="text-decoration: none; display: inline-block; background-color: #ddd; padding: 8px 16px; font-size:18px;">&#8250;</a>';
+            zoom.appendChild(zoomNavDiv);
+        }
+
+        zoom.onclick=(function(){
+            zoom.remove();
+        });
+        $('#map').append(zoom);
+        $('#zoomDelete').click(function(){
+            DeleteImage(venue, id);
+        });
+
+        $("#zoomPrev").click(function(){
+            if(zoomPicIndex > 0){
+                zoomPicIndex--;
+                $('#zoomImage').attr('src', `https://venue-image.waze.com/thumbs/thumb700_${images[zoomPicIndex].id}`);
+                id = images[zoomPicIndex].id;
+            }
+            event.stopPropagation();
+        });
+
+        $("#zoomNext").click(function(){
+            if(zoomPicIndex < (images.length - 1)){
+                zoomPicIndex++;
+                $('#zoomImage').attr('src', `https://venue-image.waze.com/thumbs/thumb700_${images[zoomPicIndex].id}`);
+                id = images[zoomPicIndex].id;
+            }
+            event.stopPropagation();
+        });
     }
 
     function PlaceMenuShortcut(itemNum){
@@ -1194,14 +1603,13 @@ var UpdateObject, MultiAction;
             cat = $('#pieItem' + (i+1))[0].value;
             icon = $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].getAttribute("data-icon");
             if(cat !== "PARKING_LOT" && cat !== resCategory && cat !== "GAS_STATION")
-                $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span><div class="drawing-controls"><span class="drawing-control polygon secondary-control waze-tooltip" data-toggle="tooltip" title="" id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '" data-original-title="Create Area"></span><span class="drawing-control main-control point waze-tooltip" data-toggle="tooltip" title="" data-original-title="Create Point"></span></div></div>');
-            else{
+                $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-container"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span><div class="drawing-controls"><span class="drawing-control polygon secondary-control waze-tooltip" data-toggle="tooltip" title="" id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '" data-original-title="Create Area"></span><span class="drawing-control main-control point waze-tooltip" data-toggle="tooltip" title="" data-original-title="Create Point"></span></div></div></div>');            else{
               //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive" style="' + (icon !== "" ? "padding-left:0px;" : "") + ' height:40px;" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><span class="menu-title ' + icon + '" style="font-size:26px;"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span><div class="drawing-controls"><span class="drawing-control polygon secondary-control" id="piePlaceAreaItem' + (i+1) + '" data-category="' + cat + '" title="Place (area)"></span><span class="drawing-control main-control point" id="piePlacePointItem' + (i+1) + '" data-category="' + cat + '" title="Place (point)"></span></div></div>');            else{
                 if(cat === resCategory) //force point
                     //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
-                    $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon + '" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span></div>');
+                    $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon + '" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-container"><div class="item-icon"></div><span class="menu-title"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span></div></div>');
                 else //Parking lot & gas station - force area
-                    $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
+                    $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-container"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div></div>');
                     //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive"             id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '">                             <span class="menu-title" style="flex-grow:1;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
             }
         }
@@ -3028,7 +3436,10 @@ var UpdateObject, MultiAction;
             CreateItem8Shortcut: '',
             CreateItem9Shortcut: '',
             CreateItem10Shortcut: '',
-            CreateItem11Shortcut: ''
+            CreateItem11Shortcut: '',
+            EnablePhotoViewer: true,
+            sortBy: "sortbyname",
+            sortOrder: "sortAsc"
         };
         settings = loadedSettings ? loadedSettings : defaultSettings;
         for (var prop in defaultSettings) {
@@ -3106,7 +3517,10 @@ var UpdateObject, MultiAction;
                 CreateItem8Shortcut: settings.CreateItem8Shortcut,
                 CreateItem9Shortcut: settings.CreateItem9Shortcut,
                 CreateItem10Shortcut: settings.CreateItem10Shortcut,
-                CreateItem11Shortcut: settings.CreateItem11Shortcut
+                CreateItem11Shortcut: settings.CreateItem11Shortcut,
+                EnablePhotoViewer: settings.EnablePhotoViewer,
+                sortBy: settings.sortBy,
+                sortOrder: settings.sortOrder
             };
 
             for (var name in W.accelerators.Actions) {
@@ -3170,7 +3584,7 @@ var UpdateObject, MultiAction;
                     ClosestSegmentIgnorePLRUnnamedPRTitle: "When looking for the closest segment, PLRs and unnamed PRs will be ignored",
                     LockLevel: 'Lock level',
                     LockLevelTitle: 'The lock level to set automatically when creating new Places',
-                    MapChanges: 'Map Changes',
+                    MapChanges: 'Map Features',
                     ShowPlaceNames: 'Show Place names',
                     ShowPlaceNamesTitle: '',
                     ShowPointNames: 'Show point names',
@@ -3224,7 +3638,9 @@ var UpdateObject, MultiAction;
                     GeometryMods: "Enable geometry modification options",
                     GeometryModsTitle: "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places",
                     SimplifyFactor: "Simplify Factor",
-                    SimplifyFactorTitle: "The larger the simplification factor the more nodes will be removed"
+                    SimplifyFactorTitle: "The larger the simplification factor the more nodes will be removed",
+                    PhotoViewer: "Enable photo viewer",
+                    PhotoViewerTitle: ""
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
