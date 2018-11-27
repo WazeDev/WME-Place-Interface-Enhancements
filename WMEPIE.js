@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.11.27.01
+// @version      2018.11.27.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1062,9 +1062,9 @@ var UpdateObject, MultiAction;
         let c=0;
         let picCount=0;
         for (var i=0; catalog[i]; i++) {
-            let ls = JSON.parse(localStorage.poiCheked);
+            /*let ls = JSON.parse(localStorage.poiCheked);
             if (ls.toSource().indexOf(catalog[i]) != -1) //Check if the POI is hidden (green check button)
-                continue;
+                continue;*/
             let venue = W.model.venues.getObjectById(catalog[i]);
             let vattr= venue.attributes;
 
@@ -1102,13 +1102,13 @@ var UpdateObject, MultiAction;
             venueCheck.innerHTML='<i style="color:#0f0;" class="fa fa-check" title="This POI is OK !"></i>';
             venueCheck.addEventListener("click", function (id, venueDiv) {
                 return function () {
-                    let ls = JSON.parse(localStorage.poiCheked);
+                    /*let ls = JSON.parse(localStorage.poiCheked);
                     if (ls.toSource().indexOf(id) === -1) {
                         ls.push(id);
                         localStorage.setItem('poiCheked', JSON.stringify(ls));
                         venueDiv.style.display='none';
                         $("#placessqty").html($("#placessqty").html()-1);
-                    }
+                    }*/
                 }
             }(catalog[i], venueDiv), false);
             //venueDiv.appendChild(venueCheck);
