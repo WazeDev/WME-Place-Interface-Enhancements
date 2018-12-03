@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.11.27.02
+// @version      2018.12.03.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -898,10 +898,11 @@ var UpdateObject, MultiAction;
         $('#map').append(optDiv);
 
         let optDiv2=document.createElement('div');
-        $(optDiv2).css({'text-align':'center','width':'300px', 'position':'relative', 'top':'30px', 'background-color':'black', 'color':'white', 'margin':'0 auto', 'border':'1px solid white', 'border-radius':'12px', 'padding':'10px'});
-        optDiv2.innerHTML = '<div>Sort by <select id="sortBy"><option value="sortbyname">Name</option><option value="sortbylockRank">Lock level</option><option value="sortbyImageCount">Image count</option></select></div>' +
-            '<div>Sort order<select id="sortOrder"><option value="sortAsc">Ascending</option><option value="sortDesc">Descending</option></select></div>' +
-            '<div style="margin-top:15px;"><button type="button" id="photoViewerSave">Save</button><button type="button" id="photoViewerCancel">Cancel</button></div>';
+        optDiv2.className = 'photoViewerOptionsContainer';
+        $(optDiv2).css({'text-align':'center','width':'500px', 'position':'relative', 'top':'30px', 'background-color':'black', 'color':'white', 'margin':'0 auto', 'border':'1px solid white', 'border-radius':'12px', 'padding':'10px'});
+        optDiv2.innerHTML = '<div class="photoViewerOptionsOptionText"><div><span>Sort by</span></div><div><span>Sort order</span></div><div><span>Keep position after picture deletion</span></div></div>' +
+            '<div class="photoViewerOptionsOptionSetting"><div><select id="sortBy"><option value="sortbyname">Name</option><option value="sortbylockRank">Lock level</option><option value="sortbyImageCount">Image count</option></select></div><div><select id="sortOrder"><option value="sortAsc">Ascending</option><option value="sortDesc">Descending</option></select></div><div><span><input type="checkbox" id="photoViewerPreserveLayout"></span></div></div>' +
+            '<div class="photoViewerOptionsFooter" style="margin-top:15px;"><button class="btn btn-primary" type="button" id="photoViewerSave">Save</button><button type="button" class="btn btn-default" id="photoViewerCancel">Cancel</button></div>';
         optDiv.appendChild(optDiv2);
 
         $('#photoViewerCancel').click(function(){
@@ -971,10 +972,12 @@ var UpdateObject, MultiAction;
 
         $('#sortBy')[0].value = settings.sortBy;
         $('#sortOrder')[0].value = settings.sortOrder;
+        setChecked('photoViewerPreserveLayout', settings.PhotoViewerPreserveLayout);
 
         $('#photoViewerSave').click(function(){
             settings.sortBy = $('#sortBy')[0].value;
             settings.sortOrder = $('#sortOrder')[0].value;
+            settings.PhotoViewerPreserveLayout = isChecked('photoViewerPreserveLayout');
             saveSettings();
             $(optDiv).css('display', 'none');
             Photos_scan();
@@ -1208,11 +1211,17 @@ var UpdateObject, MultiAction;
         }
         W.model.actionManager.add(new UpdateObject(venue,{images:newimages}));
         if(newimages.length > 0){
-            $(`#${imageID}`).remove();
+            if(settings.PhotoViewerPreserveLayout)
+                $(`#${imageID}`).css('visibility', 'hidden');
+            else
+                $(`#${imageID}`).remove();
             $("#imagesqty").html($("#imagesqty").html()-1);
         }
         else{
-            $(`#${imageID}`).parent().remove();
+            if(settings.PhotoViewerPreserveLayout)
+                $(`#${imageID}`).parent().css('visibility', 'hidden');
+            else
+                $(`#${imageID}`).parent().remove();
             $("#placessqty").html($("#placessqty").html()-1);
             $("#imagesqty").html($("#imagesqty").html()-1);
         }
@@ -3364,7 +3373,16 @@ var UpdateObject, MultiAction;
             '.pie-residential {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -37px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-residential {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
             '#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -37px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
             '.makePrimary {border:1px solid gray; display:inline-block; cursor:pointer; margin-left:5px; border-radius:5px; padding:0px 4px 0px 4px; user-select: none; font-size:11px;}',
-            '.makePrimary:hover {border-color: #26bae8; color: #26bae8}'
+            '.makePrimary:hover {border-color: #26bae8; color: #26bae8}',
+            '.photoViewerOptionsContainer { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; grid-template-areas: "header header" "optionText optionSetting" "footer footer"}',
+            '.photoViewerOptionsHeader { text-align: center; grid-area: header; }',
+            '.photoViewerOptionsOptionSetting { grid-area: optionSetting; }',
+            '.photoViewerOptionsOptionText {grid-area: optionText; }',
+            '.photoViewerOptionsFooter { text-align: center; grid-area: footer; }',
+            '.photoViewerOptionsOptionText div { height:32px;}',
+            '.photoViewerOptionsOptionSetting div { height:32px;}',
+            '.photoViewerOptionsOptionText div span { vertical-align: middle; line-height:32px;}',
+            '.photoViewerOptionsOptionSetting div span { vertical-align: middle; line-height:32px;}'
         ].join(' ');
         $('<style type="text/css">' + css + '</style>').appendTo('head');
     }
@@ -3439,7 +3457,8 @@ var UpdateObject, MultiAction;
             CreateItem11Shortcut: '',
             EnablePhotoViewer: true,
             sortBy: "sortbyname",
-            sortOrder: "sortAsc"
+            sortOrder: "sortAsc",
+            PhotoViewerPreserveLayout: false
         };
         settings = loadedSettings ? loadedSettings : defaultSettings;
         for (var prop in defaultSettings) {
@@ -3520,7 +3539,8 @@ var UpdateObject, MultiAction;
                 CreateItem11Shortcut: settings.CreateItem11Shortcut,
                 EnablePhotoViewer: settings.EnablePhotoViewer,
                 sortBy: settings.sortBy,
-                sortOrder: settings.sortOrder
+                sortOrder: settings.sortOrder,
+                PhotoViewerPreserveLayout: settings.PhotoViewerPreserveLayout
             };
 
             for (var name in W.accelerators.Actions) {
