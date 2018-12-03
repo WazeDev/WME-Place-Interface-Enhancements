@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.12.03.01
+// @version      2018.12.03.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -3776,7 +3776,9 @@ var UpdateObject, MultiAction;
                     GeometryMods: "Enable geometry modification options",
                     GeometryModsTitle: "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places",
                     SimplifyFactor: "Simplify Factor",
-                    SimplifyFactorTitle: "The larger the simplification factor the more nodes will be removed"
+                    SimplifyFactorTitle: "The larger the simplification factor the more nodes will be removed",
+                    PhotoViewer: "Enable photo viewer",
+                    PhotoViewerTitle: ""
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -3892,7 +3894,9 @@ var UpdateObject, MultiAction;
                     GeometryMods: "Activer les options de modification de géométrie",
                     GeometryModsTitle: "Active les options pour modifier la géométrie telle que : orthogonalisation, possibilité de faire pivoter ou de redimensionner la zone (redimensionnement)",
                     SimplifyFactor: "Facteur de simplification",
-                    SimplifyFactorTitle: "Plus le facteur de simplification est grand, plus de nœuds seront supprimés"
+                    SimplifyFactorTitle: "Plus le facteur de simplification est grand, plus de nœuds seront supprimés",
+                    PhotoViewer: "Activer la visionneuse photos",
+                    PhotoViewerTitle: ""
                 },
                 filter: {
                     PlaceFilterPanel: "Filtre des lieux",
