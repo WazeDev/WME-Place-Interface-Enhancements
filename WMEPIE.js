@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.12.03.02
+// @version      2018.12.15.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -16,6 +16,7 @@
 // @require      https://greasyfork.org/scripts/37486-wme-utils-hoursparser.js
 // @require      https://greasyfork.org/scripts/38421-wme-utils-navigationpoint/code/WME%20Utils%20-%20NavigationPoint.js?version=251065
 // @require      https://greasyfork.org/scripts/39208-wme-utils-google-link-enhancer/code/WME%20Utils%20-%20Google%20Link%20Enhancer.js?version=264663
+// @require      https://greasyfork.org/scripts/375202-photo-viewer-db-interface/code/Photo%20Viewer%20DB%20Interface.js
 // @contributionURL https://github.com/WazeDev/Thank-The-Authors
 // @license      GPLv3
 // ==/UserScript==
@@ -31,6 +32,7 @@
 /* global GoogleLinkEnhancer */
 /* global HoursParser */
 /* global require */
+/* global idbPVKeyval */
 /* eslint curly: ["warn", "multi-or-nest"] */
 
 var UpdateObject, MultiAction;
@@ -900,8 +902,8 @@ var UpdateObject, MultiAction;
         let optDiv2=document.createElement('div');
         optDiv2.className = 'photoViewerOptionsContainer';
         $(optDiv2).css({'text-align':'center','width':'500px', 'position':'relative', 'top':'30px', 'background-color':'black', 'color':'white', 'margin':'0 auto', 'border':'1px solid white', 'border-radius':'12px', 'padding':'10px'});
-        optDiv2.innerHTML = '<div class="photoViewerOptionsOptionText"><div><span>Sort by</span></div><div><span>Sort order</span></div><div><span>Keep position after picture deletion</span></div></div>' +
-            '<div class="photoViewerOptionsOptionSetting"><div><select id="sortBy"><option value="sortbyname">Name</option><option value="sortbylockRank">Lock level</option><option value="sortbyImageCount">Image count</option></select></div><div><select id="sortOrder"><option value="sortAsc">Ascending</option><option value="sortDesc">Descending</option></select></div><div><span><input type="checkbox" id="photoViewerPreserveLayout"></span></div></div>' +
+        optDiv2.innerHTML = '<div class="photoViewerOptionsOptionText"><div><span>Sort by</span></div><div><span>Sort order</span></div><div><span>Keep position after picture deletion</span></div><div><span>Show whitelisted Places</span></div></div>' +
+            '<div class="photoViewerOptionsOptionSetting"><div><select id="sortBy"><option value="sortbyname">Name</option><option value="sortbylockRank">Lock level</option><option value="sortbyImageCount">Image count</option></select></div><div><select id="sortOrder"><option value="sortAsc">Ascending</option><option value="sortDesc">Descending</option></select></div><div><span><input type="checkbox" id="photoViewerPreserveLayout"></span></div><div><span><input type="checkbox" id="photoViewerShowHiddenPlaces"></span></div></div>' +
             '<div class="photoViewerOptionsFooter" style="margin-top:15px;"><button class="btn btn-primary" type="button" id="photoViewerSave">Save</button><button type="button" class="btn btn-default" id="photoViewerCancel">Cancel</button></div>';
         optDiv.appendChild(optDiv2);
 
@@ -973,13 +975,16 @@ var UpdateObject, MultiAction;
         $('#sortBy')[0].value = settings.sortBy;
         $('#sortOrder')[0].value = settings.sortOrder;
         setChecked('photoViewerPreserveLayout', settings.PhotoViewerPreserveLayout);
+        setChecked('photoViewerShowHiddenPlaces', settings.PhotoViewerShowHiddenPlaces);
 
         $('#photoViewerSave').click(function(){
             settings.sortBy = $('#sortBy')[0].value;
             settings.sortOrder = $('#sortOrder')[0].value;
             settings.PhotoViewerPreserveLayout = isChecked('photoViewerPreserveLayout');
+            settings.PhotoViewerShowHiddenPlaces = isChecked('photoViewerShowHiddenPlaces');
             saveSettings();
             $(optDiv).css('display', 'none');
+            debugger;
             Photos_scan();
         });
     }
@@ -994,6 +999,7 @@ var UpdateObject, MultiAction;
         else{
             $('#photoViewerButton').css('cursor', 'pointer');
             $('#photoViewerButton').attr('title','');
+            $("#photoViewerButton").unbind('click');
             $('#photoViewerButton').click(show_visio);
         }
     }
@@ -1005,8 +1011,6 @@ var UpdateObject, MultiAction;
         $('#photoViewerZoom').remove();
     }
     function show_visio() {
-
-
         $('.save-popover-container').css('z-index', 1011);
         $('.changes-log-region').css('z-index', 1012);
         $("#photoViewerMainDiv").css('display', 'block');
@@ -1060,16 +1064,26 @@ var UpdateObject, MultiAction;
         Photos_show();
     }
 
-    function Photos_show(){
+    async function Photos_show(){
         $("#showDiv").html('');
         let c=0;
         let picCount=0;
-        for (var i=0; catalog[i]; i++) {
-            /*let ls = JSON.parse(localStorage.poiCheked);
-            if (ls.toSource().indexOf(catalog[i]) != -1) //Check if the POI is hidden (green check button)
-                continue;*/
+        for (let i=0; catalog[i]; i++) {
             let venue = W.model.venues.getObjectById(catalog[i]);
             let vattr= venue.attributes;
+            let myplace = await idbPVKeyval.get('Places', vattr.id);
+            let matchCount = 0;
+
+            if(!settings.PhotoViewerShowHiddenPlaces){
+                if(typeof myplace !== 'undefined'){
+                    for(let j=0; j<vattr.images.length; j++){
+                        if(myplace.placePicturesIDs.indexOf(vattr.images[j].id) > -1)
+                            matchCount++;
+                    }
+                    if(matchCount === vattr.images.length) //if all images are in the "okayed" list, skip displaying this Place
+                        continue;
+                }
+            }
 
             let venueDiv=document.createElement('div');
             $(venueDiv).css({'float':'left','min-width':'200px','height':'220px','margin':'0 10px 10px 0','padding':'5px','border-radius':'10px','background-color':'black','color':'white', 'overflow-y':'auto'});
@@ -1102,19 +1116,31 @@ var UpdateObject, MultiAction;
             venueCheck.style.float='right';
             venueCheck.style.marginRight='5px';
             venueCheck.style.cursor='pointer';
-            venueCheck.innerHTML='<i style="color:#0f0;" class="fa fa-check" title="This POI is OK !"></i>';
-            venueCheck.addEventListener("click", function (id, venueDiv) {
-                return function () {
-                    /*let ls = JSON.parse(localStorage.poiCheked);
-                    if (ls.toSource().indexOf(id) === -1) {
-                        ls.push(id);
-                        localStorage.setItem('poiCheked', JSON.stringify(ls));
-                        venueDiv.style.display='none';
+            venueCheck.innerHTML='<i style="color:#0f0;" class="fa fa-check" title="Whitelist this Place\'s pictures"></i>';
+            venueCheck.addEventListener("click", function (venue, venueDiv) {
+                return async function () {
+                    await idbPVKeyval.set(`Places`, {
+                        placeID: venue.attributes.id,
+                        placeName: venue.attributes.name,
+                        placePicturesIDs: venue.attributes.images.map(function(image){
+                            if(image.attributes.approved)
+                                return image.id;
+                        })
+                    });
+
+                    if(!settings.PhotoViewerShowHiddenPlaces && ((matchCount > 0 && matchCount === vattr.images.length) || matchCount == 0)){
+                        if(settings.PhotoViewerPreserveLayout)
+                            $(this).parent().css('visibility', 'hidden');
+                        else
+                            $(this).parent().remove();
                         $("#placessqty").html($("#placessqty").html()-1);
-                    }*/
+                        $("#imagesqty").html($("#imagesqty").html() - parseInt(venue.attributes.images.length));
+                    }
+                    else if(settings.PhotoViewerShowHiddenPlaces)
+                        $(this).parent().find('.approvedImage.pvImage').css('border-color', '#fff'); //turn the border white on the images that are not in a PUR
                 }
-            }(catalog[i], venueDiv), false);
-            //venueDiv.appendChild(venueCheck);
+            }(venue, venueDiv), false);
+            venueDiv.appendChild(venueCheck);
 
             // Check to localize POI
             let venuePos=document.createElement('span');
@@ -1145,28 +1171,32 @@ var UpdateObject, MultiAction;
             venueDiv.appendChild(venueLock);
             //Show differents categories
             let venueCat=document.createElement('div');
-            for (var j=0; I18n.translations[I18n.currentLocale()].venues.categories[vattr.categories[j]]; j++)
+            for (let j=0; I18n.translations[I18n.currentLocale()].venues.categories[vattr.categories[j]]; j++)
                 venueCat.innerHTML += `<span style="font-size:10px;color:#aaa;">${I18n.translations[I18n.currentLocale()].venues.categories[vattr.categories[j]]}${j < vattr.categories.length-1 ? ',' : ''} </span>`;
 
             venueCat.innerHTML+='<div style="clear:both;"></div>';
             venueDiv.appendChild(venueCat);
 
             //Show differents images
-            for (var k=0; vattr.images[k]; k++) {
-                let imgSpan = document.createElement('div');
-                imgSpan.id = vattr.images[k].attributes.id;
-                $(imgSpan).css({'float': 'left', 'padding-right':'3px'});
+            for (let k=0; vattr.images[k]; k++) {
+                let imgDIV = document.createElement('div');
+                imgDIV.id = vattr.images[k].attributes.id;
+                $(imgDIV).addClass('pvImage');
+                $(imgDIV).css({'float': 'left', 'padding-right':'3px'});
                 if(k > 0)
-                    $(imgSpan).css('margin-left', '5px');
+                    $(imgDIV).css('margin-left', '5px');
                 let venueImg=document.createElement('img');
                 $(venueImg).css({'float':'left','max-width':'180px','height':'140px','margin':'5px','cursor':'pointer'});
                 venueImg.src='https://venue-image.waze.com/thumbs/thumb347_'+vattr.images[k].attributes.id;
                 if (vattr.images[k].attributes.approved===true) {
-                    imgSpan.style.border='1px solid #0f0';
-                    imgSpan.title='This image is approved';
+                    let picIsWhitelisted = typeof myplace !== 'undefined' && myplace.placePicturesIDs.indexOf(vattr.images[k].id) > -1;
+                    imgDIV.style.border = `1px solid ${picIsWhitelisted ? "#fff" : "#0f0"}`;
+                    $(imgDIV).addClass('approvedImage');
+                    if(picIsWhitelisted)
+                        imgDIV.title='This image has been whitelisted';
                 } else {
-                    imgSpan.style.border='1px solid #f00';
-                    imgSpan.title='This image is not approved';
+                    imgDIV.style.border='1px solid #f00';
+                    imgDIV.title='This image is not approved';
                 }
                 venueImg.addEventListener("click", function (imageid, venue, approved) {
                     return function () {
@@ -1190,11 +1220,11 @@ var UpdateObject, MultiAction;
                         let imageID = $(this).prop('data-imageID');
                         DeleteImage(venue, imageID);
                     });
-                    imgSpan.appendChild(deleteImg);
+                    imgDIV.appendChild(deleteImg);
                 }
                 picCount++;
-                imgSpan.appendChild(venueImg);
-                venueDiv.appendChild(imgSpan);
+                imgDIV.appendChild(venueImg);
+                venueDiv.appendChild(imgDIV);
             }
             c++;
         }
@@ -3540,7 +3570,8 @@ var UpdateObject, MultiAction;
                 EnablePhotoViewer: settings.EnablePhotoViewer,
                 sortBy: settings.sortBy,
                 sortOrder: settings.sortOrder,
-                PhotoViewerPreserveLayout: settings.PhotoViewerPreserveLayout
+                PhotoViewerPreserveLayout: settings.PhotoViewerPreserveLayout,
+                PhotoViewerShowHiddenPlaces: settings.PhotoViewerShowHiddenPlaces
             };
 
             for (var name in W.accelerators.Actions) {
