@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2018.12.15.01
+// @version      2019.01.08.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -136,7 +136,7 @@ var UpdateObject, MultiAction;
             '<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">' + I18n.t('pie.prefs.ShowImperial') + '</label></div>',
             '<div id="divShowAreaPlaceSizeMetric" class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeMetric" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeMetric">' + I18n.t('pie.prefs.ShowMetric') + '</label></div>',
             '</div>',
-            '<div class="controls-container pie-controls-container" id="divShowLockButtonsRPP" title="' + I18n.t('pie.prefs.ShowRPPLockButtonsTitle') + '"><input type="checkbox" id="_cbShowLockButtonsRPP" class="pieSettingsCheckbox" /><label for="_cbShowLockButtonsRPP" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowRPPLockButtons') + '</label></div>',
+            !WazeWrap.isBetaEditor ? '<div class="controls-container pie-controls-container" id="divShowLockButtonsRPP" title="' + I18n.t('pie.prefs.ShowRPPLockButtonsTitle') + '"><input type="checkbox" id="_cbShowLockButtonsRPP" class="pieSettingsCheckbox" /><label for="_cbShowLockButtonsRPP" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowRPPLockButtons') + '</label></div>' : '',
             '<div class="controls-container pie-controls-container" id="divShowPlaceLocatorCrosshair" title="' + I18n.t('pie.prefs.ShowPlaceLocatorCrosshairTitle') + '" ><input type="checkbox" id="_cbShowPlaceLocatorCrosshair" class="pieSettingsCheckbox" /><label for="_cbShowPlaceLocatorCrosshair" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowPlaceLocatorCrosshair') + '</label></br>',
             '<span class="controls-container pie-controls-container" style="padding-left:30px;" title=""><input type="checkbox" id="_cbPlaceLocatorCrosshairProdPL" class="pieSettingsCheckbox" /><label for="_cbPlaceLocatorCrosshairProdPL" style="white-space:pre-line;">' + I18n.t('pie.prefs.ProdPL') + '</label></span></br>',
             '<span class="controls-container pie-controls-container" style="padding-left:30px;" title="' + I18n.t('pie.prefs.ZoomTitle') + '">' + I18n.t('pie.prefs.Zoom') + ' <select id="piePlaceZoom"><option value="10">10</option><option value="9">9</option><option value="8">8</option><option value="7">7</option><option value="6">6</option><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option><option value="0">0</option></select></span></div>',
@@ -739,7 +739,7 @@ var UpdateObject, MultiAction;
                                updatePlaceSizeDisplay();
                                AddPlaceCategoriesButtons();
                                AddHoursParserInterface();
-                               AddEEPJumpButtons();
+                                   AddEEPJumpButtons();
                                AddMakePrimaryButtons();
                                if(settings.ShowPlaceLocatorCrosshair)
                                    ShowPlaceLocatorCrosshair();
@@ -984,7 +984,6 @@ var UpdateObject, MultiAction;
             settings.PhotoViewerShowHiddenPlaces = isChecked('photoViewerShowHiddenPlaces');
             saveSettings();
             $(optDiv).css('display', 'none');
-            debugger;
             Photos_scan();
         });
     }
@@ -3036,6 +3035,8 @@ var UpdateObject, MultiAction;
     }
 
     function AddEEPJumpButtons(){
+        if(WazeWrap.isBetaEditor)
+            return;
         $('.navigation-point-list-item').find('.buttons').prepend('<div><i id="EEPCrosshair" class="fa fa-crosshairs" style="color:#2f799b" aria-hidden="true"></i></div>');
         $('#EEPCrosshair').click(function(){
             let point = WazeWrap.getSelectedFeatures()[0].model.attributes.entryExitPoints[0]._point;
@@ -3163,6 +3164,8 @@ var UpdateObject, MultiAction;
 
     //Using the same display for lock buttons as ClickSaver (with permission from MapoMatic) - thanks MoM!
     function addLockButtons() {
+        if(WazeWrap.isBetaEditor)
+            return;
         if(WazeWrap.getSelectedFeatures().length > 0){
             var item = WazeWrap.getSelectedFeatures()[0];
             var isRPP = item.model.type === "venue" && item.model.isResidential(); //(item.model.type === "venue" && item.model.attributes.residential === true);
