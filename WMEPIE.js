@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.01.08.01
+// @version      2019.01.17.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -15,7 +15,7 @@
 // @require      https://greasyfork.org/scripts/27023-jscolor/code/JSColor.js
 // @require      https://greasyfork.org/scripts/37486-wme-utils-hoursparser.js
 // @require      https://greasyfork.org/scripts/38421-wme-utils-navigationpoint/code/WME%20Utils%20-%20NavigationPoint.js?version=251065
-// @require      https://greasyfork.org/scripts/39208-wme-utils-google-link-enhancer/code/WME%20Utils%20-%20Google%20Link%20Enhancer.js?version=264663
+// @require      https://greasyfork.org/scripts/39208-wme-utils-google-link-enhancer/code/WME%20Utils%20-%20Google%20Link%20Enhancer.js?version=663055
 // @require      https://greasyfork.org/scripts/375202-photo-viewer-db-interface/code/Photo%20Viewer%20DB%20Interface.js
 // @contributionURL https://github.com/WazeDev/Thank-The-Authors
 // @license      GPLv3
@@ -735,11 +735,15 @@ var UpdateObject, MultiAction;
                            var addedNode = mutation.addedNodes[i];
                            // Only fire up if it's a node
                            if (addedNode.nodeType === Node.ELEMENT_NODE && ($(addedNode).hasClass('address-edit-view') || $(addedNode).hasClass('conversation-view'))) {
+                               //Hide the suggested categories for Shopping / Services due to the amount of vertical space it takes up - is often used as a valid category
+                               if(WazeWrap.hasPlaceSelected())
+                                   if ( WazeWrap.getSelectedFeatures()[0].model.attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].model.attributes.categories[0] === 'SHOPPING_AND_SERVICES' )
+                                       $('.suggested-categories').remove();
                                addLockButtons();
                                updatePlaceSizeDisplay();
                                AddPlaceCategoriesButtons();
                                AddHoursParserInterface();
-                                   AddEEPJumpButtons();
+                               AddEEPJumpButtons();
                                AddMakePrimaryButtons();
                                if(settings.ShowPlaceLocatorCrosshair)
                                    ShowPlaceLocatorCrosshair();
@@ -764,7 +768,7 @@ var UpdateObject, MultiAction;
         extprovobserver.observe(document.getElementById('edit-panel'), { childList: true, subtree: true });
 
         W.selectionManager.events.register("selectionchanged", null, function(){
-            if(WazeWrap.getSelectedFeatures().length > 0 && WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
+            if(WazeWrap.hasPlaceSelected()){
                 //Trim whitespace from start and end of house number field on Places
                 $('.form-control.house-number').focusout(function(){
                     $('.form-control.house-number')[0].value = $('.form-control.house-number')[0].value.trim();
@@ -793,6 +797,10 @@ var UpdateObject, MultiAction;
                     $('input[name="url"]').parent().parent().find('label').css('text-decoration', 'underline');
                     $('input[name="url"]').parent().parent().find('label').css('cursor', 'pointer');
                 }
+
+                //Hide the suggested categories for Shopping / Services due to the amount of vertical space it takes up - is often used as a valid category
+                if (WazeWrap.getSelectedFeatures()[0].model.attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].model.attributes.categories[0] === 'SHOPPING_AND_SERVICES' )
+                    $('.suggested-categories').remove();
             }
         });
 
