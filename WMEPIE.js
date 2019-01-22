@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.01.22.01
+// @version      2019.01.22.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -333,16 +333,6 @@ var UpdateObject, MultiAction;
             ToggleExternalProvidersCSS(this.checked);
         });
 
-        $('#_cbShowLockButtonsRPP').change(function() {
-            if(this.checked)
-                attachRPPLockButtonHandlers();
-            else
-            {
-                $('#pieRPPLockButtonsContainer').remove();
-                unregisterEvents(addLockButtons);
-            }
-        });
-
         $('#_cbShowPlaceLocatorCrosshair').change(function(){
             if(this.checked)
                 registerEvents(ShowPlaceLocatorCrosshair);
@@ -580,9 +570,6 @@ var UpdateObject, MultiAction;
             ShowPLSpotEstimatorButton();
         }
 
-        if(settings.ShowLockButtonsRPP)
-            attachRPPLockButtonHandlers();
-
         if(settings.ShowExternalProviderTooltip)
             ToggleExternalProvidersCSS(true);
 
@@ -743,7 +730,6 @@ var UpdateObject, MultiAction;
                                updatePlaceSizeDisplay();
                                AddPlaceCategoriesButtons();
                                AddHoursParserInterface();
-                               AddEEPJumpButtons();
                                AddMakePrimaryButtons();
                                if(settings.ShowPlaceLocatorCrosshair)
                                    ShowPlaceLocatorCrosshair();
@@ -884,8 +870,6 @@ var UpdateObject, MultiAction;
         registerEvents(AddHoursParserInterface);
         AddHoursParserInterface();
 
-        registerEvents(AddEEPJumpButtons);
-        AddEEPJumpButtons();
 
         registerEvents(AddMakePrimaryButtons);
         AddMakePrimaryButtons();
@@ -2106,13 +2090,14 @@ var UpdateObject, MultiAction;
         return $lockLevels.html();
     }
 
-    function attachRPPLockButtonHandlers(){
+    //implementd natively as of 2019-01-22
+    /*function attachRPPLockButtonHandlers(){
         $('#pieRPPLockButtonsContainer').remove();
         W.selectionManager.events.register("selectionchanged", null, addLockButtons);
         W.model.actionManager.events.register("afterundoaction",null, addLockButtons);
         W.model.actionManager.events.register("afterclearactions",null, addLockButtons);
         W.model.actionManager.events.register("afteraction",null, addLockButtons);
-    }
+    }*/
 
     function attachPlaceSizeHandlers(){
         W.selectionManager.events.register("selectionchanged", null, updatePlaceSizeDisplay);
