@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.01.22.02
+// @version      2019.01.23.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -726,7 +726,6 @@ var UpdateObject, MultiAction;
                                if(WazeWrap.hasPlaceSelected())
                                    if ( WazeWrap.getSelectedFeatures()[0].model.attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].model.attributes.categories[0] === 'SHOPPING_AND_SERVICES' )
                                        $('.suggested-categories').remove();
-                               addLockButtons();
                                updatePlaceSizeDisplay();
                                AddPlaceCategoriesButtons();
                                AddHoursParserInterface();
@@ -3002,7 +3001,7 @@ var UpdateObject, MultiAction;
         if(WazeWrap.getSelectedFeatures().length > 0)
             if(WazeWrap.getSelectedFeatures()[0].model.type === "venue")
                 $('.full-address').click(function(){
-                    $('.street-name').parent().parent().before($('.house-number').parent().parent());
+                    $('.street-name').parent().parent().before($('.form-control.house-number').parent().parent());
                 });
     }
 
