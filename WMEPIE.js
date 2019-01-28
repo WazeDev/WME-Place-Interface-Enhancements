@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.01.23.01
+// @version      2019.01.28.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -153,6 +153,7 @@ var UpdateObject, MultiAction;
             '<div class="controls-container pie-controls-container" id="divHidePaymentType" title="' + I18n.t('pie.prefs.HidePaymentTypeTitle') + '"><input type="checkbox" id="_cbHidePaymentType" class="pieSettingsCheckbox" /><label for="_cbHidePaymentType" style="white-space:pre-line;">' + I18n.t('pie.prefs.HidePaymentType') + '</label></div>',
             `<div class="controls-container pie-controls-container" id="divGeometryMods" title="${I18n.t('pie.prefs.GeometryModsTitle')}"><input type="checkbox" id="_cbGeometryMods" class="pieSettingsCheckbox" /><label for="_cbGeometryMods" style="white-space:pre-line;">${I18n.t('pie.prefs.GeometryMods')}</label></div>`,
             `<div class="controls-container pie-controls-container" id="divSimplifyFactor" style="padding-left:20px;" title="${I18n.t("pie.prefs.SimplifyFactorTitle")}"> ${I18n.t("pie.prefs.SimplifyFactor")} <input type="number" min="0" max="10" step=".5" style="width:45px; height:20px;" id="pieSimplifyFactor"></div>`,
+            `<div class="controls-container pie-controls-container" id="divHideShopAndServices" title="${I18n.t("pie.prefs.HideShoppingServicesTitle")}"><input type="checkbox" id="_cbHideShopAndServices" class="pieSettingsCheckbox" /><label for="_cbHideShopAndServices" style="white-space:pre-line;">${I18n.t("pie.prefs.HideShoppingServices")}</label></div>`,
             '</fieldset>',
 
             '<fieldset id="fieldNewPlaces" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
@@ -491,6 +492,7 @@ var UpdateObject, MultiAction;
         setChecked('_cbHidePaymentType', settings.HidePaymentType);
         setChecked('_cbGeometryMods', settings.GeometryMods);
         setChecked('_cbEnablePhotoViewer', settings.EnablePhotoViewer);
+        setChecked('_cbHideShopAndServices', settings.HideShopAndServices);
         if(settings.ShowPlaceNames){
             $('#_cbShowPlaceNamesPoint')[0].disabled = false;
             $('#_cbShowPlaceNamesArea')[0].disabled = false;
@@ -724,7 +726,7 @@ var UpdateObject, MultiAction;
                            if (addedNode.nodeType === Node.ELEMENT_NODE && ($(addedNode).hasClass('address-edit-view') || $(addedNode).hasClass('conversation-view'))) {
                                //Hide the suggested categories for Shopping / Services due to the amount of vertical space it takes up - is often used as a valid category
                                if(WazeWrap.hasPlaceSelected())
-                                   if ( WazeWrap.getSelectedFeatures()[0].model.attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].model.attributes.categories[0] === 'SHOPPING_AND_SERVICES' )
+                                   if (settings.HideShopAndServices && WazeWrap.getSelectedFeatures()[0].model.attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].model.attributes.categories[0] === 'SHOPPING_AND_SERVICES')
                                        $('.suggested-categories').remove();
                                updatePlaceSizeDisplay();
                                AddPlaceCategoriesButtons();
@@ -784,7 +786,7 @@ var UpdateObject, MultiAction;
                 }
 
                 //Hide the suggested categories for Shopping / Services due to the amount of vertical space it takes up - is often used as a valid category
-                if (WazeWrap.getSelectedFeatures()[0].model.attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].model.attributes.categories[0] === 'SHOPPING_AND_SERVICES' )
+                if (settings.HideShopAndServices && WazeWrap.getSelectedFeatures()[0].model.attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].model.attributes.categories[0] === 'SHOPPING_AND_SERVICES' )
                     $('.suggested-categories').remove();
             }
         });
@@ -1081,7 +1083,7 @@ var UpdateObject, MultiAction;
                 venueDiv.style.border='1px solid #26bae8';
                 //venueDiv.title='This POI is approved';
             } else {
-                venueDiv.style.border='1px solid #b50';
+                venueDiv.style.border='1px solid #f00';
                 venueDiv.title='This POI is not approved';
             }
             if (vattr.adLocked) {
@@ -1101,36 +1103,71 @@ var UpdateObject, MultiAction;
             }
             venueDiv.appendChild(venueName);
 
-            // Check to valid POI (no come back)
-            let venueCheck=document.createElement('span');
-            venueCheck.style.float='right';
-            venueCheck.style.marginRight='5px';
-            venueCheck.style.cursor='pointer';
-            venueCheck.innerHTML='<i style="color:#0f0;" class="fa fa-check" title="Whitelist this Place\'s pictures"></i>';
-            venueCheck.addEventListener("click", function (venue, venueDiv) {
-                return async function () {
-                    await idbPVKeyval.set(`Places`, {
-                        placeID: venue.attributes.id,
-                        placeName: venue.attributes.name,
-                        placePicturesIDs: venue.attributes.images.map(function(image){
-                            if(image.attributes.approved)
-                                return image.id;
-                        })
-                    });
+            if(vattr.approved){
+                // Whitelist button
+                let venueCheck=document.createElement('span');
+                venueCheck.style.float='right';
+                venueCheck.style.marginRight='5px';
+                venueCheck.style.cursor='pointer';
+                venueCheck.innerHTML='<i style="color:#fff;" class="fa fa-thumbs-up" title="Whitelist this Place\'s pictures"></i>';
+                venueCheck.addEventListener("click", function (venue, venueDiv) {
+                    return async function () {
+                        await idbPVKeyval.set(`Places`, {
+                            placeID: venue.attributes.id,
+                            placeName: venue.attributes.name,
+                            placePicturesIDs: venue.attributes.images.map(function(image){
+                                if(image.attributes.approved)
+                                    return image.id;
+                            })
+                        });
 
-                    if(!settings.PhotoViewerShowHiddenPlaces && ((matchCount > 0 && matchCount === vattr.images.length) || matchCount == 0)){
-                        if(settings.PhotoViewerPreserveLayout)
-                            $(this).parent().css('visibility', 'hidden');
-                        else
-                            $(this).parent().remove();
-                        $("#placessqty").html($("#placessqty").html()-1);
-                        $("#imagesqty").html($("#imagesqty").html() - parseInt(venue.attributes.images.length));
+                        if(!settings.PhotoViewerShowHiddenPlaces && ((matchCount > 0 && matchCount === vattr.images.length) || matchCount == 0)){
+                            if(settings.PhotoViewerPreserveLayout)
+                                $(this).parent().css('visibility', 'hidden');
+                            else
+                                $(this).parent().remove();
+                            $("#placessqty").html($("#placessqty").html()-1);
+                            $("#imagesqty").html($("#imagesqty").html() - parseInt(venue.attributes.images.length));
+                        }
+                        else if(settings.PhotoViewerShowHiddenPlaces)
+                            $(this).parent().find('.approvedImage.pvImage').css('border-color', '#fff'); //turn the border white on the images that are not in a PUR
                     }
-                    else if(settings.PhotoViewerShowHiddenPlaces)
-                        $(this).parent().find('.approvedImage.pvImage').css('border-color', '#fff'); //turn the border white on the images that are not in a PUR
-                }
-            }(venue, venueDiv), false);
-            venueDiv.appendChild(venueCheck);
+                }(venue, venueDiv), false);
+                venueDiv.appendChild(venueCheck);
+            }
+            else{
+                let purActions=document.createElement('span');
+                purActions.style.float='right';
+                purActions.style.marginRight='5px';
+                purActions.style.cursor='pointer';
+                let purApprove = document.createElement('i');
+                purApprove.className = "fa fa-check";
+                purApprove.title = "Approve this PUR";
+                purApprove.style.color = "#0f0";
+                purApprove.venue = venue;
+                purApprove.addEventListener("click", function(evt){
+                    let ven = evt.target.venue;
+                    W.model.actionManager.add(new(require("Waze/Action/UpdatePlaceUpdate"))(ven, ven.attributes.venueUpdateRequests[0], true));
+                    $($(this).parent().parent()).css("border", "1px solid #0f0");
+                    $($(this).parent().parent().find("img")).css("border", "1px solid #0f0")
+                    $(this).parent().remove();
+                }, false);
+                purActions.appendChild(purApprove);
+
+                let purReject = document.createElement('i');
+                purReject.className = "fa fa-times";
+                purReject.title = "Reject this PUR";
+                purReject.style.color = "#f00";
+                purReject.venue = venue;
+                purReject.addEventListener("click", function(evt){
+                    let ven = evt.target.venue;
+                    W.model.actionManager.add(new(require("Waze/Action/UpdatePlaceUpdate"))(ven, ven.attributes.venueUpdateRequests[0], false));
+                    $(this).parent().parent().remove();
+                }, false);
+                purActions.appendChild(purReject);
+
+                venueDiv.appendChild(purActions);
+            }
 
             // Check to localize POI
             let venuePos=document.createElement('span');
@@ -1212,6 +1249,43 @@ var UpdateObject, MultiAction;
                     });
                     imgDIV.appendChild(deleteImg);
                 }
+                else
+                {
+                    if(vattr.approved){
+                        let purActions=document.createElement('span');
+                        purActions.style.float='right';
+                        purActions.style.marginRight='5px';
+                        purActions.style.cursor='pointer';
+                        let purApprove = document.createElement('i');
+                        purApprove.className = "fa fa-check";
+                        purApprove.title = "Approve this picture";
+                        purApprove.style.color = "#0f0";
+                        purApprove.venue = venue;
+                        purApprove.currImage = vattr.images[k].attributes.id;
+                        purApprove.addEventListener("click", function(evt){
+                            processPlacePUR(evt, true);
+                            $($(this).parent().parent()).css("border", "1px solid #0f0");
+                            $(this).parent().remove();
+                        }, false);
+                        purActions.appendChild(purApprove);
+
+                        var br = document.createElement('br');
+                        purActions.appendChild(br);
+
+                        let purReject = document.createElement('i');
+                        purReject.className = "fa fa-times";
+                        purReject.title = "Reject this picture";
+                        purReject.style.color = "#f00";
+                        purReject.venue = venue;
+                        purReject.currImage = vattr.images[k].attributes.id;
+                        purReject.addEventListener("click", function(evt){
+                            processPlacePUR(evt, false);
+                            $(this).parent().remove();
+                        }, false);
+                        purActions.appendChild(purReject);
+                        imgDIV.appendChild(purActions);
+                    }
+                }
                 picCount++;
                 imgDIV.appendChild(venueImg);
                 venueDiv.appendChild(imgDIV);
@@ -1220,6 +1294,23 @@ var UpdateObject, MultiAction;
         }
         $("#placessqty").html(c);
         $("#imagesqty").html(picCount);
+    }
+
+    function processPlacePUR(evt, approve){
+        let ven = evt.target.venue;
+        let currImage = evt.target.currImage;
+        let pur;
+        let venURs = ven.attributes.venueUpdateRequests;
+        for(let i=0; i<venURs.length; i++){
+            if(venURs[i].attributes.updateType === "ADD_IMAGE"){
+                if(venURs[i].id === currImage){
+                    pur = venURs[i];
+                    break;
+                }
+            }
+        }
+        if(pur)
+            W.model.actionManager.add(new(require("Waze/Action/UpdatePlaceUpdate"))(ven, pur, approve));
     }
 
     function DeleteImage(venue, imageID){
@@ -3485,7 +3576,8 @@ var UpdateObject, MultiAction;
             EnablePhotoViewer: true,
             sortBy: "sortbyname",
             sortOrder: "sortAsc",
-            PhotoViewerPreserveLayout: false
+            PhotoViewerPreserveLayout: false,
+            HideShopAndServices: true
         };
         settings = loadedSettings ? loadedSettings : defaultSettings;
         for (var prop in defaultSettings) {
@@ -3568,7 +3660,8 @@ var UpdateObject, MultiAction;
                 sortBy: settings.sortBy,
                 sortOrder: settings.sortOrder,
                 PhotoViewerPreserveLayout: settings.PhotoViewerPreserveLayout,
-                PhotoViewerShowHiddenPlaces: settings.PhotoViewerShowHiddenPlaces
+                PhotoViewerShowHiddenPlaces: settings.PhotoViewerShowHiddenPlaces,
+                HideShopAndServices: settings.HideShopAndServices
             };
 
             for (var name in W.accelerators.Actions) {
@@ -3688,7 +3781,9 @@ var UpdateObject, MultiAction;
                     SimplifyFactor: "Simplify Factor",
                     SimplifyFactorTitle: "The larger the simplification factor the more nodes will be removed",
                     PhotoViewer: "Enable photo viewer",
-                    PhotoViewerTitle: ""
+                    PhotoViewerTitle: "",
+                    HideShoppingServices: "Hide Shopping / Services sub category suggestions",
+                    HideSHoppingServicesTitle: ""
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -3806,7 +3901,9 @@ var UpdateObject, MultiAction;
                     SimplifyFactor: "Simplify Factor",
                     SimplifyFactorTitle: "The larger the simplification factor the more nodes will be removed",
                     PhotoViewer: "Enable photo viewer",
-                    PhotoViewerTitle: ""
+                    PhotoViewerTitle: "",
+                    HideShoppingServices: "Hide Shopping / Services sub category suggestions",
+                    HideSHoppingServicesTitle: ""
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -3924,7 +4021,9 @@ var UpdateObject, MultiAction;
                     SimplifyFactor: "Facteur de simplification",
                     SimplifyFactorTitle: "Plus le facteur de simplification est grand, plus de nœuds seront supprimés",
                     PhotoViewer: "Activer la visionneuse photos",
-                    PhotoViewerTitle: ""
+                    PhotoViewerTitle: "",
+                    HideShoppingServices: "Hide Shopping / Services sub category suggestions",
+                    HideSHoppingServicesTitle: ""
                 },
                 filter: {
                     PlaceFilterPanel: "Filtre des lieux",
