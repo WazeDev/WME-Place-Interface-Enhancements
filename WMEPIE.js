@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.01.28.01
+// @version      2019.02.01.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -874,6 +874,8 @@ var UpdateObject, MultiAction;
 
         registerEvents(AddMakePrimaryButtons);
         AddMakePrimaryButtons();
+	    
+	WazeWrap.Interface.ShowScriptUpdate("WME Place Interface Enhancements", GM_info.script.version, "No actual changes, I just wanted to show off the new Script Update dialog. <br><br> =-)", "https://greasyfork.org/en/scripts/26340-wme-place-interface-enhancements", "https://www.waze.com/forum/viewtopic.php?f=819&t=215990");
     }
 
     function SetupPhotoViewer(){
