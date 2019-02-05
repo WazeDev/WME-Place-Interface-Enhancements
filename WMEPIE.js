@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.02.05.01
+// @version      2019.02.05.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -835,7 +835,7 @@ var UpdateObject, MultiAction;
         registerEvents(AddMakePrimaryButtons);
         AddMakePrimaryButtons();
 
-        WazeWrap.Interface.ShowScriptUpdate("WME Place Interface Enhancements", GM_info.script.version, "Bug fixes for WME update: <ul><li>Hours parser not displaying</li><li>PLA, copy & location buttons not displaying</li><li>Removed the Nav point link option - has been disabled for a long time and I have no intention of re-implementing</li></ul>", "https://greasyfork.org/en/scripts/26340-wme-place-interface-enhancements", "https://www.waze.com/forum/viewtopic.php?f=819&t=215990");
+        WazeWrap.Interface.ShowScriptUpdate("WME Place Interface Enhancements", GM_info.script.version, "More bug fixes <br><br><h4>2019.05.02.01</h4>Bug fixes for WME update: <ul><li>Hours parser not displaying</li><li>PLA, copy & location buttons not displaying</li><li>Removed the Nav point link option - has been disabled for a long time and I have no intention of re-implementing</li></ul>", "https://greasyfork.org/en/scripts/26340-wme-place-interface-enhancements", "https://www.waze.com/forum/viewtopic.php?f=819&t=215990");
     }
 
     function SetupPhotoViewer(){
@@ -1446,8 +1446,8 @@ var UpdateObject, MultiAction;
     // Formats "hour object" into a string.
     function formatOpeningHour(hourEntry) {
         var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-        var hours = hourEntry.attributes.fromHour + '-' + hourEntry.attributes.toHour;
-        return hourEntry.attributes.days.map(day => dayNames[day] + ' ' + hours).join(', ');
+        var hours = hourEntry.fromHour + '-' + hourEntry.toHour;
+        return hourEntry.days.map(day => dayNames[day] + ' ' + hours).join(', ');
     }
 
     // Pull natural text from opening hours
