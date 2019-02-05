@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.02.01.01
+// @version      2019.02.05.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -15,7 +15,7 @@
 // @require      https://greasyfork.org/scripts/27023-jscolor/code/JSColor.js
 // @require      https://greasyfork.org/scripts/37486-wme-utils-hoursparser.js
 // @require      https://greasyfork.org/scripts/38421-wme-utils-navigationpoint/code/WME%20Utils%20-%20NavigationPoint.js?version=251065
-// @require      https://greasyfork.org/scripts/39208-wme-utils-google-link-enhancer/code/WME%20Utils%20-%20Google%20Link%20Enhancer.js?version=663055
+// @require      https://greasyfork.org/scripts/39208-wme-utils-google-link-enhancer/code/WME%20Utils%20-%20Google%20Link%20Enhancer.js
 // @require      https://greasyfork.org/scripts/375202-photo-viewer-db-interface/code/Photo%20Viewer%20DB%20Interface.js
 // @contributionURL https://github.com/WazeDev/Thank-The-Authors
 // @license      GPLv3
@@ -148,7 +148,6 @@ var UpdateObject, MultiAction;
             '<div class="controls-container pie-controls-container" id="divClearDescription" title="' + I18n.t('pie.prefs.ClearDescriptionTitle') + '" ><input type="checkbox" id="_cbClearDescription" class="pieSettingsCheckbox" /><label for="_cbClearDescription" style="white-space:pre-line;">' + I18n.t('pie.prefs.ClearDescription') + '</label></div>',
             //'<div class="controls-container pie-controls-container" id="divMoveAddress" title="' + I18n.t('pie.prefs.MoveAddressTitle') + '"><input type="checkbox" id="_cbMoveAddress" class="pieSettingsCheckbox"/><label for="_cbMoveAddress" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveAddress') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divMoveHNEntry" title="' + I18n.t('pie.prefs.MoveHNEntryTitle') + '"><input type="checkbox" id="_cbMoveHNEntry" class="pieSettingsCheckbox"/><label for="_cbMoveHNEntry" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveHNEntry') + '</label></div>',
-            '<div class="controls-container pie-controls-container" id="divNavLink" title="' + I18n.t('pie.prefs.NavLinkTitle') + '"><input type="checkbox" id="_cbNavLink" class="pieSettingsCheckbox" disabled/><label for="_cbNavLink" style="white-space:pre-line;">' + I18n.t('pie.prefs.NavLink') + '</label></div>',
             '<br>',
             '<div class="controls-container pie-controls-container" id="divHidePaymentType" title="' + I18n.t('pie.prefs.HidePaymentTypeTitle') + '"><input type="checkbox" id="_cbHidePaymentType" class="pieSettingsCheckbox" /><label for="_cbHidePaymentType" style="white-space:pre-line;">' + I18n.t('pie.prefs.HidePaymentType') + '</label></div>',
             `<div class="controls-container pie-controls-container" id="divGeometryMods" title="${I18n.t('pie.prefs.GeometryModsTitle')}"><input type="checkbox" id="_cbGeometryMods" class="pieSettingsCheckbox" /><label for="_cbGeometryMods" style="white-space:pre-line;">${I18n.t('pie.prefs.GeometryMods')}</label></div>`,
@@ -486,7 +485,6 @@ var UpdateObject, MultiAction;
         setChecked('_cbShowPLSpotEstimatorButton', settings.ShowPLSpotEstimatorButton);
         setChecked('_cbShowNavPointClosestSegmentOnHover', settings.ShowNavPointClosestSegmentOnHover);
         setChecked('_cbShowClosestSegmentSelected', settings.ShowClosestSegmentSelected);
-        setChecked('_cbNavLink', settings.NavLink);
         setChecked('_cbEnableGLE', settings.EnableGLE);
         setChecked('_cbOpenPUR', settings.OpenPUR);
         setChecked('_cbHidePaymentType', settings.HidePaymentType);
@@ -736,7 +734,6 @@ var UpdateObject, MultiAction;
                                    ShowPlaceLocatorCrosshair();
                                if(settings.ShowSearchButton)
                                    ShowSearchButton();
-                               ShowNavPointLink();
                                if(settings.ShowParkingLotButton)
                                    ShowParkingLotButton();
                                if(settings.ShowCopyPlaceButton)
@@ -803,43 +800,6 @@ var UpdateObject, MultiAction;
                 });
         });*/
 
-        //Always display the link when a point Place is selected, but default to un-linked
-        W.selectionManager.events.register("selectionchanged", null, ShowNavPointLink);
-        W.model.actionManager.events.register('afterundoaction', null, ShowNavPointLink);
-        W.selectionManager.events.register('selectionchanged', null, ShowNavPointLink);
-        W.model.venues.on('objectschanged', ShowNavPointLink);
-
-        W.model.actionManager.events.register('afteraction', null, function(){
-            ShowNavPointLink();
-            if(WazeWrap.getSelectedFeatures().length > 0 && WazeWrap.getSelectedFeatures()[0].model.type == "venue" && WazeWrap.getSelectedFeatures()[0].model.isPoint()){
-                if($('#placeNavLink').attr("class") == "fa fa-link fa-lg"){
-                    let myPlaceAttr = WazeWrap.getSelectedFeatures()[0].model.attributes;
-                    //We only want to do this if the last item changed is our selected Place && it was moved.
-                    if(W.model.actionManager.actions[W.model.actionManager.index].feature != undefined && (W.model.actionManager.actions[W.model.actionManager.index].feature.attributes.id == myPlaceAttr.id) && typeof W.model.actionManager.actions[W.model.actionManager.index].oldGeometry != "undefined"){
-                        if(WazeWrap.getSelectedFeatures()[0].model.attributes.entryExitPoints.length > 0){ //We only want to do this if there is an existing nav point
-                            let newAttr = {};
-                            let existingAttr = myPlaceAttr.entryExitPoints[0];
-                            if (existingAttr) {
-                                for (var prop in existingAttr) {
-                                    if (existingAttr.hasOwnProperty(prop)){
-                                        let value = existingAttr[prop];
-                                        if (Array.isArray(value)) value = [].concat(value);
-                                        newAttr[prop] = value;
-                                    }
-                                }
-                            }
-                            newAttr._point = new OL.Geometry.Point(myPlaceAttr.geometry.x, myPlaceAttr.geometry.y);
-                            newAttr.__proto__.getPoint = function(){
-                                return this._point.clone();
-                            };
-                            W.model.actionManager.add(new UpdateObject(WazeWrap.getSelectedFeatures()[0].model, {'entryExitPoints': [newAttr]}));
-                        }
-                        //NewPlace.attributes.entryExitPoints.push({entry: true, exit: true, name:"", primary: false, point: new OL.Geometry.Point(pos.lon, pos.lat)})
-                    }
-                }
-            }
-        });
-
         //Obsoleted by WME update released 2017-10-24
         /*var observer = new MutationObserver(function(mutations) {
                mutations.forEach(function(mutation) {
@@ -874,8 +834,8 @@ var UpdateObject, MultiAction;
 
         registerEvents(AddMakePrimaryButtons);
         AddMakePrimaryButtons();
-	    
-	WazeWrap.Interface.ShowScriptUpdate("WME Place Interface Enhancements", GM_info.script.version, "No actual changes, I just wanted to show off the new Script Update dialog. <br><br> =-)", "https://greasyfork.org/en/scripts/26340-wme-place-interface-enhancements", "https://www.waze.com/forum/viewtopic.php?f=819&t=215990");
+
+        WazeWrap.Interface.ShowScriptUpdate("WME Place Interface Enhancements", GM_info.script.version, "Bug fixes for WME update: <ul><li>Hours parser not displaying</li><li>PLA, copy & location buttons not displaying</li><li>Removed the Nav point link option - has been disabled for a long time and I have no intention of re-implementing</li></ul>", "https://greasyfork.org/en/scripts/26340-wme-place-interface-enhancements", "https://www.waze.com/forum/viewtopic.php?f=819&t=215990");
     }
 
     function SetupPhotoViewer(){
@@ -1420,45 +1380,44 @@ var UpdateObject, MultiAction;
     }
 
     function AddHoursParserInterface(){
-        if(WazeWrap.hasSelectedFeatures())
-            if(WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
-                var $PIEHoursParser = $("<div>", {style:"min-height:20px"});
-                if(!$('#PIEHoursParserDiv').length){
-                    $PIEHoursParser.html([
-                        '<div id="PIEHoursParserDiv" style="margin-top:5px">',
-                        '<textarea id="PIE-hourspaste" placeholder="' + I18n.t('pie.hoursParser.defaultText') + '" wrap="off" autocomplete="off" style="overflow: auto; width: 85%; max-width: 85%; min-width: 85%; font-size: 0.85em; height: 24px; min-height: 24px; max-height: 300px; padding-left: 3px; color: rgb(153, 153, 153);"></textarea>',
-                        '<input class="btn btn-default btn-xs" id="PIEAppendHours" title="' + I18n.t('pie.hoursParser.AddHoursTitle') + '" type="button" value="' + I18n.t('pie.hoursParser.AddHours') + '" style="margin-bottom:4px">',
-                        '<input class="btn btn-default btn-xs" id="PIEReplaceHours" title="' + I18n.t('pie.hoursParser.ReplaceHoursTitle') + '" type="button" value="' + I18n.t('pie.hoursParser.ReplaceHours') + '" style="margin-bottom:4px">',
-                        '<span id="PIEHoursParserError" style="display:block; color:red"></span>',
-                        '</div>'
-                    ].join(' '));
-                    $('.opening-hours > div > .add.waze-btn').parent().append($PIEHoursParser.html());
-                    $('#PIEAppendHours').click(function(){ addHours(false);});
-                    $('#PIEReplaceHours').click(function(){ addHours(true);});
+        if(WazeWrap.hasPlaceSelected()){
+            var $PIEHoursParser = $("<div>", {style:"min-height:20px"});
+            if(!$('#PIEHoursParserDiv').length){
+                $PIEHoursParser.html([
+                    '<div id="PIEHoursParserDiv" style="margin-top:5px">',
+                    '<textarea id="PIE-hourspaste" placeholder="' + I18n.t('pie.hoursParser.defaultText') + '" wrap="off" autocomplete="off" style="overflow: auto; width: 85%; max-width: 85%; min-width: 85%; font-size: 0.85em; height: 24px; min-height: 24px; max-height: 300px; padding-left: 3px; color: rgb(153, 153, 153);"></textarea>',
+                    '<input class="btn btn-default btn-xs" id="PIEAppendHours" title="' + I18n.t('pie.hoursParser.AddHoursTitle') + '" type="button" value="' + I18n.t('pie.hoursParser.AddHours') + '" style="margin-bottom:4px">',
+                    '<input class="btn btn-default btn-xs" id="PIEReplaceHours" title="' + I18n.t('pie.hoursParser.ReplaceHoursTitle') + '" type="button" value="' + I18n.t('pie.hoursParser.ReplaceHours') + '" style="margin-bottom:4px">',
+                    '<span id="PIEHoursParserError" style="display:block; color:red"></span>',
+                    '</div>'
+                ].join(' '));
+                $('.opening-hours > div > .add.waze-btn').parent().append($PIEHoursParser.html());
+                $('#PIEAppendHours').click(function(){ addHours(false);});
+                $('#PIEReplaceHours').click(function(){ addHours(true);});
 
-                    // Enter = Add hours, shift || ctrl + Enter = new line
-                    $("#PIE-hourspaste").keydown(function(event){
-                        if (event.keyCode === 13) {
-                            if (event.ctrlKey) {
-                                // Simulate a newline event (shift + enter)
-                                var text = this.value;
-                                var selStart = this.selectionStart;
-                                this.value = text.substr(0, selStart) + '\n' + text.substr(this.selectionEnd, text.length-1);
-                                this.selectionStart = selStart+1;
-                                this.selectionEnd = selStart+1;
-                                return true;
-                            } else if(!(event.shiftKey||event.ctrlKey) && $('#PIE-hourspaste').val() !== '' ){
-                                event.stopPropagation();
-                                event.preventDefault();
-                                event.returnValue = false;
-                                event.cancelBubble = true;
-                                addHours(false);
-                                return false;
-                            }
+                // Enter = Add hours, shift || ctrl + Enter = new line
+                $("#PIE-hourspaste").keydown(function(event){
+                    if (event.keyCode === 13) {
+                        if (event.ctrlKey) {
+                            // Simulate a newline event (shift + enter)
+                            var text = this.value;
+                            var selStart = this.selectionStart;
+                            this.value = text.substr(0, selStart) + '\n' + text.substr(this.selectionEnd, text.length-1);
+                            this.selectionStart = selStart+1;
+                            this.selectionEnd = selStart+1;
+                            return true;
+                        } else if(!(event.shiftKey||event.ctrlKey) && $('#PIE-hourspaste').val() !== '' ){
+                            event.stopPropagation();
+                            event.preventDefault();
+                            event.returnValue = false;
+                            event.cancelBubble = true;
+                            addHours(false);
+                            return false;
                         }
-                    });
-                }
+                    }
+                });
             }
+        }
     }
 
     function addHours(replaceAll = false) {
@@ -1493,8 +1452,9 @@ var UpdateObject, MultiAction;
 
     // Pull natural text from opening hours
     function getOpeningHours(venue) {
-        return venue && venue.getOpeningHours && venue.getOpeningHours().map(formatOpeningHour);
+        return venue && venue.attributes.getOpeningHours && venue.attributes.getOpeningHours().map(formatOpeningHour);
     }
+
     //*******/
     function UpdatePlaceFilter(){
         let index = W.map.landmarkLayer.styleMap.styles.default.rules.findIndex(function(e){ return e.name == "PIEPlaceFilter";});
@@ -2208,44 +2168,9 @@ var UpdateObject, MultiAction;
         W.model.actionManager.events.unregister("noActions",null, noActions);
     }
 
-    var currLinkClass = []; //We have to keep track of the current status in case the user toggled the linking due to the panel getting rebuilt after every action
-    function ShowNavPointLink(){
-        $('#pieNavLink').remove();
-        return;
-        if(WazeWrap.getSelectedFeatures().length > 0){
-            if(WazeWrap.getSelectedFeatures()[0].model.type === "venue" && WazeWrap.getSelectedFeatures()[0].model.isPoint()){
-                if(currLinkClass.length == 0 || currLinkClass[0] != WazeWrap.getSelectedFeatures()[0].model.attributes.id){ //First time this place has been selected
-                    currLinkClass[0] = WazeWrap.getSelectedFeatures()[0].model.attributes.id;
-                    currLinkClass[1] = (settings.NavLink ? "fa fa-link fa-lg" : "fa fa-chain-broken fa-lg");
-                }
-                var $NavLink;
-                if(_.contains(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME")){
-                    $NavLink = $('<div style="display:inline-block; z-index:100; cursor:pointer;" id="pieNavLink" title=""><i class="' + currLinkClass[1] + '" id="placeNavLink" aria-hidden="true"></i></div>');
-                    $('.address-edit.side-panel-section').before($NavLink);
-                }
-                else{
-                     $NavLink = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="pieNavLink" title=""><i class="' + currLinkClass[1] + '" id="placeNavLink" aria-hidden="true"></i></div>');
-                    $('#landmark-edit-general > form > div:nth-child(2) > i').after($NavLink);
-                }
-                $('#pieNavLink').click(function(){
-                    if($('#placeNavLink').attr("class") == "fa fa-link fa-lg"){
-                        $('#placeNavLink').attr("class", "fa fa-chain-broken fa-lg");
-                        currLinkClass[1] = "fa fa-chain-broken fa-lg";
-                    }
-                    else{
-                        $('#placeNavLink').attr("class", "fa fa-link fa-lg");
-                        currLinkClass[1] = "fa fa-link fa-lg";
-                    }
-                });
-            }
-        }
-        else
-            currLinkClass = [];
-    }
-
     function openPUR(){
-        if(WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].model.type === "venue" && $('.pending-changes-alert').length > 0){
-            if(typeof WazeWrap.getSelectedFeatures()[0].model.state === 'undefined' || WazeWrap.getSelectedFeatures()[0].model.state === null)
+        if(WazeWrap.hasPlaceSelected() && $('.pending-changes-alert').length > 0){
+            if(WazeWrap.getSelectedFeatures()[0].model.attributes.venueUpdateRequests.length > 0 && (typeof WazeWrap.getSelectedFeatures()[0].model.state === 'undefined' || WazeWrap.getSelectedFeatures()[0].model.state === null))
                 W.commands.execute("place_updates:list", WazeWrap.getSelectedFeatures()[0].model); // W.model.venues.get(WazeWrap.getSelectedFeatures()[0].model.attributes.id)
         }
     }
@@ -2546,7 +2471,7 @@ var UpdateObject, MultiAction;
                 }
                 else{
                      $crosshairs = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="pieCrosshairs" title="Zoom and center on Place"><i class="fa fa-crosshairs fa-lg" id="placeCrosshair" aria-hidden="true"></i></div>');
-                    $('#landmark-edit-general > form > div:nth-child(2) > i').after($crosshairs);
+                    $('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($crosshairs);
                 }
                 $('#pieCrosshairs').click(function(){
                     CenterOnPlace(WazeWrap.getSelectedFeatures()[0].model, settings.PlaceZoom);
@@ -2572,13 +2497,12 @@ var UpdateObject, MultiAction;
     var BusinessPLAMode = false;
     function ShowParkingLotButton(){
         $('#piePLAButton').remove();
-
         if(WazeWrap.getSelectedFeatures().length > 0){
             if(WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
                 var $PLAButton;
                 if(!(_.contains(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME") || _.contains(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"PARKING_LOT"))){
                     $PLAButton = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="piePLAButton" title="Create a Parking Lot Area for this Place"><i class="fa fa-product-hunt fa-lg" aria-hidden="true"></i></div>');
-                    $('#landmark-edit-general > form > div:nth-child(2) > i').after($PLAButton);
+                    $('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($PLAButton);
 
                     $('#piePLAButton').click(function(){
                         if(!BusinessPLAMode){
@@ -2620,7 +2544,7 @@ var UpdateObject, MultiAction;
             if(WazeWrap.getSelectedFeatures()[0].model.type === "venue" && WazeWrap.getSelectedFeatures()[0].model.attributes.categories.includes("PARKING_LOT")){
                 var $ParkingSpotEstimatorButton;
                 $ParkingSpotEstimatorButton = $('<div style="font-size:18px; float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" class="PIEParkingSpotEstimatorButton" title="' + I18n.t('pie.prefs.PSEDisplayButtonTitle') + '">#</div>');
-                $('#landmark-edit-general > form > div:nth-child(2) > i').after($ParkingSpotEstimatorButton);
+                $('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($ParkingSpotEstimatorButton);
 
                 $('select[name="estimatedNumberOfSpots"]').before($ParkingSpotEstimatorButton.clone());
 
@@ -2963,7 +2887,7 @@ var UpdateObject, MultiAction;
                 var $PlaceCopyButton;
                 if(!_.contains(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME")){
                     $PlaceCopyButton = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" id="pieCopyPlaceButton" title="Creates a copy of this Place"><i class="fa fa-files-o fa-lg" aria-hidden="true"></i></div>');
-                    $('#landmark-edit-general > form > div:nth-child(2) > i').after($PlaceCopyButton);
+                    $('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($PlaceCopyButton);
 
                     $('#pieCopyPlaceButton').click(function(){
                         var PlaceObject = require("Waze/Feature/Vector/Landmark");
@@ -3636,7 +3560,6 @@ var UpdateObject, MultiAction;
                 ShowPLSpotEstimatorButton: settings.ShowPLSpotEstimatorButton,
                 ShowNavPointClosestSegmentOnHover: settings.ShowNavPointClosestSegmentOnHover,
                 ShowClosestSegmentSelected: settings.ShowClosestSegmentSelected,
-                NavLink: settings.NavLink,
                 ToggleAreaPlacesShortcut: settings.ToggleAreaPlacesShortcut,
                 EnableGLE: settings.EnableGLE,
                 OpenPUR: settings.OpenPUR,
@@ -3770,8 +3693,6 @@ var UpdateObject, MultiAction;
                     PSEDisplayButtonTitle: "Opens the Parking Space Estimator tool",
                     ShowNavPointClosestSegmentOnHover: "Display the nav point and closest segment line on hover",
                     ShowClosestSegmentSelected: "Display a line from the nav point to the point on the closest segment",
-                    NavLink: "Link nav point",
-                    NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved",
                     EnableGLE: "Enable Google Link Enhancer",
                     EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in orange, already linked POI in gray (autocomplete menu)",
                     OpenPUR: "Automatically open PUR",
@@ -3890,8 +3811,6 @@ var UpdateObject, MultiAction;
                     PSEDisplayButtonTitle: "Opens the Parking Space Estimator tool",
                     ShowNavPointClosestSegmentOnHover: "Display the nav point and closest segment line on hover",
                     ShowClosestSegmentSelected: "Display a line from the nav point to the point on the closest segment",
-                    NavLink: "Link nav point",
-                    NavLinkTitle: "Enables the nav point link on all point Places. When linked, the nav point will move to the location of the point Place when the Place is moved",
                     EnableGLE: "Habilitar mejoras en links de Google",
                     EnableGLETitle: "Resalta los GPIDs a lugares cerrados en rojo, GPIDs a mas de 400m del lugar en Waze en verde azulado, GPIDs no válidos en magenta, GPIDs vinculados varias veces en naranja, GPIDs ya vinculados en gris (menú de autocompletar)",
                     OpenPUR: "Automatically open PUR",
@@ -4010,8 +3929,6 @@ var UpdateObject, MultiAction;
                     PSEDisplayButtonTitle: "Ouvre le simulateur de places de stationnement",
                     ShowNavPointClosestSegmentOnHover: "Affiche une ligne entre le point d'entrée et le segment le plus proche",
                     ShowClosestSegmentSelected: "Affiche une ligne depuis le point d'entrée vers le point sur le segment le plus proche",
-                    NavLink: "Lier le point d'entrée",
-                    NavLinkTitle: "Active le lien de point d'entrée sur tous les lieux. Lorsqu'il est lié, le point de navigation se déplacera à l'emplacement du point Lieu lorsque le lieu est déplacé",
                     EnableGLE: "Activer le lien Google amélioré",
                     EnableGLETitle: "Met en évidence les liens Google fermés en rouge, les points d'intérêt Google liés se trouvant à plus de 400 m du Lieu Waze en bleu ciel, les liens Google non valides en magenta, les points d'intérêt Google liés plusieurs fois en orange, les points d'intérêt déjà liés en gris (menu de saisie semi-automatique)",
                     OpenPUR: "Ouverture automatique des PUR",
