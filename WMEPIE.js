@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.02.05.03
+// @version      2019.02.06.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,6 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
+    const updateMessage = "Intermediate release: more bug fixes for buttons not diplaying (Make primary and geometry mod buttons).<br><br>Known issue still existing: creating RPP is not pulling the HN or street name.";
 
     //Layer definitions
     {
@@ -835,7 +836,7 @@ var UpdateObject, MultiAction;
         registerEvents(AddMakePrimaryButtons);
         AddMakePrimaryButtons();
 
-        WazeWrap.Interface.ShowScriptUpdate("WME Place Interface Enhancements", GM_info.script.version, "More bug fixes <br><br><h4>2019.05.02.01</h4>Bug fixes for WME update: <ul><li>Hours parser not displaying</li><li>PLA, copy & location buttons not displaying</li><li>Removed the Nav point link option - has been disabled for a long time and I have no intention of re-implementing</li></ul>", "https://greasyfork.org/en/scripts/26340-wme-place-interface-enhancements", "https://www.waze.com/forum/viewtopic.php?f=819&t=215990");
+        WazeWrap.Interface.ShowScriptUpdate("WME Place Interface Enhancements", GM_info.script.version, updateMessage, "https://www.waze.com/forum/viewtopic.php?f=819&t=215990");
     }
 
     function SetupPhotoViewer(){
@@ -1445,6 +1446,7 @@ var UpdateObject, MultiAction;
     //******* Taken from WMEPH for hours parsing
     // Formats "hour object" into a string.
     function formatOpeningHour(hourEntry) {
+        debugger;
         var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
         var hours = hourEntry.fromHour + '-' + hourEntry.toHour;
         return hourEntry.days.map(day => dayNames[day] + ' ' + hours).join(', ');
@@ -2380,7 +2382,7 @@ var UpdateObject, MultiAction;
             if(W.selectionManager.getSelectedFeatures()[0].model.type === "mapComment")
                 $('#edit-panel > div > div > div.tab-content > form > div:nth-child(3)').after($GeomMods);
             else
-                $('#landmark-edit-general > form > div:nth-child(7)').after($GeomMods);
+                $('#landmark-edit-general > form > div:nth-child(4) > div:nth-child(2)').after($GeomMods);
 
             $('#pieorthogonalize').click(function(){
                 OrthogonalizePlace();
@@ -3024,7 +3026,7 @@ var UpdateObject, MultiAction;
 
     function AddMakePrimaryButtons(){
         if(WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
-            if($('#landmark-edit-general > form > div:nth-child(1) > div > div > div > ul > li').length > 0){
+            if($('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(1) > div > div > div > ul > li').length > 0){
                 var $button = $('<div>', {class:'makePrimary'}).text("Make primary").click(function(){
                     let obj = WazeWrap.getSelectedFeatures()[0].model;
                     let toPrimary = $(this).prev().prev().val();
@@ -3038,7 +3040,7 @@ var UpdateObject, MultiAction;
                     multiaction.doSubAction(new UpdateObject(obj, {name: toPrimary}));
                     W.model.actionManager.add(multiaction);
                 });
-                $('#landmark-edit-general > form > div:nth-child(1) > div > div > div > ul > li').find('.delete').after($button);
+                $('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(1) > div > div > div > ul > li').find('.delete').after($button);
             }
         }
     }
