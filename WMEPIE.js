@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.02.06.01
+// @version      2019.02.14.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -2064,7 +2064,6 @@ var UpdateObject, MultiAction;
         var closestSeg = WazeWrap.Geometry.findClosestSegment(new OL.Geometry.Point(pos.lon, pos.lat), settings.SkipPLR, settings.SkipPLR);
 
         W.model.actionManager.add(new AddPlace(NewPlace));
-        W.selectionManager.setSelectedModels([NewPlace]);
 
         if(closestSeg){ //if we were able to find a segment, try to pull the city and/or street name if the options are enabled
             var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = closestSeg.getAddress();
@@ -2101,8 +2100,10 @@ var UpdateObject, MultiAction;
             else
                 newAttributes.emptyCity = true;
 
+
             multiaction.doSubAction(new UpdateFeatureAddress(NewPlace, newAttributes));
             W.model.actionManager.add(multiaction);
+            W.selectionManager.setSelectedModels([NewPlace]);
         }
         else
             console.log("WMEPIE - No segment found; cannot set street or city name.");
