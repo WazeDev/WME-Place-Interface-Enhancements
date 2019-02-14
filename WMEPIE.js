@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.02.14.01
+// @version      2019.02.14.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Intermediate release: more bug fixes for buttons not diplaying (Make primary and geometry mod buttons).<br><br>Known issue still existing: creating RPP is not pulling the HN or street name.";
+    const updateMessage = "Forgot to update the update message!<br><br>Fixing the RPP creating pulling setting the street name and city from the closest segment.";
 
     //Layer definitions
     {
