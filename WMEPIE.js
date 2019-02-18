@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.02.14.02
+// @version      2019.02.18.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Forgot to update the update message!<br><br>Fixing the RPP creating pulling setting the street name and city from the closest segment.";
+    const updateMessage = "Dogfooding. Nom nom nom.  Added functionality to WazeWrap to handle some error catching so WME updates cause less trouble when something is broken.";
 
     //Layer definitions
     {
@@ -400,31 +400,31 @@ var UpdateObject, MultiAction;
 
         $('#_cbShowNavPointClosestSegmentOnHover').change(function(){
             if(this.checked)
-                W.map.events.register("mousemove", null, drawNavPointClosestSegmentLines);
+                WazeWrap.Events.register("mousemove", null, drawNavPointClosestSegmentLines);
             else
-                W.map.events.unregister("mousemove", null, drawNavPointClosestSegmentLines);
+                WazeWrap.Events.unregister("mousemove", null, drawNavPointClosestSegmentLines);
         });
 
         $('#_cbShowClosestSegmentSelected').change(function(){
             if(this.checked){
-                W.model.actionManager.events.register('afterundoaction', this, checkSelection);
-                W.model.actionManager.events.register('afteraction', this, checkSelection);
-                W.selectionManager.events.register('selectionchanged', this, checkSelection);
+                WazeWrap.Events.register('afterundoaction', this, checkSelection);
+                WazeWrap.Events.register('afteraction', this, checkSelection);
+                WazeWrap.Events.register('selectionchanged', this, checkSelection);
                 W.model.venues.on('objectschanged', ObjectsChanged);
             }
             else{
-                W.model.actionManager.events.unregister('afterundoaction', this, checkSelection);
-                W.model.actionManager.events.unregister('afteraction', this, checkSelection);
-                W.selectionManager.events.unregister('selectionchanged', this, checkSelection);
+                WazeWrap.Eventsun.register('afterundoaction', this, checkSelection);
+                WazeWrap.Events.unregister('afteraction', this, checkSelection);
+                WazeWrap.Events.unregister('selectionchanged', this, checkSelection);
                 W.model.venues.off('objectschanged', ObjectsChanged);
             }
         });
 
         $('#_cbOpenPUR').change(function(){
             if(this.checked)
-                W.selectionManager.events.register('selectionchanged', this, openPUR);
+                WazeWrap.Events.register('selectionchanged', this, openPUR);
             else
-                W.selectionManager.events.unregister('selectionchanged', this, openPUR);
+                WazeWrap.Events.unregister('selectionchanged', this, openPUR);
         });
 
         $('#_cbEnableGLE').change(function(){
@@ -515,7 +515,8 @@ var UpdateObject, MultiAction;
 
         if(settings.ShowPlaceLocatorCrosshair){
             registerEvents(ShowPlaceLocatorCrosshair);
-            ShowPlaceLocatorCrosshair(); //in case the user opened a PL with a Place selected
+            //JUSTIN
+            //ShowPlaceLocatorCrosshair(); //in case the user opened a PL with a Place selected
         }
 
         if(settings.ShowParkingLotButton){
@@ -575,14 +576,14 @@ var UpdateObject, MultiAction;
             ToggleExternalProvidersCSS(true);
 
         if(settings.ShowClosestSegmentSelected){
-            W.model.actionManager.events.register('afterundoaction', null, checkSelection);
-            W.model.actionManager.events.register('afteraction', null, checkSelection);
-            W.selectionManager.events.register('selectionchanged', null, checkSelection);
+            WazeWrap.Events.register('afterundoaction', null, checkSelection);
+            WazeWrap.Events.register('afteraction', null, checkSelection);
+            WazeWrap.Events.register('selectionchanged', null, checkSelection);
             W.model.venues.on('objectschanged', ObjectsChanged);
         }
 
         if(settings.OpenPUR)
-            W.selectionManager.events.register('selectionchanged', null, openPUR);
+            WazeWrap.Events.register('selectionchanged', null, openPUR);
 
         if(settings.EnableGLE)
             GLE.enable();
@@ -752,7 +753,7 @@ var UpdateObject, MultiAction;
 
         extprovobserver.observe(document.getElementById('edit-panel'), { childList: true, subtree: true });
 
-        W.selectionManager.events.register("selectionchanged", null, function(){
+        WazeWrap.Events.register("selectionchanged", null, function(){
             if(WazeWrap.hasPlaceSelected()){
                 //Trim whitespace from start and end of house number field on Places
                 $('.form-control.house-number').focusout(function(){
@@ -816,8 +817,8 @@ var UpdateObject, MultiAction;
         W.model.actionManager.events.register("afterclearactions",null, highlightObsoleteHospitalCategory);
         W.model.actionManager.events.register("afteraction",null, highlightObsoleteHospitalCategory);*/
 
-        W.map.events.register("zoomend", null, DisplayPlaceNames);
-        W.map.events.register("changelayer", null, DisplayPlaceNames);
+        WazeWrap.Events.register("zoomend", null, DisplayPlaceNames);
+        WazeWrap.Events.register("changelayer", null, DisplayPlaceNames);
 
         //Shamelessly copied from URO+
         var MO_MPLayer = new MutationObserver(MPLayerChanged);
@@ -1446,7 +1447,6 @@ var UpdateObject, MultiAction;
     //******* Taken from WMEPH for hours parsing
     // Formats "hour object" into a string.
     function formatOpeningHour(hourEntry) {
-        debugger;
         var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
         var hours = hourEntry.fromHour + '-' + hourEntry.toHour;
         return hourEntry.days.map(day => dayNames[day] + ' ' + hours).join(', ');
@@ -1736,17 +1736,19 @@ var UpdateObject, MultiAction;
     }
 
     function registerEvents(handler){
-        W.selectionManager.events.register("selectionchanged", null, handler);
-        W.model.actionManager.events.register("afterundoaction",null, handler);
-        W.model.actionManager.events.register("afterclearactions",null, handler);
-        W.model.actionManager.events.register("afteraction",null, handler);
+        WazeWrap.Events.register("selectionchanged", null, handler);
+        //W.selectionManager.events.register("selectionchanged", null, handler);
+        WazeWrap.Events.register("afterundoaction",null, handler);
+        WazeWrap.Events.register("afterclearactions",null, handler);
+        WazeWrap.Events.register("afteraction",null, handler);
     }
 
     function unregisterEvents(handler){
-        W.selectionManager.events.unregister("selectionchanged", null, handler);
-        W.model.actionManager.events.unregister("afterundoaction",null, handler);
-        W.model.actionManager.events.unregister("afterclearactions",null, handler);
-        W.model.actionManager.events.unregister("afteraction",null, handler);
+        WazeWrap.Events.unregister("selectionchanged", null, handler);
+        //W.selectionManager.events.unregister("selectionchanged", null, handler);
+        WazeWrap.Events.unregister("afterundoaction",null, handler);
+        WazeWrap.Events.unregister("afterclearactions",null, handler);
+        WazeWrap.Events.unregister("afteraction",null, handler);
     }
 
     function ToggleExternalProvidersCSS(truthiness){
@@ -2155,19 +2157,19 @@ var UpdateObject, MultiAction;
     }*/
 
     function attachPlaceSizeHandlers(){
-        W.selectionManager.events.register("selectionchanged", null, updatePlaceSizeDisplay);
-        W.model.actionManager.events.register("afteraction",null, updatePlaceSizeDisplay);
-        W.model.actionManager.events.register("afterundoaction",null, updatePlaceSizeDisplay);
-        W.model.actionManager.events.register("afterclearactions",null, updatePlaceSizeDisplay);
+        WazeWrap.Events.register("selectionchanged", null, updatePlaceSizeDisplay);
+        WazeWrap.Events.register("afteraction",null, updatePlaceSizeDisplay);
+        WazeWrap.Events.register("afterundoaction",null, updatePlaceSizeDisplay);
+        WazeWrap.Events.register("afterclearactions",null, updatePlaceSizeDisplay);
         W.model.actionManager.events.register("noActions",null, noActions);
         updatePlaceSizeDisplay();
     }
 
     function removePlaceSizeHandlers(){
-        W.selectionManager.events.unregister("selectionchanged", null, updatePlaceSizeDisplay);
-        W.model.actionManager.events.unregister("afteraction",null, updatePlaceSizeDisplay);
-        W.model.actionManager.events.unregister("afterundoaction",null, updatePlaceSizeDisplay);
-        W.model.actionManager.events.unregister("afterclearactions",null, updatePlaceSizeDisplay);
+        WazeWrap.Events.unregister("selectionchanged", null, updatePlaceSizeDisplay);
+        WazeWrap.Events.unregister("afteraction",null, updatePlaceSizeDisplay);
+        WazeWrap.Events.unregister("afterundoaction",null, updatePlaceSizeDisplay);
+        WazeWrap.Events.unregisterWazeWrap.Events.unregister("afterclearactions",null, updatePlaceSizeDisplay);
         W.model.actionManager.events.unregister("noActions",null, noActions);
     }
 
