@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Incrementing version to pull in latest Google Link Enhancer - fixes the line drawn to the Google POI when moused over in the External Providers list.<br><br><h1>.02</h1>Incrementing the version to pull the latest WazeWrap which restores the missing functions removed in the latest WME update and are causing issues with scripts.";
+    const updateMessage = "Incrementing version to pull in latest Google Link Enhancer - fixes the line drawn to the Google POI when moused over in the External Providers list.<br><br><h2>.02</h2>Incrementing the version to pull the latest WazeWrap which restores the missing functions removed in the latest WME update and are causing issues with scripts.";
 
     //Layer definitions
     {
