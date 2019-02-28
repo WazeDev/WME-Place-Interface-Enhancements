@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.02.27.03
+// @version      2019.02.28.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Incrementing version to pull in latest Google Link Enhancer - fixes the line drawn to the Google POI when moused over in the External Providers list.<br><br><h2>.02</h2>Incrementing the version to pull the latest WazeWrap which restores the missing functions removed in the latest WME update and are causing issues with scripts.";
+    const updateMessage = "Further backend changes are causing issues with the Google Link Enhancer feature.  This has been disabled in order to prevent further issues, until the functionality can reliably be restored.";
 
     //Layer definitions
     {
@@ -429,7 +429,7 @@ var UpdateObject, MultiAction;
 
         $('#_cbEnableGLE').change(function(){
             if(this.checked)
-                GLE.enable();
+                //GLE.enable();
             else
                 GLE.disable();
         });
@@ -586,7 +586,7 @@ var UpdateObject, MultiAction;
             WazeWrap.Events.register('selectionchanged', null, openPUR);
 
         if(settings.EnableGLE)
-            GLE.enable();
+            //GLE.enable();
 
         //if(settings.EnablePhotoViewer)
         SetupPhotoViewer();
