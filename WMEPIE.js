@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.03.07.01
+// @version      2019.03.12.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -2303,6 +2303,7 @@ var UpdateObject, MultiAction;
             let lines = $('#piePlaceGeomWaze').val().split('\n');
 
             for(var i = 0;i < lines.length;i++){
+                lines[i] = lines[i].replace(/\t/, " ");
                 if(! /^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/.test(lines[i])){
                     alert("Incorrectly formatted coordinates");
                     return;
