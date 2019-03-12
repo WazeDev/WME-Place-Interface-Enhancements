@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.03.12.01
+// @version      2019.03.12.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -3947,7 +3947,7 @@ var UpdateObject, MultiAction;
                     SimplifyFactorTitle: "Plus le facteur de simplification est grand, plus de nœuds seront supprimés",
                     PhotoViewer: "Activer la visionneuse photos",
                     PhotoViewerTitle: "",
-                    HideShoppingServices: "Hide Shopping / Services sub category suggestions",
+                    HideShoppingServices: "Masquer les suggestions de sous-catégorie Shopping / Services",
                     HideSHoppingServicesTitle: ""
                 },
                 filter: {
