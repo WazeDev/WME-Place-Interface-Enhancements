@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.03.18.01
+// @version      2019.03.18.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = '<img src="https://i.imgflip.com/2w1dqc.jpg" height="175px;" width="145px;/"><br><br>Some Google Link Enhancer features restored<ul><li>Drawling the line to the GM POI location on hover</li><li>Color highlighting in the side panel</li><li>Duplicate external provider highlighting</li>';
+    const updateMessage = '<img src="https://imgur.com/sE35OUe.jpg" height="175px;" width="155px;/"><br><br>The Parking Lot Estimator tool rises from the ashes of WME updates and works again.';
 
     //Layer definitions
     {
@@ -2566,7 +2566,7 @@ var UpdateObject, MultiAction;
 
     function startPLSpotEstimatorDrawMode(){
         let polyDrawFeatureOptions = {callbacks : {"done": PLSpotEstimatordoneHandler, "point": pointHandler}};
-
+        PLSpotEstimatorLayer.setZIndex(1000);
         PLSpotEstimatordrawControl = new OL.Control.DrawFeature(PLSpotEstimatorLayer, OL.Handler.Path, polyDrawFeatureOptions);
         W.map.addControl(PLSpotEstimatordrawControl);
         PLSpotEstimatordrawControl.activate();
@@ -2576,7 +2576,8 @@ var UpdateObject, MultiAction;
 
     function startPLSpotEstimatorCalibrationMode(){
         let polyDrawFeatureOptions = {callbacks : {"done": PLSpotEstimatorCalibrationdoneHandler, "point": pointHandler}};
-
+        W.map.addLayer(PLSpotEstimatorCalibrationLayer);
+        PLSpotEstimatorCalibrationLayer.setZIndex(1005);
         PLSpotEstimatorCalibrationdrawControl = new OL.Control.DrawFeature(PLSpotEstimatorCalibrationLayer, OL.Handler.Path, polyDrawFeatureOptions);
         W.map.addControl(PLSpotEstimatorCalibrationdrawControl);
         PLSpotEstimatorCalibrationdrawControl.activate();
@@ -2651,7 +2652,6 @@ var UpdateObject, MultiAction;
             PLSpotEstimatorCalibrationdrawControl.destroy();
         }
         PLSpotEstimatorCalibrationLayer.removeAllFeatures();
-        W.map.removeLayer(PLSpotEstimatorCalibrationLayer);
         $('div#WazeMap.view-area.olMap').off('keydown');
     }
 
@@ -2703,12 +2703,11 @@ var UpdateObject, MultiAction;
         else{
             if(WazeWrap.getSelectedFeatures().length > 0){
                 if(WazeWrap.getSelectedFeatures()[0].model.type === "venue" && WazeWrap.getSelectedFeatures()[0].model.attributes.categories.includes("PARKING_LOT")){
-                    debugger;
                     W.map.addLayer(PLSpotEstimatorLayer);
-                    W.map.addLayer(PLSpotEstimatorCalibrationLayer);
+                    PLSpotEstimatorLayer.setZIndex(1000);
                     var $PLSpotEstimator = $('<div>');
                     $PLSpotEstimator.html([
-                        '<div style="position: absolute; text-align:center; z-index:1000; background-color:white; top:30px; left:300px; border-radius:20px; border: 2px solid; width: 300px; padding-left:10px; padding-right:10px; padding-bottom:5px;" id="PIEParkingSpotEstimator">',
+                        '<div style="position: absolute; text-align:center; z-index:1010; background-color:white; top:30px; left:300px; border-radius:20px; border: 2px solid; width: 300px; padding-left:10px; padding-right:10px; padding-bottom:5px;" id="PIEParkingSpotEstimator">',
                         '<span style="font-weight:bold;">' + I18n.t('pie.prefs.PSEParkingSpaceEstimator') + '</span><i class="fa fa-window-close-o" aria-hidden="true" style="float:right; cursor:pointer;" id="PIECloseParkingSpotEstimator"></i>',
                         '<hr>',
                         '<div style=" display:flex; justify-content:space-between;">',
@@ -2724,7 +2723,6 @@ var UpdateObject, MultiAction;
                     $("#WazeMap").append($PLSpotEstimator.html());
 
                     $("#PIECloseParkingSpotEstimator").click(function(){
-                        debugger;
                         $('#PIEParkingSpotEstimator').remove();
                         disablePLSpotEstimatorDrawMode();
                         disablePLSpotEstimatorCalibrationDrawMode();
