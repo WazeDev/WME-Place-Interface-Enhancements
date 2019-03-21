@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.03.18.02
+// @version      2019.03.21.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -505,7 +505,7 @@ var UpdateObject, MultiAction;
         $('#pieSimplifyFactor')[0].value = settings.SimplifyFactor;
 
         if(settings.ShowNavPointClosestSegmentOnHover)
-            W.map.events.register("mousemove", null, drawNavPointClosestSegmentLines);
+            WazeWrap.Events.register("mousemove", null, drawNavPointClosestSegmentLines);
 
         if(settings.ShowAreaPlaceSize){
             $('#_cbShowAreaPlaceSizeImperial')[0].disabled = false;
