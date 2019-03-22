@@ -186,6 +186,7 @@ var UpdateObject, MultiAction;
             '<div id="divEnableGLE" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EnableGLETitle') + '"><input type="checkbox" id="_cbEnableGLE" class="pieSettingsCheckbox"/><label for="_cbEnableGLE" style="white-space:pre-line;">' + I18n.t('pie.prefs.EnableGLE') + '</label></div>',
             '<div id="divOpenPUR" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.OpenPURTitle') + '"><input type="checkbox" id="_cbOpenPUR" class="pieSettingsCheckbox"/><label for="_cbOpenPUR" style="white-space:pre-line;">' + I18n.t('pie.prefs.OpenPUR') + '</label></div>',
             '<div id="divEnablePhotoViewer" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.PhotoViewerTite') + '"><input type="checkbox" id="_cbEnablePhotoViewer" class="pieSettingsCheckbox"/><label for="_cbEnablePhotoViewer" style="white-space:pre-line;">' + I18n.t('pie.prefs.PhotoViewer') + '</label></div>',
+            '<div id="divEnlargeGeoHandles" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EnlargeGeoHandlesTite') + '"><input type="checkbox" id="_cbEnlargeGeoHandles" class="pieSettingsCheckbox"/><label for="_cbEnlargeGeoHandles" style="white-space:pre-line;">' + I18n.t('pie.prefs.EnlargeGeoHandles') + '</label></div>',
             '</fieldset>',
             '<div class="controls-container" id="divPlaceMenuCustomization">',
             '<b>' + I18n.t('pie.prefs.PlaceMenuCustomization') + '</b></br>',
@@ -443,6 +444,13 @@ var UpdateObject, MultiAction;
             }
         });
 
+        $('#_cbEnlargeGeoHandles').change(function(){
+            if(this.checked)
+                changeGeoHandleStyle(8);
+            else
+                changeGeoHandleStyle(6);
+        });
+
         $('#_cbHidePaymentType').change(function(){
             if(this.checked)
                 registerEvents(HidePaymentTypePlaceSelected);
@@ -492,6 +500,7 @@ var UpdateObject, MultiAction;
         setChecked('_cbGeometryMods', settings.GeometryMods);
         setChecked('_cbEnablePhotoViewer', settings.EnablePhotoViewer);
         setChecked('_cbHideShopAndServices', settings.HideShopAndServices);
+        setChecked('_cbEnlargeGeoHandles', settings.EnlargeGeoHandles);
         if(settings.ShowPlaceNames){
             $('#_cbShowPlaceNamesPoint')[0].disabled = false;
             $('#_cbShowPlaceNamesArea')[0].disabled = false;
@@ -590,6 +599,9 @@ var UpdateObject, MultiAction;
 
         //if(settings.EnablePhotoViewer)
         SetupPhotoViewer();
+
+        if(settings.EnlargeGeoHandles)
+            changeGeoHandleStyle(8);
 
         if(settings.HidePaymentType){
             registerEvents(HidePaymentTypePlaceSelected);
@@ -1455,6 +1467,21 @@ var UpdateObject, MultiAction;
     // Pull natural text from opening hours
     function getOpeningHours(venue) {
         return venue && venue.attributes.openingHours && venue.attributes.openingHours.map(formatOpeningHour);
+    }
+
+    function changeGeoHandleStyle(radius){
+        let handleStyle;
+        let rules = W.map.getLayersByName("Places")[0].styleMap.styles.default.rules;
+        for(let i=0; i< rules.length; i++){
+            if(rules[i].id === "Waze_Rule_14"){
+                handleStyle = rules[i];
+                break;
+            }
+        }
+        if(handleStyle){
+            handleStyle.symbolizer.pointRadius = radius;
+            W.map.getLayersByName("Places")[0].redraw();
+        }
     }
 
     //*******/
@@ -3514,7 +3541,8 @@ var UpdateObject, MultiAction;
             sortBy: "sortbyname",
             sortOrder: "sortAsc",
             PhotoViewerPreserveLayout: false,
-            HideShopAndServices: true
+            HideShopAndServices: true,
+            EnlargeGeoHandles: false
         };
         settings = loadedSettings ? loadedSettings : defaultSettings;
         for (var prop in defaultSettings) {
@@ -3597,7 +3625,8 @@ var UpdateObject, MultiAction;
                 sortOrder: settings.sortOrder,
                 PhotoViewerPreserveLayout: settings.PhotoViewerPreserveLayout,
                 PhotoViewerShowHiddenPlaces: settings.PhotoViewerShowHiddenPlaces,
-                HideShopAndServices: settings.HideShopAndServices
+                HideShopAndServices: settings.HideShopAndServices,
+                EnlargeGeoHandles: settings.EnlargeGeoHandles
             };
 
             for (var name in W.accelerators.Actions) {
@@ -3717,7 +3746,9 @@ var UpdateObject, MultiAction;
                     PhotoViewer: "Enable photo viewer",
                     PhotoViewerTitle: "",
                     HideShoppingServices: "Hide Shopping / Services sub category suggestions",
-                    HideSHoppingServicesTitle: ""
+                    HideSHoppingServicesTitle: "",
+                    EnlargeGeoHandles: "Enlarge geometry handles",
+                    EnlargeGeoHandlesTitle: "Makes the geometry handles on area Places larger so they are easier to grab to adjust the size"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -3835,7 +3866,9 @@ var UpdateObject, MultiAction;
                     PhotoViewer: "Enable photo viewer",
                     PhotoViewerTitle: "",
                     HideShoppingServices: "Hide Shopping / Services sub category suggestions",
-                    HideSHoppingServicesTitle: ""
+                    HideSHoppingServicesTitle: "",
+                    EnlargeGeoHandles: "Enlarge geometry handles",
+                    EnlargeGeoHandlesTitle: "Makes the geometry handles on area Places larger so they are easier to grab to adjust the size"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -3953,7 +3986,9 @@ var UpdateObject, MultiAction;
                     PhotoViewer: "Activer la visionneuse photos",
                     PhotoViewerTitle: "",
                     HideShoppingServices: "Masquer les suggestions de sous-catégorie Shopping / Services",
-                    HideSHoppingServicesTitle: ""
+                    HideSHoppingServicesTitle: "",
+                    EnlargeGeoHandles: "Enlarge geometry handles",
+                    EnlargeGeoHandlesTitle: "Makes the geometry handles on area Places larger so they are easier to grab to adjust the size"
                 },
                 filter: {
                     PlaceFilterPanel: "Filtre des lieux",
