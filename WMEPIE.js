@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.03.21.02
+// @version      2019.03.22.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = 'Forgot to update the release note!  Fixed a bug with an event handler attachment which resulting in an option not disabling when unchecking the option in the side panel.';
+    const updateMessage = 'Added an option to enlarge the area Place geometry handles so they are easier to grab and adjust';
 
     //Layer definitions
     {
