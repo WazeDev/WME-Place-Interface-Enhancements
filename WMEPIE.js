@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.03.25.01
+// @version      2019.03.25.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = 'Enlarge geometry handles now also enlarges the virtual geo handle.';
+    const updateMessage = 'Added an option to hide Place names for hidden Places (hidden by the filter or shortcut to hide area Places)<br><br><h4>.01</h4>Enlarge geometry handles now also enlarges the virtual geo handle.';
 
     //Layer definitions
     {
@@ -173,6 +173,7 @@ var UpdateObject, MultiAction;
             '<div id="divShowNamesArea"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowAreaNamesTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesArea" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesArea">' + I18n.t('pie.prefs.ShowAreaNames') + '</label></div>',
             '<br><div id="divShowNamesPLA"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowPLANameTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesPLA" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesPLA">' + I18n.t('pie.prefs.ShowPLAName') + '</label></div>',
             '<br><div id="divShowNamesLock"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowLockLevelTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesLock" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesLock">' + I18n.t('pie.prefs.ShowLockLevel') + '</label></div>',
+            `<br><div id="divhidePlaceNamesWhenPlacesHidden" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t('pie.prefs.hidePlaceNamesWhenPlacesHiddenTitle')}"><input type="checkbox" id="_cbhidePlaceNamesWhenPlacesHidden" class="pieSettingsCheckbox" disabled /><label for="_cbhidePlaceNamesWhenPlacesHidden">${I18n.t('pie.prefs.hidePlaceNamesWhenPlacesHidden')}</label></div>`,
             '<div id="divPlaceNamesFontCustomization" class="controls-container pie-controls-container" style="padding-left:20px;">',
             I18n.t('pie.prefs.FontSize') + ' <input type="text" size="1" id="piePlaceNameFontSize"/>px</br>',
             I18n.t('pie.prefs.FontColor') + ' <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFont"></button></br>',
@@ -315,6 +316,7 @@ var UpdateObject, MultiAction;
                 $('#_cbShowPlaceNamesArea')[0].disabled = false;
                 $('#_cbShowPlaceNamesPLA')[0].disabled = false;
                 $('#_cbShowPlaceNamesLock')[0].disabled = false;
+                $('#_cbhidePlaceNamesWhenPlacesHidden')[0].disabled = false;
             }
             else
             {
@@ -322,12 +324,17 @@ var UpdateObject, MultiAction;
                 $('#_cbShowPlaceNamesArea')[0].disabled = true;
                 $('#_cbShowPlaceNamesPLA')[0].disabled = true;
                 $('#_cbShowPlaceNamesLock')[0].disabled = true;
+                $('#_cbhidePlaceNamesWhenPlacesHidden')[0].disabled = true;
             }
             console.log(this.checked);
             DisplayPlaceNames();
         });
 
         $('[id^="_cbShowPlaceNames"]').change(function(){
+            DisplayPlaceNames();
+        });
+
+        $('#_cbhidePlaceNamesWhenPlacesHidden').change(function(){
             DisplayPlaceNames();
         });
 
@@ -504,11 +511,13 @@ var UpdateObject, MultiAction;
         setChecked('_cbEnablePhotoViewer', settings.EnablePhotoViewer);
         setChecked('_cbHideShopAndServices', settings.HideShopAndServices);
         setChecked('_cbEnlargeGeoHandles', settings.EnlargeGeoHandles);
+        setChecked('_cbhidePlaceNamesWhenPlacesHidden', settings.hidePlaceNamesWhenPlacesHidden);
         if(settings.ShowPlaceNames){
             $('#_cbShowPlaceNamesPoint')[0].disabled = false;
             $('#_cbShowPlaceNamesArea')[0].disabled = false;
             $('#_cbShowPlaceNamesPLA')[0].disabled = false;
             $('#_cbShowPlaceNamesLock')[0].disabled = false;
+            $('#_cbhidePlaceNamesWhenPlacesHidden')[0].disabled = false;
         }
         $('#piePlaceZoom')[0].value = settings.PlaceZoom;
         $('#pieDefaultLockLevel')[0].value = settings.DefaultLockLevel;
@@ -1532,6 +1541,7 @@ var UpdateObject, MultiAction;
             W.map.landmarkLayer.styleMap.styles['default'].rules.push(myRule);
             W.map.landmarkLayer.redraw();
         }
+        DisplayPlaceNames();
     }
 
     function ToggleHideAreaPlaces(){
@@ -1557,6 +1567,7 @@ var UpdateObject, MultiAction;
             W.map.landmarkLayer.styleMap.styles.default.rules.splice(index, 1);
             W.map.landmarkLayer.redraw();
         }
+        DisplayPlaceNames(); //refresh the name display
     }
 
     var highlightedVenue, highlighting;
@@ -1809,12 +1820,13 @@ var UpdateObject, MultiAction;
 
     function DisplayPlaceNames(){
         PIEPlaceNameLayer.removeAllFeatures();
-        var showPoint, showArea, showLock, showNames, showPLA;
+        var showPoint, showArea, showLock, showNames, showPLA, hideNames;
         showNames = isChecked('_cbShowPlaceNames');
         showPoint = isChecked('_cbShowPlaceNamesPoint');
         showArea = isChecked('_cbShowPlaceNamesArea');
         showLock = isChecked('_cbShowPlaceNamesLock');
         showPLA = isChecked('_cbShowPlaceNamesPLA');
+        hideNames = isChecked('_cbhidePlaceNamesWhenPlacesHidden');
 
         if(showNames){
             var isPoint;
@@ -1824,15 +1836,18 @@ var UpdateObject, MultiAction;
                 if((isPoint && W.map.zoom >= 5) || (!isPoint && W.map.zoom >= 3)){
                     if(WazeWrap.Geometry.isGeometryInMapExtent(venue.geometry)){
                         if( (isPoint && showPoint) || (!isPoint && showArea && !venue.isParkingLot()) || (!isPoint && showPLA && venue.isParkingLot())){
-                            var textLoc;
+                            let placedisplay = $(`#${venue.geometry.id}`).css('display');
+                            if((typeof placedisplay === 'undefined' || placedisplay === 'none') && hideNames)
+                                continue;
+                            let textLoc;
                             if(isPoint)
                                 textLoc = new OL.Geometry.Point(venue.geometry.x, venue.geometry.y);
                             else
                                 textLoc = venue.geometry.getCentroid();
-                            var placeName =WordWrap(venue.attributes.name.trim() + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : ''));
+                            let placeName =WordWrap(venue.attributes.name.trim() + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : ''));
                             if(venue.attributes.categories[0] === "RESIDENCE_HOME")
                                 placeName = venue.attributes.houseNumber + (venue.attributes.name.trim() !== '' ? ' - ' + venue.attributes.name : '') + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : '');
-                            var placeNameLabel = new OL.Feature.Vector(textLoc,{display: 'block',labelText: placeName.trim(), yOffset:(isPoint ? -13 - placeName.split("\n").length * 5 : 0)});
+                            let placeNameLabel = new OL.Feature.Vector(textLoc,{display: 'block',labelText: placeName.trim(), yOffset:(isPoint ? -13 - placeName.split("\n").length * 5 : 0)});
                             PIEPlaceNameLayer.addFeatures([placeNameLabel]);
                         }
                     }
@@ -3562,7 +3577,8 @@ var UpdateObject, MultiAction;
             sortOrder: "sortAsc",
             PhotoViewerPreserveLayout: false,
             HideShopAndServices: true,
-            EnlargeGeoHandles: false
+            EnlargeGeoHandles: false,
+            hidePlaceNamesWhenPlacesHidden: false
         };
         settings = loadedSettings ? loadedSettings : defaultSettings;
         for (var prop in defaultSettings) {
@@ -3646,7 +3662,8 @@ var UpdateObject, MultiAction;
                 PhotoViewerPreserveLayout: settings.PhotoViewerPreserveLayout,
                 PhotoViewerShowHiddenPlaces: settings.PhotoViewerShowHiddenPlaces,
                 HideShopAndServices: settings.HideShopAndServices,
-                EnlargeGeoHandles: settings.EnlargeGeoHandles
+                EnlargeGeoHandles: settings.EnlargeGeoHandles,
+                hidePlaceNamesWhenPlacesHidden: settings.hidePlaceNamesWhenPlacesHidden
             };
 
             for (var name in W.accelerators.Actions) {
@@ -3768,7 +3785,9 @@ var UpdateObject, MultiAction;
                     HideShoppingServices: "Hide Shopping / Services sub category suggestions",
                     HideSHoppingServicesTitle: "",
                     EnlargeGeoHandles: "Enlarge geometry handles",
-                    EnlargeGeoHandlesTitle: "Makes the geometry handles on area Places larger so they are easier to grab to adjust the size"
+                    EnlargeGeoHandlesTitle: "Makes the geometry handles on area Places larger so they are easier to grab to adjust the size",
+                    hidePlaceNamesWhenPlacesHidden: "Hide Place names for hidden Places",
+                    hidePlaceNamesWhenPlacesHiddenTitle: "When enabled, any Place that is hidden (either via the filter or hiding area Places shortcut) will not show their name on the map"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -3888,7 +3907,9 @@ var UpdateObject, MultiAction;
                     HideShoppingServices: "Hide Shopping / Services sub category suggestions",
                     HideSHoppingServicesTitle: "",
                     EnlargeGeoHandles: "Enlarge geometry handles",
-                    EnlargeGeoHandlesTitle: "Makes the geometry handles on area Places larger so they are easier to grab to adjust the size"
+                    EnlargeGeoHandlesTitle: "Makes the geometry handles on area Places larger so they are easier to grab to adjust the size",
+                    hidePlaceNamesWhenPlacesHidden: "Hide Place names for hidden Places",
+                    hidePlaceNamesWhenPlacesHiddenTitle: "When enabled, any Place that is hidden (either via the filter or hiding area Places shortcut) will not show their name on the map"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
@@ -4008,7 +4029,9 @@ var UpdateObject, MultiAction;
                     HideShoppingServices: "Masquer les suggestions de sous-catégorie Shopping / Services",
                     HideSHoppingServicesTitle: "",
                     EnlargeGeoHandles: "Enlarge geometry handles",
-                    EnlargeGeoHandlesTitle: "Makes the geometry handles on area Places larger so they are easier to grab to adjust the size"
+                    EnlargeGeoHandlesTitle: "Makes the geometry handles on area Places larger so they are easier to grab to adjust the size",
+                    hidePlaceNamesWhenPlacesHidden: "Hide Place names for hidden Places",
+                    hidePlaceNamesWhenPlacesHiddenTitle: "When enabled, any Place that is hidden (either via the filter or hiding area Places shortcut) will not show their name on the map"
                 },
                 filter: {
                     PlaceFilterPanel: "Filtre des lieux",
