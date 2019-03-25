@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.03.22.01
+// @version      2019.03.25.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = 'Added an option to enlarge the area Place geometry handles so they are easier to grab and adjust';
+    const updateMessage = 'Enlarge geometry handles now also enlarges the virtual geo handle.';
 
     //Layer definitions
     {
@@ -449,7 +449,10 @@ var UpdateObject, MultiAction;
                 changeGeoHandleStyle(8);
             else
                 changeGeoHandleStyle(6);
+            unregisterEvents(enlargeVirtualVerticies);
+            registerEvents(enlargeVirtualVerticies);
         });
+
 
         $('#_cbHidePaymentType').change(function(){
             if(this.checked)
@@ -600,8 +603,10 @@ var UpdateObject, MultiAction;
         //if(settings.EnablePhotoViewer)
         SetupPhotoViewer();
 
-        if(settings.EnlargeGeoHandles)
+        if(settings.EnlargeGeoHandles){
             changeGeoHandleStyle(8);
+            registerEvents(enlargeVirtualVerticies);
+        }
 
         if(settings.HidePaymentType){
             registerEvents(HidePaymentTypePlaceSelected);
@@ -1481,6 +1486,21 @@ var UpdateObject, MultiAction;
         if(handleStyle){
             handleStyle.symbolizer.pointRadius = radius;
             W.map.getLayersByName("Places")[0].redraw();
+        }
+    }
+
+    function enlargeVirtualVerticies(){
+        if(WazeWrap.hasPlaceSelected()){
+            setTimeout(function(){
+            if(settings.EnlargeGeoHandles){
+                    W.map.controls.find(function(c){ return c.displayClass === "olControlModifyFeature";}).virtualStyle.pointRadius = 6;
+            }
+            else{
+                W.map.controls.find(function(c){ return c.displayClass === "olControlModifyFeature";}).virtualStyle.pointRadius = 4;
+            }
+            W.map.controls.find(function(c){ return c.displayClass === "olControlModifyFeature";}).resetVertices();
+            unregisterEvents(enlargeVirtualVerticies);
+            }, 50);
         }
     }
 
