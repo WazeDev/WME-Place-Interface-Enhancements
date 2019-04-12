@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.03.28.01
+// @version      2019.04.12.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Version bump to update Google Link Enhancer.  Look.  I'm not going to lie to you and tell you it will work this time.  That's what we thought the other times.  It looks more promising this time, though, so hopefully this will be the last hiccup.";
+    const updateMessage = "Bug fix for the code that hides area Places - error occurs for newly created Places that do not yet have a geometry saved.";
 
     //Layer definitions
     {
@@ -1552,7 +1552,7 @@ var UpdateObject, MultiAction;
                 filter: new OL.Filter.Comparison({
                     type: '==',
                     evaluate: function(venue) {
-                        return (/POLYGON/i.test(venue.geometry.id));
+                        return (venue.geometry != null ? /POLYGON/i.test(venue.geometry.id) : false);
                     }
                 }),
                 symbolizer: {
