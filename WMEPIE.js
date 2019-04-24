@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.04.12.01
+// @version      2019.04.24.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Bug fix for the code that hides area Places - error occurs for newly created Places that do not yet have a geometry saved.";
+    const updateMessage = "";
 
     //Layer definitions
     {
@@ -1485,7 +1485,7 @@ var UpdateObject, MultiAction;
 
     function changeGeoHandleStyle(radius){
         let handleStyle;
-        let rules = W.map.getLayersByName("Places")[0].styleMap.styles.default.rules;
+        let rules = W.map.getLayerByUniqueName("landmarks").styleMap.styles.default.rules;
         for(let i=0; i< rules.length; i++){
             if(rules[i].id === "Waze_Rule_14"){
                 handleStyle = rules[i];
@@ -1494,7 +1494,7 @@ var UpdateObject, MultiAction;
         }
         if(handleStyle){
             handleStyle.symbolizer.pointRadius = radius;
-            W.map.getLayersByName("Places")[0].redraw();
+            W.map.getLayerByUniqueName("landmarks").redraw();
         }
     }
 
