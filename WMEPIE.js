@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.04.29.03
+// @version      2019.04.29.04
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Bumping PIE version to force a WazeWrap update.";
+    const updateMessage = "Small bug fixes for error message display.";
 
     //Layer definitions
     {
@@ -2349,7 +2349,7 @@ var UpdateObject, MultiAction;
 
             for(var i = 0;i < lines.length;i++){
                 if(! /^(-?\d*(?:\.\d*)?),\s?(-?\d*(?:\.\d*))$/.test(lines[i])){
-                    WazeWrap.Alerts.error("Incorrectly formatted coordinates");
+                    WazeWrap.Alerts.error(GM_info.script.name, "Incorrectly formatted coordinates");
                     return;
                 }
                 let coords = lines[i].match(/^(-?\d*(?:\.\d*)?),\s?(-?\d*(?:\.\d*))$/);
@@ -2368,7 +2368,7 @@ var UpdateObject, MultiAction;
                 if(lines[i].length > 0){
                     lines[i] = lines[i].replace(/\t/, " ");
                     if(! /^(-?\d*(?:\.\d*)?)\s+(-?\d*(?:\.\d*))$/.test(lines[i])){
-                        WazeWrap.Alerts.error("Incorrectly formatted coordinates");
+                        WazeWrap.Alerts.error(GM_info.script.name, "Incorrectly formatted coordinates");
                         return;
                     }
                     let coords = lines[i].match(/^(-?\d*(?:\.\d*)?)\s+(-?\d*(?:\.\d*))$/);
@@ -2386,7 +2386,7 @@ var UpdateObject, MultiAction;
 
             for(var i = 0;i < lines.length;i++){
                 if(! /^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/.test(lines[i].trim())){
-                    WazeWrap.Alerts.error("Incorrectly formatted coordinates");
+                    WazeWrap.Alerts.error(GM_info.script.name, "Incorrectly formatted coordinates");
                     return;
                 }
                 let coords = lines[i].trim().match(/^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/);
