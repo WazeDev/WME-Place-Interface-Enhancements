@@ -173,6 +173,7 @@ var UpdateObject, MultiAction;
             '<div id="divShowNamesArea"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowAreaNamesTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesArea" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesArea">' + I18n.t('pie.prefs.ShowAreaNames') + '</label></div>',
             '<br><div id="divShowNamesPLA"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowPLANameTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesPLA" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesPLA">' + I18n.t('pie.prefs.ShowPLAName') + '</label></div>',
             '<br><div id="divShowNamesLock"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowLockLevelTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesLock" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesLock">' + I18n.t('pie.prefs.ShowLockLevel') + '</label></div>',
+            '<br><div id="divShowNamesHN"class="controls-container pie-controls-container" style="padding-left:20px;" title="' + I18n.t('pie.prefs.ShowPlaceHouseNumberTitle') + '"><input type="checkbox" id="_cbShowPlaceNamesHN" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesHN">' + I18n.t('pie.prefs.ShowPlaceHouseNumber') + '</label></div>',
             `<br><div id="divhidePlaceNamesWhenPlacesHidden" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t('pie.prefs.hidePlaceNamesWhenPlacesHiddenTitle')}"><input type="checkbox" id="_cbhidePlaceNamesWhenPlacesHidden" class="pieSettingsCheckbox" disabled /><label for="_cbhidePlaceNamesWhenPlacesHidden">${I18n.t('pie.prefs.hidePlaceNamesWhenPlacesHidden')}</label></div>`,
             '<div id="divPlaceNamesFontCustomization" class="controls-container pie-controls-container" style="padding-left:20px;">',
             I18n.t('pie.prefs.FontSize') + ' <input type="text" size="1" id="piePlaceNameFontSize"/>px</br>',
@@ -316,6 +317,7 @@ var UpdateObject, MultiAction;
                 $('#_cbShowPlaceNamesArea')[0].disabled = false;
                 $('#_cbShowPlaceNamesPLA')[0].disabled = false;
                 $('#_cbShowPlaceNamesLock')[0].disabled = false;
+                $('#_cbShowPlaceNamesHN')[0].disabled = false;
                 $('#_cbhidePlaceNamesWhenPlacesHidden')[0].disabled = false;
             }
             else
@@ -324,6 +326,7 @@ var UpdateObject, MultiAction;
                 $('#_cbShowPlaceNamesArea')[0].disabled = true;
                 $('#_cbShowPlaceNamesPLA')[0].disabled = true;
                 $('#_cbShowPlaceNamesLock')[0].disabled = true;
+                $('#_cbShowPlaceNamesHN')[0].disabled = true;
                 $('#_cbhidePlaceNamesWhenPlacesHidden')[0].disabled = true;
             }
             console.log(this.checked);
@@ -496,6 +499,7 @@ var UpdateObject, MultiAction;
         setChecked('_cbShowPlaceNamesArea', settings.ShowPlaceNamesArea);
         setChecked('_cbShowPlaceNamesPLA', settings.ShowPlaceNamesPLA);
         setChecked('_cbShowPlaceNamesLock', settings.ShowPlaceNamesLock);
+        setChecked('_cbShowPlaceNamesHN', settings.ShowPlaceNamesHN);
         setChecked('_cbClearDescription', settings.ClearDescription);
         setChecked('_cbPlaceNameFontBold', settings.PlaceNameFontBold);
         setChecked('_cbPlaceLocatorCrosshairProdPL', settings.PlaceLocatorCrosshairProdPL);
@@ -517,6 +521,7 @@ var UpdateObject, MultiAction;
             $('#_cbShowPlaceNamesArea')[0].disabled = false;
             $('#_cbShowPlaceNamesPLA')[0].disabled = false;
             $('#_cbShowPlaceNamesLock')[0].disabled = false;
+            $('#_cbShowPlaceNamesHN')[0].disabled = false;
             $('#_cbhidePlaceNamesWhenPlacesHidden')[0].disabled = false;
         }
         $('#piePlaceZoom')[0].value = settings.PlaceZoom;
@@ -1820,11 +1825,12 @@ var UpdateObject, MultiAction;
 
     function DisplayPlaceNames(){
         PIEPlaceNameLayer.removeAllFeatures();
-        var showPoint, showArea, showLock, showNames, showPLA, hideNames;
+        var showPoint, showArea, showLock, showNames, showPLA, hideNames, showHN;
         showNames = isChecked('_cbShowPlaceNames');
         showPoint = isChecked('_cbShowPlaceNamesPoint');
         showArea = isChecked('_cbShowPlaceNamesArea');
         showLock = isChecked('_cbShowPlaceNamesLock');
+        showHN = isChecked('_cbShowPlaceNamesHN');
         showPLA = isChecked('_cbShowPlaceNamesPLA');
         hideNames = isChecked('_cbhidePlaceNamesWhenPlacesHidden');
 
@@ -1844,7 +1850,7 @@ var UpdateObject, MultiAction;
                                 textLoc = new OL.Geometry.Point(venue.geometry.x, venue.geometry.y);
                             else
                                 textLoc = venue.geometry.getCentroid();
-                            let placeName =WordWrap(venue.attributes.name.trim() + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : ''));
+                            let placeName =WordWrap(venue.attributes.name.trim() + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : '') + (showHN && venue.attributes.houseNumber ? ' <' + (venue.attributes.houseNumber) + '>' : ''));
                             if(venue.attributes.categories[0] === "RESIDENCE_HOME")
                                 placeName = venue.attributes.houseNumber + (venue.attributes.name.trim() !== '' ? ' - ' + venue.attributes.name : '') + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : '');
                             let placeNameLabel = new OL.Feature.Vector(textLoc,{display: 'block',labelText: placeName.trim(), yOffset:(isPoint ? -13 - placeName.split("\n").length * 5 : 0)});
@@ -3736,6 +3742,8 @@ var UpdateObject, MultiAction;
                     ShowAreaNamesTitle: "Will display the Place's name in the middle of the Place area",
                     ShowLockLevel: 'Show lock level',
                     ShowLockLevelTitle: "Will display the Place's lock level in the middle of the Place area",
+                    ShowPlaceHouseNumber: "Show house number",
+                    ShowPlaceHouseNumberTitle: "Will display the Place's house number in the middle of the Place area",
                     ShowPLAName: 'Show PLA name',
                     ShowPLANameTitle: '',
                     Item: 'Item',
@@ -3858,6 +3866,8 @@ var UpdateObject, MultiAction;
                     ShowAreaNamesTitle: "Muestra el nombre de lugares definidos como área",
                     ShowLockLevel: 'Mostrar nivel de bloqueo',
                     ShowLockLevelTitle: "Muestra el nivel de bloqueo en el centro del lugar",
+                    ShowPlaceHouseNumber: "Mostrar numero de casa",
+                    ShowPlaceHouseNumberTitle: "Muestra el numero de casa en el centro del lugar",
                     ShowPLAName: 'Mostrar nombre de PLA',
                     ShowPLANameTitle: 'Muestra el nombre de áreas de estacionamiento (PLAs)',
                     Item: 'Opción',
