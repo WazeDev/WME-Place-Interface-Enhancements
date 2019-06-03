@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.05.03.01
+// @version      2019.05.31.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "";
+    const updateMessage = "Disabling Google Link Enhancer when in Event mode";
 
     //Layer definitions
     {
@@ -868,7 +868,20 @@ var UpdateObject, MultiAction;
         registerEvents(AddMakePrimaryButtons);
         AddMakePrimaryButtons();
 
+        WazeWrap.Events.register("change:mode", null, function(x, modeID){
+            if(modeID === 1) //in event mode
+                GLE.disable();
+            else{
+                if(settings.EnableGLE)
+                    GLE.enable();
+            }
+        });
+
         WazeWrap.Interface.ShowScriptUpdate("WME Place Interface Enhancements", GM_info.script.version, updateMessage, "", "https://www.waze.com/forum/viewtopic.php?f=819&t=215990");
+    }
+
+    function handleEventModeChange(){
+
     }
 
     function SetupPhotoViewer(){
