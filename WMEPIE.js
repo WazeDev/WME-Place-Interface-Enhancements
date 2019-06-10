@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Disabling Google Link Enhancer when in Event mode";
+    const updateMessage = "Fixing typo in unregistering an event when disabling Show Closest Segment.";
 
     //Layer definitions
     {
