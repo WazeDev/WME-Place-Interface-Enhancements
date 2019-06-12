@@ -1863,7 +1863,12 @@ var UpdateObject, MultiAction;
                                 textLoc = new OL.Geometry.Point(venue.geometry.x, venue.geometry.y);
                             else
                                 textLoc = venue.geometry.getCentroid();
-                            let placeName =WordWrap(venue.attributes.name.trim() + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : '') + (showHN && venue.attributes.houseNumber ? ' <' + (venue.attributes.houseNumber) + '>' : ''));
+                            let placeName = venue.attributes.name.trim() + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : '');
+                            if (showHN && venue.attributes.houseNumber){
+                                placeName += '\n' + venue.getAddress().attributes.street.name;
+                                placeName += ' <' + (venue.attributes.houseNumber) + '>';
+                            }
+                            placeName = WordWrap(placeName);
                             if(venue.attributes.categories[0] === "RESIDENCE_HOME")
                                 placeName = venue.attributes.houseNumber + (venue.attributes.name.trim() !== '' ? ' - ' + venue.attributes.name : '') + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : '');
                             let placeNameLabel = new OL.Feature.Vector(textLoc,{display: 'block',labelText: placeName.trim(), yOffset:(isPoint ? -13 - placeName.split("\n").length * 5 : 0)});
