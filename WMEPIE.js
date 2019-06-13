@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.06.10.01
+// @version      2019.06.12.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Fixing typo in unregistering an event when disabling Show Closest Segment.";
+    const updateMessage = "Adding support for saving/loading settings from the WazeDev server if the user has set a PIN in the WazeWrap tab.";
 
     //Layer definitions
     {
@@ -114,7 +114,7 @@ var UpdateObject, MultiAction;
 
     bootstrap();
 
-    function init(){
+    async function init(){
         loadTranslations();
         GLE = new GoogleLinkEnhancer();
         hoursparser = new HoursParser();
@@ -210,7 +210,7 @@ var UpdateObject, MultiAction;
         MultiAction = require("Waze/Action/MultiAction");
 
         //Load settings
-        loadSettings();
+        await loadSettings();
 
         var style = new OL.Style({
             pointRadius: "${pointRadius}",
@@ -740,7 +740,8 @@ var UpdateObject, MultiAction;
 
 
         window.addEventListener("beforeunload", function() {
-            saveSettings();
+		checkShortcutsChanged();
+            //saveSettings();
         }, false);
 
         let extprovobserver = new MutationObserver(function(mutations) {
@@ -3532,7 +3533,7 @@ var UpdateObject, MultiAction;
         $('<style type="text/css" id=' + id + '>' + css + '</style>').appendTo('head');
     }
 
-    function loadSettings() {
+    async function loadSettings() {
         var loadedSettings = $.parseJSON(localStorage.getItem("WMEPIE_Settings"));
         var defaultSettings = {
             ShowAreaPlaceSize: false,
@@ -3603,13 +3604,19 @@ var UpdateObject, MultiAction;
             PhotoViewerPreserveLayout: false,
             HideShopAndServices: true,
             EnlargeGeoHandles: false,
-            hidePlaceNamesWhenPlacesHidden: false
+            hidePlaceNamesWhenPlacesHidden: false,
+            lastSaved: 0
         };
-        settings = loadedSettings ? loadedSettings : defaultSettings;
+        /*settings = loadedSettings ? loadedSettings : defaultSettings;
         for (var prop in defaultSettings) {
             if (!settings.hasOwnProperty(prop))
                 settings[prop] = defaultSettings[prop];
-        }
+        }*/
+    	settings = $.extend({}, defaultSettings, loadedSettings);
+
+        let serverSettings = await WazeWrap.Remote.RetrieveSettings("WME_PIE");
+        if(serverSettings && serverSettings.lastSaved > settings.lastSaved)
+            $.extend(settings, serverSettings);
 
         if(settings.ShowAreaPlaceSizeImperial === false && settings.ShowAreaPlaceSizeMetric === false)
             if(W.prefs.attributes.isImperial)
@@ -3689,11 +3696,12 @@ var UpdateObject, MultiAction;
                 PhotoViewerShowHiddenPlaces: settings.PhotoViewerShowHiddenPlaces,
                 HideShopAndServices: settings.HideShopAndServices,
                 EnlargeGeoHandles: settings.EnlargeGeoHandles,
-                hidePlaceNamesWhenPlacesHidden: settings.hidePlaceNamesWhenPlacesHidden
+                hidePlaceNamesWhenPlacesHidden: settings.hidePlaceNamesWhenPlacesHidden,
+                lastSaved: Date.now()
             };
 
             for (var name in W.accelerators.Actions) {
-                var TempKeys = "";
+                let TempKeys = "";
                 if (W.accelerators.Actions[name].group == 'wmepie') {
                     if (W.accelerators.Actions[name].shortcut) {
                         if (W.accelerators.Actions[name].shortcut.altKey === true)
@@ -3714,7 +3722,37 @@ var UpdateObject, MultiAction;
             }
 
             localStorage.setItem("WMEPIE_Settings", JSON.stringify(localsettings));
+            WazeWrap.Remote.SaveSettings("WME_PIE", localsettings);
         }
+    }
+	
+    function checkShortcutsChanged(){
+        let triggerSave = false;
+        for (let name in W.accelerators.Actions) {
+            let TempKeys = "";
+            if (W.accelerators.Actions[name].group == 'wmepie') {
+                if (W.accelerators.Actions[name].shortcut) {
+                    if (W.accelerators.Actions[name].shortcut.altKey === true)
+                        TempKeys += 'A';
+                    if (W.accelerators.Actions[name].shortcut.shiftKey === true)
+                        TempKeys += 'S';
+                    if (W.accelerators.Actions[name].shortcut.ctrlKey === true)
+                        TempKeys += 'C';
+                    if (TempKeys !== "")
+                        TempKeys += '+';
+                    if (W.accelerators.Actions[name].shortcut.keyCode)
+                        TempKeys += W.accelerators.Actions[name].shortcut.keyCode;
+                } else {
+                    TempKeys = "-1";
+                }
+                if(settings[name] != Tempkeys){
+                    triggerSave = true;
+                    break;
+                }
+            }
+        }
+        if(triggerSave)
+            saveSettings();
     }
 
     function loadTranslations() {
