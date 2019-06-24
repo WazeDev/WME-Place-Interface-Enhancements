@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.06.12.02
+// @version      2019.06.21.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Adding support for saving/loading settings from the WazeDev server if the user has set a PIN in the WazeWrap tab.";
+    const updateMessage = "Fixing the photo viewer cancel button - Waze changed the text of the cancel button that was being used previously.";
 
     //Layer definitions
     {
@@ -919,7 +919,7 @@ var UpdateObject, MultiAction;
 
         //Button to quit
         let quit=document.createElement('button');
-        quit.innerHTML=I18n.translations[I18n.currentLocale()].toolbar.cancel;
+        quit.innerHTML=I18n.translations[I18n.currentLocale()].merge_places.actions.cancel
         $(quit).css({'float':'right','height':'23px','line-height':'23px','margin':'3px','padding':'0 10px','background-color':'#26bae8','color':'white','border':'0','border-radius':'13px'});
         quit.onclick = hide_visio;
         topbar.appendChild(quit);
