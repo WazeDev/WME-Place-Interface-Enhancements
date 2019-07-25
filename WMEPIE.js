@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.06.21.01
+// @version      2019.07.25.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Fixing the photo viewer cancel button - Waze changed the text of the cancel button that was being used previously.";
+    const updateMessage = "Bug fixes for changes in _ library";
 
     //Layer definitions
     {
@@ -1937,7 +1937,7 @@ var UpdateObject, MultiAction;
 
     function highlightObsoleteHospitalCategory(){
         if(WazeWrap.getSelectedFeatures().length > 0 && WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
-                if(_.contains(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"HOSPITAL_MEDICAL_CARE")){
+                if(_.includes(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"HOSPITAL_MEDICAL_CARE")){
                     $('.select2-choices').css('animation-iteration-count', 'infinite');
                     $('.select2-choices').attr('title', 'The "Hospital / Medical Care" category is no longer valid.\n\nPlease change it to "Hospital / Urgent Care" or "Doctor / Clinic", whichever is most appropriate');
                     $('.select2-choices').tooltip();
@@ -2257,7 +2257,7 @@ var UpdateObject, MultiAction;
     }
 
     function _hidePaymentType(){
-        if(WazeWrap.hasSelectedFeatures() && _.contains(WazeWrap.getSelectedFeatures()[0].model.attributes.categories, "PARKING_LOT")){
+        if(WazeWrap.hasSelectedFeatures() && _.includes(WazeWrap.getSelectedFeatures()[0].model.attributes.categories, "PARKING_LOT")){
             let attr = WazeWrap.getSelectedFeatures()[0].model.attributes;
             if(attr.categoryAttributes.PARKING_LOT.costType && attr.categoryAttributes.PARKING_LOT.costType === "FREE"){
                 if(!$('#landmark-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').hasClass("collapse"))
@@ -2547,7 +2547,7 @@ var UpdateObject, MultiAction;
         if(WazeWrap.getSelectedFeatures().length > 0){
             if(WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
                 var $crosshairs;
-                if(_.contains(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME")){
+                if(_.includes(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME")){
                     $('.landmark > .tab-content').css('position', 'relative');
                     $crosshairs = $('<div style="position:absolute; z-index:100; cursor:pointer; top:0; right:0;" id="pieCrosshairs" title="Zoom and center on Place"><i class="fa fa-crosshairs fa-lg" id="placeCrosshair" aria-hidden="true"></i></div>');
                     //$('.address-edit.side-panel-section').before($crosshairs);
@@ -2584,7 +2584,7 @@ var UpdateObject, MultiAction;
         if(WazeWrap.getSelectedFeatures().length > 0){
             if(WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
                 var $PLAButton;
-                if(!(_.contains(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME") || _.contains(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"PARKING_LOT"))){
+                if(!(_.includes(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME") || _.includes(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"PARKING_LOT"))){
                     $PLAButton = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="piePLAButton" title="Create a Parking Lot Area for this Place"><i class="fa fa-product-hunt fa-lg" aria-hidden="true"></i></div>');
                     $('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($PLAButton);
 
@@ -2972,7 +2972,7 @@ var UpdateObject, MultiAction;
             //WazeWrap.getSelectedFeatures()[0].model.attributes.id.match(/(\d+\.){2}\d+/)
             if(WazeWrap.getSelectedFeatures()[0].model.type === "venue"){// && (typeof WazeWrap.getSelectedFeatures()[0].model.attributes.id === "string")){ //id is only a string if the Place has been saved - don't allow copying unsaved Places
                 var $PlaceCopyButton;
-                if(!_.contains(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME")){
+                if(!_.includes(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME")){
                     $PlaceCopyButton = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" id="pieCopyPlaceButton" title="Creates a copy of this Place"><i class="fa fa-files-o fa-lg" aria-hidden="true"></i></div>');
                     $('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($PlaceCopyButton);
 
@@ -3011,10 +3011,10 @@ var UpdateObject, MultiAction;
                         NewPlace.attributes.openingHours = [].concat(oldPlace.attributes.openingHours);
                         NewPlace.attributes.streetID = oldPlace.attributes.streetID;
 
-                        if(_.contains(NewPlace.attributes.categories,"GAS_STATION"))
+                        if(_.includes(NewPlace.attributes.categories,"GAS_STATION"))
                             NewPlace.attributes.brand = oldPlace.attributes.brand;
 
-                        if(_.contains(NewPlace.attributes.categories,"PARKING_LOT")){
+                        if(_.includes(NewPlace.attributes.categories,"PARKING_LOT")){
                             NewPlace.attributes.categoryAttributes.PARKING_LOT = {};
                             var PLAttribute = oldPlace.attributes.categoryAttributes.PARKING_LOT;
                             if((PLAttribute.lotType != null))
