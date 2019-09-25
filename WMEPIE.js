@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.07.25.01
+// @version      2019.09.24.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Bug fixes for changes in _ library";
+    const updateMessage = "Bug fix for RPP creation pulling alt name cities.";
 
     //Layer definitions
     {
@@ -2162,12 +2162,15 @@ var UpdateObject, MultiAction;
                 var cityName = address.attributes.city.attributes.name;
 
                 if(settings.UseAltCity && cityName === ""){
+                    debugger;
                     if(address.attributes.altStreets.length > 0){ //segment has alt names
                         for(var j=0;j<closestSeg.attributes.streetIDs.length;j++){
                             var altCity = W.model.cities.getObjectById(W.model.streets.getObjectById(closestSeg.attributes.streetIDs[j]).cityID).attributes;
 
-                            if(altCity.englishName !== null && altCity.englishName !== "")
-                                cityName = altCity.englishName;
+                            if(altCity.name !== null && altCity.englishName !== ""){
+                                cityName = altCity.name;
+                                break;
+                            }
                         }
                     }
                 }
