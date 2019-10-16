@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.09.26.01
+// @version      2019.10.10.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "";
+    const updateMessage = "Fix translations";
 
     //Layer definitions
     {
@@ -4121,7 +4121,7 @@ var UpdateObject, MultiAction;
         for (var i = 0; i < Object.keys(translations).length; i++) {
             var locale = Object.keys(translations)[i];
             if (I18n.currentLocale() == locale) {
-                I18n.translations[locale].pie.prefs = translations[locale].prefs;
+                I18n.translations[locale].pie = translations[locale];
                 return;
             }
         }
