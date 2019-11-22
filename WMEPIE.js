@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2019.11.20.01
+// @version      2019.11.21.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1595,7 +1595,7 @@ var UpdateObject, MultiAction;
                 showStopPointsLayer.removeAllFeatures();
         highlightedVenue = W.map.landmarkLayer.getFeatureBy("renderIntent","highlight");
 
-        if(highlightedVenue !== null && highlightedVenue.model && highlighting === false && W.map.zoom >= 4){
+        if(highlightedVenue !== null && highlightedVenue.model && highlighting === false && W.map.getZoom() >= 4){
             let isArea = !highlightedVenue.model.isPoint();
             let navPoint;
 
@@ -1624,7 +1624,7 @@ var UpdateObject, MultiAction;
                 showStopPointsLayer.addFeatures([lineFeature, pointFeature]);
 
         }
-        if(highlightedVenue === null || W.map.zoom < 4)
+        if(highlightedVenue === null || W.map.getZoom() < 4)
             showStopPointsLayer.removeAllFeatures();
         }
         catch(err){
@@ -1847,7 +1847,7 @@ var UpdateObject, MultiAction;
             for (var placeID in W.model.venues.objects) {
                 var venue = W.model.venues.getObjectById(placeID);
                 isPoint = venue.isPoint();
-                if((isPoint && W.map.zoom >= 5) || (!isPoint && W.map.zoom >= 3)){
+                if((isPoint && W.map.getZoom() >= 5) || (!isPoint && W.map.getZoom() >= 3)){
                     if(WazeWrap.Geometry.isGeometryInMapExtent(venue.geometry)){
                         if( (isPoint && showPoint) || (!isPoint && showArea && !venue.isParkingLot()) || (!isPoint && showPLA && venue.isParkingLot())){
                             let placedisplay = $(`#${venue.geometry.id}`).css('display');
@@ -3140,7 +3140,7 @@ var UpdateObject, MultiAction;
         $('.navigation-point-list-item').find('.buttons').prepend('<div><i id="EEPCrosshair" class="fa fa-crosshairs" style="color:#2f799b" aria-hidden="true"></i></div>');
         $('#EEPCrosshair').click(function(){
             let point = WazeWrap.getSelectedFeatures()[0].model.attributes.entryExitPoints[0]._point;
-            W.map.setCenter([point.x, point.y], W.map.zoom);
+            W.map.setCenter([point.x, point.y], W.map.getZoom());
         });
     }*/
 
