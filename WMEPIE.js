@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2020.03.25.01
+// @version      2020.03.27.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "";
+    const updateMessage = "<ul><li>Bug fix for checking/enabling layers introduced by the recent WME update</li><li>Added the picture date in the Photo Viewer when viewing single pictures</li></ul>";
 
     //Layer definitions
     {
@@ -884,7 +884,7 @@ var UpdateObject, MultiAction;
         //Black background
         let mainDiv=document.createElement('div');
         mainDiv.id='photoViewerMainDiv';
-        $(mainDiv).css({'float':'right','position':'absolute','left':'0px','top':'0px','width':'100%','height':'100%','background-color':'rgb(0, 0, 0, 0.85)','z-index':'1005','overflow-y':'auto','display':'none'});
+        $(mainDiv).css({'float':'right','position':'absolute','left':'0px','top':'0px','width':'100%','height':'100%','background-color':'rgb(0, 0, 0, 0.85)','z-index':'1005','overflow-y':'auto','display':'none', 'font-size':'13px'});
         $('#map').append(mainDiv);
 
         //Div options
@@ -987,7 +987,7 @@ var UpdateObject, MultiAction;
 
     function togglePhotoViewerMouseEvent(){
         //if the Places category is not enabled or all of the Place options are not enabled, don't allow opening the viewer - nothing will display.
-        if(!isChecked("layer-switcher-group_places") || (!isChecked("layer-switcher-item_parking_places") && !isChecked("layer-switcher-item_residential_places") && !isChecked('layer-switcher-item_venues'))){
+        if(!$("#layer-switcher-group_places").prop('checked') || (!$("#layer-switcher-item_parking_places").prop('checked') && !$("#layer-switcher-item_residential_places").prop('checked') && !$('#layer-switcher-item_venues').prop('checked'))){
            $('#photoViewerButton').css('cursor', 'not-allowed');
             $('#photoViewerButton').attr('title','Enable the Places layers to use this tool');
             $('#photoViewerButton').off();
@@ -1365,6 +1365,13 @@ var UpdateObject, MultiAction;
         imageDIV.innerHTML=`<img id="zoomImage" style="border-radius:12px; border:2px solid ${approved ? '#0f0' : '#f00'};" src="https://venue-image.waze.com/thumbs/thumb700_${id}" />${approved ? '<i id="zoomDelete" class="fa fa-trash-o fa-lg" style="cursor:pointer; color:white; position:absolute; top:0; margin-left:7px;"></i>' : ''}`;
         zoom.appendChild(imageDIV);
 
+        let zoomDateDiv = document.createElement('div');
+        zoomDateDiv.setAttribute('id', 'zoomDate');
+        $(zoomDateDiv).css({'text-align':'center', 'position':'relative', 'top':'30px', 'color':'white'});
+        let d = new Date(images[zoomPicIndex].attributes.date);
+        zoomDateDiv.innerHTML = `${d.toLocaleString()}`;
+        zoom.appendChild(zoomDateDiv);
+
         if(venue.attributes.images.length > 1){
             let zoomNavDiv = document.createElement('div');
             $(zoomNavDiv).css({'text-align':'center', 'position':'relative', 'top':'30px'});
@@ -1385,6 +1392,8 @@ var UpdateObject, MultiAction;
                 zoomPicIndex--;
                 $('#zoomImage').attr('src', `https://venue-image.waze.com/thumbs/thumb700_${images[zoomPicIndex].id}`);
                 id = images[zoomPicIndex].id;
+                let d = new Date(images[zoomPicIndex].attributes.date);
+                $('#zoomDate').text(d.toLocaleString());
             }
             event.stopPropagation();
         });
@@ -1394,6 +1403,8 @@ var UpdateObject, MultiAction;
                 zoomPicIndex++;
                 $('#zoomImage').attr('src', `https://venue-image.waze.com/thumbs/thumb700_${images[zoomPicIndex].id}`);
                 id = images[zoomPicIndex].id;
+                let d = new Date(images[zoomPicIndex].attributes.date);
+                $('#zoomDate').text(d.toLocaleString());
             }
             event.stopPropagation();
         });
@@ -1951,16 +1962,16 @@ var UpdateObject, MultiAction;
             return;
 
         if(category === "PARKING_LOT"){
-            if(!isChecked("layer-switcher-item_parking_places")){
-                if(!isChecked("layer-switcher-group_places"))
+            if(!$("#layer-switcher-item_parking_places").prop('checked')){
+                if(!$("#layer-switcher-group_places").prop('checked'))
                     $("#layer-switcher-group_places").click();
                 $("#layer-switcher-item_parking_places").click();
             }
         }
         else if(category === resCategory)
         {
-            if(!isChecked("layer-switcher-item_residential_places")){
-                if(!isChecked("layer-switcher-group_places"))
+            if(!$("#layer-switcher-item_residential_places").prop('checked')){
+                if(!$("#layer-switcher-group_places").prop('checked'))
                     $("#layer-switcher-group_places").click();
                 $("#layer-switcher-item_residential_places").click();
             }
@@ -2122,9 +2133,9 @@ var UpdateObject, MultiAction;
         else{
             var points = [];
             var i;
-            for(i=0;i<pos.components[0].components.length;i++){
+            for(i=0;i<pos.components[0].components.length;i++)
                 points.push(new OL.Geometry.Point(pos.components[0].components[i].x, pos.components[0].components[i].y));
-            }
+
             var ring = new OL.Geometry.LinearRing(points);
             NewPlace.geometry = new OL.Geometry.Polygon([ring]);
 
@@ -2193,16 +2204,14 @@ var UpdateObject, MultiAction;
             setTimeout(editRPPAddress, 50);
     }
 
-    function editRPPAddress(rppTries){
-        rppTries = rppTries || 1;
-
+    function editRPPAddress(rppTries = 1){
         if ($('.address-edit-view').length > 0) {
             $('.full-address').trigger("click");
             $('.house-number:first').focus();
 
         } else if (rppTries < 1000) {
             console.log("not found");
-            setTimeout(function () {editRPPAddress(rppTries++);}, 200);
+            setTimeout(function () {editRPPAddress(++rppTries);}, 200);
         }
     }
 
@@ -2599,8 +2608,8 @@ var UpdateObject, MultiAction;
                             //businessPLAPlacePhone = WazeWrap.getSelectedFeatures()[0].model.attributes.phone;
                             //businessPLAPlaceURL = WazeWrap.getSelectedFeatures()[0].model.attributes.url;
                             startBusinessPLAPlacementMode();
-                            if(!isChecked("layer-switcher-item_parking_places")){
-                                if(!isChecked("layer-switcher-group_places"))
+                            if(!$("#layer-switcher-item_parking_places").prop('checked')){
+                                if(!$("#layer-switcher-group_places").prop('checked'))
                                     $("#layer-switcher-group_places").click();
                                 $("#layer-switcher-item_parking_places").click();
                             }
