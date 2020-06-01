@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2020.06.01.02
+// @version      2020.06.01.03
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1510,7 +1510,7 @@ var UpdateObject, MultiAction;
 
     function changeGeoHandleStyle(radius){
         let handleStyle;
-        let rules = W.map.getLayerByUniqueName("landmarks").styleMap.styles.default.rules;
+        let rules = W.map.getLayerByUniqueName("venues").styleMap.styles.default.rules;
         for(let i=0; i< rules.length; i++){
             if(rules[i].id === "Waze_Rule_14"){
                 handleStyle = rules[i];
@@ -1519,7 +1519,7 @@ var UpdateObject, MultiAction;
         }
         if(handleStyle){
             handleStyle.symbolizer.pointRadius = radius;
-            W.map.getLayerByUniqueName("landmarks").redraw();
+            W.map.getLayerByUniqueName("venues").redraw();
         }
     }
 
@@ -1644,7 +1644,7 @@ var UpdateObject, MultiAction;
     }
 
     function ObjectsChanged(){
-        if(W.map.getLayerByUniqueName('landmarks').selectedFeatures.length >0)
+        if(W.map.getLayerByUniqueName('venues').selectedFeatures.length >0)
             getActiveEditor().then(val => {
                 if(placeIsPoint && val.vertices.length > 0){
                     removeDragCallbacks();
