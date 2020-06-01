@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2020.06.01.05
+// @version      2020.06.01.06
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1980,6 +1980,7 @@ var UpdateObject, MultiAction;
         newPlaceCategory = category;
         var polyDrawFeatureOptions = {callbacks : {"done": doneHandler}};
         if(isPoint){
+            debugger;
             $(".olMapViewport").on('mousemove', MouseMoveHandler);
             $(".olMapViewport").click(function(){endPlacementMode(category, isPoint);});
             /*drawPoly = new OpenLayers.Control.DrawFeature(newPlaceLayer, OpenLayers.Handler.Polygon, polyDrawFeatureOptions);
@@ -2103,6 +2104,7 @@ var UpdateObject, MultiAction;
 
     function getMousePos900913(){
         var mousePosition = $('.WazeControlMousePosition').text().split(" ");
+        [mousePosition[0], mousePosition[1]] = [mousePosition[1], mousePosition[0]];
         return WazeWrap.Geometry.ConvertTo900913(mousePosition[0], mousePosition[1]);
     }
 
