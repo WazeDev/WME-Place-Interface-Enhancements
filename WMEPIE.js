@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2020.06.01.03
+// @version      2020.06.01.04
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1237,8 +1237,8 @@ var UpdateObject, MultiAction;
                         //let venueList = [];
                         //venueList.push(W.model.venues.objects[idvenue]);
                         //W.selectionManager.setSelectedModels(venueList);
-                        $("#landmark-edit-photos").css('display', 'block');
-                        $("#landmark-edit-general").css('display', 'none');
+                        $("#venue-edit-photos").css('display', 'block');
+                        $("#venue-edit-general").css('display', 'none');
                     }
                 }(vattr.images[k].attributes.id, venue, vattr.images[k].attributes.approved), false);
 
@@ -2272,12 +2272,12 @@ var UpdateObject, MultiAction;
         if(WazeWrap.hasSelectedFeatures() && _.includes(WazeWrap.getSelectedFeatures()[0].model.attributes.categories, "PARKING_LOT")){
             let attr = WazeWrap.getSelectedFeatures()[0].model.attributes;
             if(attr.categoryAttributes.PARKING_LOT.costType && attr.categoryAttributes.PARKING_LOT.costType === "FREE"){
-                if(!$('#landmark-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').hasClass("collapse"))
-                    $('#landmark-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').addClass("collapse");
+                if(!$('#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').hasClass("collapse"))
+                    $('#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').addClass("collapse");
             }
             else{
-                if($('#landmark-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').hasClass("collapse"))
-                    $('#landmark-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').removeClass("collapse");
+                if($('#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').hasClass("collapse"))
+                    $('#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').removeClass("collapse");
             }
         }
     }
@@ -2476,7 +2476,7 @@ var UpdateObject, MultiAction;
             if(W.selectionManager.getSelectedFeatures()[0].model.type === "mapComment")
                 $('#edit-panel > div > div > div.tab-content > form > div:nth-child(3)').after($GeomMods);
             else
-                $('#landmark-edit-general > form > div:nth-child(4) > div:nth-child(2)').after($GeomMods);
+                $('#venue-edit-general > form > div:nth-child(4) > div:nth-child(2)').after($GeomMods);
 
             $('#pieorthogonalize').click(function(){
                 OrthogonalizePlace();
@@ -2560,14 +2560,14 @@ var UpdateObject, MultiAction;
             if(WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
                 var $crosshairs;
                 if(_.includes(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME")){
-                    $('.landmark > .tab-content').css('position', 'relative');
+                    $('.venue > .tab-content').css('position', 'relative');
                     $crosshairs = $('<div style="position:absolute; z-index:100; cursor:pointer; top:0; right:0;" id="pieCrosshairs" title="Zoom and center on Place"><i class="fa fa-crosshairs fa-lg" id="placeCrosshair" aria-hidden="true"></i></div>');
                     //$('.address-edit.side-panel-section').before($crosshairs);
-                    $('.landmark > .tab-content').append($crosshairs);
+                    $('.venue > .tab-content').append($crosshairs);
                 }
                 else{
                      $crosshairs = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="pieCrosshairs" title="Zoom and center on Place"><i class="fa fa-crosshairs fa-lg" id="placeCrosshair" aria-hidden="true"></i></div>');
-                    $('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($crosshairs);
+                    $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($crosshairs);
                 }
                 $('#pieCrosshairs').click(function(){
                     CenterOnPlace(WazeWrap.getSelectedFeatures()[0].model, settings.PlaceZoom);
@@ -2598,7 +2598,7 @@ var UpdateObject, MultiAction;
                 var $PLAButton;
                 if(!(_.includes(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME") || _.includes(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"PARKING_LOT"))){
                     $PLAButton = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="piePLAButton" title="Create a Parking Lot Area for this Place"><i class="fa fa-product-hunt fa-lg" aria-hidden="true"></i></div>');
-                    $('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($PLAButton);
+                    $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($PLAButton);
 
                     $('#piePLAButton').click(function(){
                         if(!BusinessPLAMode){
@@ -2640,7 +2640,7 @@ var UpdateObject, MultiAction;
             if(WazeWrap.getSelectedFeatures()[0].model.type === "venue" && WazeWrap.getSelectedFeatures()[0].model.attributes.categories.includes("PARKING_LOT")){
                 var $ParkingSpotEstimatorButton;
                 $ParkingSpotEstimatorButton = $('<div style="font-size:18px; float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" class="PIEParkingSpotEstimatorButton" title="' + I18n.t('pie.prefs.PSEDisplayButtonTitle') + '">#</div>');
-                $('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($ParkingSpotEstimatorButton);
+                $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($ParkingSpotEstimatorButton);
 
                 $('select[name="estimatedNumberOfSpots"]').before($ParkingSpotEstimatorButton.clone());
 
@@ -2986,7 +2986,7 @@ var UpdateObject, MultiAction;
                 var $PlaceCopyButton;
                 if(!_.includes(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME")){
                     $PlaceCopyButton = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" id="pieCopyPlaceButton" title="Creates a copy of this Place"><i class="fa fa-files-o fa-lg" aria-hidden="true"></i></div>');
-                    $('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($PlaceCopyButton);
+                    $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($PlaceCopyButton);
 
                     $('#pieCopyPlaceButton').click(function(){
                         var PlaceObject = require("Waze/Feature/Vector/Landmark");
@@ -3092,7 +3092,7 @@ var UpdateObject, MultiAction;
                     var noStreet = I18n.translations[I18n.currentLocale()].edit.address.no_street;
 
                     address = address.replace(noCity + ",","");
-                    if(address !== I18n.translations[I18n.currentLocale()].edit.landmark.no_address)
+                    if(address !== I18n.translations[I18n.currentLocale()].edit.venue.no_address)
                         $('.search-query')[0].value = address;
                 });
             }
@@ -3100,8 +3100,8 @@ var UpdateObject, MultiAction;
     }
 
     function ShowClearDescription(){
-        $('#landmark-edit-general textarea').parent().append('<i class="fa fa-times-circle clearButton" style="position:absolute; top:0; right:0;"></i>');
-        $('#landmark-edit-general textarea').parent().css('position', 'relative');
+        $('#venue-edit-general textarea').parent().append('<i class="fa fa-times-circle clearButton" style="position:absolute; top:0; right:0;"></i>');
+        $('#venue-edit-general textarea').parent().css('position', 'relative');
         $('.clearButton').click(function(){
             W.model.actionManager.add(new UpdateObject( WazeWrap.getSelectedFeatures()[0].model, { description: "" }));
         });
@@ -3110,7 +3110,7 @@ var UpdateObject, MultiAction;
     function MoveAddress(){
         if(WazeWrap.getSelectedFeatures().length > 0)
             if(WazeWrap.getSelectedFeatures()[0].model.type === "venue")
-                $('#landmark-edit-general').prepend($('.address-edit.side-panel-section'));
+                $('#venue-edit-general').prepend($('.address-edit.side-panel-section'));
     }
 
     function MoveHNEntry(){
@@ -3123,7 +3123,7 @@ var UpdateObject, MultiAction;
 
     function AddMakePrimaryButtons(){
         if(WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
-            if($('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(1) > div > div > div > ul > li').length > 0){
+            if($('#venue-edit-general > form > div:nth-child(1) > div:nth-child(1) > div > div > div > ul > li').length > 0){
                 var $button = $('<div>', {class:'makePrimary'}).text("Make primary").click(function(){
                     let obj = WazeWrap.getSelectedFeatures()[0].model;
                     let toPrimary = $(this).prev().prev().val();
@@ -3137,7 +3137,7 @@ var UpdateObject, MultiAction;
                     multiaction.doSubAction(new UpdateObject(obj, {name: toPrimary}));
                     W.model.actionManager.add(multiaction);
                 });
-                $('#landmark-edit-general > form > div:nth-child(1) > div:nth-child(1) > div > div > div > ul > li').find('.delete').after($button);
+                $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(1) > div > div > div > ul > li').find('.delete').after($button);
             }
         }
     }
@@ -3232,7 +3232,7 @@ var UpdateObject, MultiAction;
                 if(metersArea > 0 && isArea){
                     var ftArea = Math.round(metersArea * 10.76391 *100)/100;
 
-                    var list = $('#landmark-edit-general > ul')[0];
+                    var list = $('#venue-edit-general > ul')[0];
                     var newList = document.createElement("UL");
                     newList.id = "AreaSize";
 
@@ -3260,8 +3260,8 @@ var UpdateObject, MultiAction;
                     if(list.before != null)
                        list.before(newList);
                     else{
-                        var parent = $('#landmark-edit-general > ul')[0].parentNode;
-                        parent.insertBefore(newList,$('#landmark-edit-general > ul')[0]);
+                        var parent = $('#venue-edit-general > ul')[0].parentNode;
+                        parent.insertBefore(newList,$('#venue-edit-general > ul')[0]);
                     }
 
                     $('#AreaSize').addClass("list-unstyled");
@@ -3314,7 +3314,7 @@ var UpdateObject, MultiAction;
                     }
                 });
                 $div.append($controls);
-                $('#landmark-edit-general > form.attributes-form.side-panel-section').after($div);
+                $('#venue-edit-general > form.attributes-form.side-panel-section').after($div);
             }
         }
     }*/
