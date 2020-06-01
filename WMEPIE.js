@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2020.05.22.02
+// @version      2020.06.01.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1540,11 +1540,11 @@ var UpdateObject, MultiAction;
 
     //*******/
     function UpdatePlaceFilter(){
-        let index = W.map.landmarkLayer.styleMap.styles.default.rules.findIndex(function(e){ return e.name == "PIEPlaceFilter";});
+        let index = W.map.venueLayer.styleMap.styles.default.rules.findIndex(function(e){ return e.name == "PIEPlaceFilter";});
         if(index > -1)
         {
-            W.map.landmarkLayer.styleMap.styles.default.rules.splice(index, 1);
-            W.map.landmarkLayer.redraw();
+            W.map.venueLayer.styleMap.styles.default.rules.splice(index, 1);
+            W.map.venueLayer.redraw();
         }
         if($('#piePlaceFilter').val().trim() != "")
         {
@@ -1563,14 +1563,14 @@ var UpdateObject, MultiAction;
                 },
                 name: "PIEPlaceFilter"
             });
-            W.map.landmarkLayer.styleMap.styles['default'].rules.push(myRule);
-            W.map.landmarkLayer.redraw();
+            W.map.venueLayer.styleMap.styles['default'].rules.push(myRule);
+            W.map.venueLayer.redraw();
         }
         DisplayPlaceNames();
     }
 
     function ToggleHideAreaPlaces(){
-        let index = W.map.landmarkLayer.styleMap.styles.default.rules.findIndex(function(e){ return e.name == "PIEHide";});
+        let index = W.map.venueLayer.styleMap.styles.default.rules.findIndex(function(e){ return e.name == "PIEHide";});
         if(index === -1)
         {
             let myRule = new W.Rule({
@@ -1585,12 +1585,12 @@ var UpdateObject, MultiAction;
                 },
                 name: "PIEHide"
             });
-            W.map.landmarkLayer.styleMap.styles['default'].rules.push(myRule);
-            W.map.landmarkLayer.redraw();
+            W.map.venueLayer.styleMap.styles['default'].rules.push(myRule);
+            W.map.venueLayer.redraw();
         }
         else{
-            W.map.landmarkLayer.styleMap.styles.default.rules.splice(index, 1);
-            W.map.landmarkLayer.redraw();
+            W.map.venueLayer.styleMap.styles.default.rules.splice(index, 1);
+            W.map.venueLayer.redraw();
         }
         DisplayPlaceNames(); //refresh the name display
     }
@@ -1600,11 +1600,11 @@ var UpdateObject, MultiAction;
         try{
         highlighting = false;
         if(highlightedVenue !== null)
-            if(highlightedVenue === W.map.landmarkLayer.getFeatureBy("renderIntent","highlight"))
+            if(highlightedVenue === W.map.venueLayer.getFeatureBy("renderIntent","highlight"))
                 highlighting = true;
             else
                 showStopPointsLayer.removeAllFeatures();
-        highlightedVenue = W.map.landmarkLayer.getFeatureBy("renderIntent","highlight");
+        highlightedVenue = W.map.venueLayer.getFeatureBy("renderIntent","highlight");
 
         if(highlightedVenue !== null && highlightedVenue.model && highlighting === false && W.map.getZoom() >= 4){
             let isArea = !highlightedVenue.model.isPoint();
@@ -1667,7 +1667,7 @@ var UpdateObject, MultiAction;
 
     function checkConditions() {
 		var a = W.map.getZoom() > 3,
-			b = W.map.landmarkLayer.getVisibility(),
+			b = W.map.venueLayer.getVisibility(),
 			c = closestSegmentLayer.getVisibility(),
 			d = !$('#map-lightbox > div').is(':visible'),//$('#map-lightbox > div').length === 0,/* Check for HN editing */
             e = (WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].model.type !== "bigJunction");
