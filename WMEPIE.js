@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2020.06.01.06
+// @version      2020.08.12.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -51,6 +51,7 @@ var UpdateObject, MultiAction;
     let GLE;
     var catalog = [];
     const updateMessage = "";
+    var lastSelectedFeature;
 
     //Layer definitions
     {
@@ -186,8 +187,8 @@ var UpdateObject, MultiAction;
             '<div id="divShowClosestSegmentSelected" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowClosestSegmentSelected" class="pieSettingsCheckbox" /><label for="_cbShowClosestSegmentSelected" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowClosestSegmentSelected') + '</label></div>',
             '<div id="divEnableGLE" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EnableGLETitle') + '"><input type="checkbox" id="_cbEnableGLE" class="pieSettingsCheckbox"/><label for="_cbEnableGLE" style="white-space:pre-line;">' + I18n.t('pie.prefs.EnableGLE') + '</label></div>',
             '<div id="divOpenPUR" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.OpenPURTitle') + '"><input type="checkbox" id="_cbOpenPUR" class="pieSettingsCheckbox"/><label for="_cbOpenPUR" style="white-space:pre-line;">' + I18n.t('pie.prefs.OpenPUR') + '</label></div>',
-            '<div id="divEnablePhotoViewer" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.PhotoViewerTite') + '"><input type="checkbox" id="_cbEnablePhotoViewer" class="pieSettingsCheckbox"/><label for="_cbEnablePhotoViewer" style="white-space:pre-line;">' + I18n.t('pie.prefs.PhotoViewer') + '</label></div>',
-            '<div id="divEnlargeGeoHandles" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EnlargeGeoHandlesTite') + '"><input type="checkbox" id="_cbEnlargeGeoHandles" class="pieSettingsCheckbox"/><label for="_cbEnlargeGeoHandles" style="white-space:pre-line;">' + I18n.t('pie.prefs.EnlargeGeoHandles') + '</label></div>',
+            '<div id="divEnablePhotoViewer" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.PhotoViewerTitle') + '"><input type="checkbox" id="_cbEnablePhotoViewer" class="pieSettingsCheckbox"/><label for="_cbEnablePhotoViewer" style="white-space:pre-line;">' + I18n.t('pie.prefs.PhotoViewer') + '</label></div>',
+            '<div id="divEnlargeGeoHandles" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EnlargeGeoHandlesTitle') + '"><input type="checkbox" id="_cbEnlargeGeoHandles" class="pieSettingsCheckbox"/><label for="_cbEnlargeGeoHandles" style="white-space:pre-line;">' + I18n.t('pie.prefs.EnlargeGeoHandles') + '</label></div>',
             '</fieldset>',
             '<div class="controls-container" id="divPlaceMenuCustomization">',
             '<b>' + I18n.t('pie.prefs.PlaceMenuCustomization') + '</b></br>',
@@ -781,6 +782,8 @@ var UpdateObject, MultiAction;
         extprovobserver.observe(document.getElementById('edit-panel'), { childList: true, subtree: true });
 
         WazeWrap.Events.register("selectionchanged", null, function(){
+            if(W.selectionManager.getSelectedFeatures.length > 0)
+                lastSelectedFeature = W.selectionManager.getSelectedFeatures()[0].model.type;
             if(WazeWrap.hasPlaceSelected()){
                 //Trim whitespace from start and end of house number field on Places
                 $('.form-control.house-number').focusout(function(){
@@ -1477,6 +1480,14 @@ var UpdateObject, MultiAction;
         var pasteHours = $('#PIE-hourspaste').val();
         if (pasteHours.trim() === "")
             return;
+
+        var englishNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        var lngDate = I18n.translations[I18n.locale].date.day_names.map(function(value) { return value.toLowerCase(); })
+        var lngFullDate = I18n.translations[I18n.locale].date.abbr_day_names.map(function(value) { return value.toLowerCase(); })
+        for (var i = 0; i < englishNames.length; i++) {
+            pasteHours = pasteHours.replace(lngDate[i], englishNames[i]);
+            pasteHours = pasteHours.replace(lngFullDate[i], englishNames[i]);
+        }
 
         if(!replaceAll)
             pasteHours = pasteHours + ',' + getOpeningHours(WazeWrap.getSelectedFeatures()[0].model).join(',');
@@ -2458,7 +2469,7 @@ var UpdateObject, MultiAction;
             }
             coord = currPlaceGeom[i];
             if(i < currPlaceGeom.length-1){
-                coord = coord.transform(W.map.projection, W.map.displayProjection);
+                coord = coord.transform(W.map.getProjectionObject(), W.map.displayProjection);
                 standardGeom += `${coord.y}, ${coord.x}`
                 WMEGeom += `${coord.x} ${coord.y}`;
             }
@@ -2550,7 +2561,7 @@ var UpdateObject, MultiAction;
                 });
             }
         }
-        else if(!WazeWrap.hasSelectedFeatures() && W.geometryEditing.activeEditor){
+        else if(!WazeWrap.hasSelectedFeatures() && W.geometryEditing.activeEditor && lastSelectedFeature == "venue"){
             if(W.geometryEditing.activeEditor.radiusHandle)
                 W.geometryEditing.activeEditor.radiusHandle.destroy();
         }
@@ -4002,7 +4013,7 @@ var UpdateObject, MultiAction;
                     tooFar: 'El lugar vinculado a Google está a más de {0} metros del lugar de Waze. Verifica que el enlace sea correcto.'
                 }
             },
-            fr: {
+             fr: {
                 prefs: {
                     title: 'Place Interface Enhancements',
                     ShowAreaPlaceSize: 'Afficher la taille de la place',
@@ -4077,8 +4088,8 @@ var UpdateObject, MultiAction;
                     PSEShowPSEButton: "Afficher le simulateur de places de stationnement",
                     PSEShowPSEButtonTitle: "Affiche un bouton pour lancer le simulateur de places de stationnement",
                     PSEDisplayButtonTitle: "Ouvre le simulateur de places de stationnement",
-                    ShowNavPointClosestSegmentOnHover: "Affiche une ligne entre le point d'entrée et le segment le plus proche",
-                    ShowClosestSegmentSelected: "Affiche une ligne depuis le point d'entrée vers le point sur le segment le plus proche",
+                    ShowNavPointClosestSegmentOnHover: "Afficher une ligne entre le point d'entrée et le segment le plus proche",
+                    ShowClosestSegmentSelected: "Afficher une ligne depuis le point d'entrée vers le point sur le segment le plus proche",
                     EnableGLE: "Activer le lien Google amélioré",
                     EnableGLETitle: "Met en évidence les liens Google fermés en rouge, les points d'intérêt Google liés se trouvant à plus de 400 m du Lieu Waze en bleu ciel, les liens Google non valides en magenta, les points d'intérêt Google liés plusieurs fois en orange, les points d'intérêt déjà liés en gris (menu de saisie semi-automatique)",
                     OpenPUR: "Ouverture automatique des PUR",
@@ -4093,10 +4104,11 @@ var UpdateObject, MultiAction;
                     PhotoViewerTitle: "",
                     HideShoppingServices: "Masquer les suggestions de sous-catégorie Shopping / Services",
                     HideSHoppingServicesTitle: "",
-                    EnlargeGeoHandles: "Enlarge geometry handles",
-                    EnlargeGeoHandlesTitle: "Makes the geometry handles on area Places larger so they are easier to grab to adjust the size",
-                    hidePlaceNamesWhenPlacesHidden: "Hide Place names for hidden Places",
-                    hidePlaceNamesWhenPlacesHiddenTitle: "When enabled, any Place that is hidden (either via the filter or hiding area Places shortcut) will not show their name on the map"
+                    EnlargeGeoHandles: "Agrandir les points de géométrie",
+                    EnlargeGeoHandlesTitle: "Rend les points de géométrie des Lieux zone plus grand pour faciliter la sélection pour ajuster la taille",
+                    hidePlaceNamesWhenPlacesHidden: "Cacher le nom des Lieux masqués",
+                    hidePlaceNamesWhenPlacesHiddenTitle: "Lorsque activé, tous les Lieux masqués (soit via le filtre ou soit via le raccourci pour masquer les Lieux) n’auront pas leur nom d’affiché sur la carte"
+
                 },
                 filter: {
                     PlaceFilterPanel: "Filtre des lieux",
@@ -4123,7 +4135,7 @@ var UpdateObject, MultiAction;
                     badLink: "Lien Google non valide. Veuillez l'enlever.",
                     tooFar: "Le Lieu lié à Google se trouve à plus de {0} mètres du lieu Waze. Veuillez vérifier que le lien est correct."
                 }
-            }
+             }
         });
     }
 
