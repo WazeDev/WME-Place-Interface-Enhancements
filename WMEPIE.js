@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "";
+    const updateMessage = "Big thanks to abelter for updating the Google Link Enhancer to support temporary closed POIs.  Other changes: lots of stuffs.";
     var lastSelectedFeature;
 
     //Layer definitions
