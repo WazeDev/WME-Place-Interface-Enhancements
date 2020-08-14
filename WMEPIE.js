@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2020.08.12.02
+// @version      2020.08.14.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Big thanks to abelter for updating the Google Link Enhancer to support temporary closed POIs.  Other changes: lots of stuffs.";
+    const updateMessage = "";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -1991,7 +1991,6 @@ var UpdateObject, MultiAction;
         newPlaceCategory = category;
         var polyDrawFeatureOptions = {callbacks : {"done": doneHandler}};
         if(isPoint){
-            debugger;
             $(".olMapViewport").on('mousemove', MouseMoveHandler);
             $(".olMapViewport").click(function(){endPlacementMode(category, isPoint);});
             /*drawPoly = new OpenLayers.Control.DrawFeature(newPlaceLayer, OpenLayers.Handler.Polygon, polyDrawFeatureOptions);
@@ -2186,7 +2185,6 @@ var UpdateObject, MultiAction;
                 var cityName = address.attributes.city.attributes.name;
 
                 if(settings.UseAltCity && cityName === ""){
-                    debugger;
                     if(address.attributes.altStreets.length > 0){ //segment has alt names
                         for(var j=0;j<closestSeg.attributes.streetIDs.length;j++){
                             var altCity = W.model.cities.getObjectById(W.model.streets.getObjectById(closestSeg.attributes.streetIDs[j]).cityID).attributes;
