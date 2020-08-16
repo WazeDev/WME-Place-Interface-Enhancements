@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2020.08.14.01
+// @version      2020.08.15.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "";
+    const updateMessage = "Place filtering now hides the Place names along with the Places";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -1872,9 +1872,15 @@ var UpdateObject, MultiAction;
                 if((isPoint && W.map.getZoom() >= 5) || (!isPoint && W.map.getZoom() >= 3)){
                     if(WazeWrap.Geometry.isGeometryInMapExtent(venue.geometry)){
                         if( (isPoint && showPoint) || (!isPoint && showArea && !venue.isParkingLot()) || (!isPoint && showPLA && venue.isParkingLot())){
-                            let placedisplay = $(`#${venue.geometry.id}`).css('display');
-                            if((typeof placedisplay === 'undefined' || placedisplay === 'none') && hideNames)
-                                continue;
+                            let placeFilter = $('#piePlaceFilter').val();
+                            if(placeFilter.length > 0){
+                                let nameMatch = RegExp($('#piePlaceFilter').val(), "ig").exec(venue.attributes.name);
+                                if(nameMatch && $("#_rbHidePlaces").prop("checked"))
+                                    continue;
+                                else if(!nameMatch && !$("#_rbHidePlaces").prop("checked")) //no name match and show only
+                                    continue;
+                            }
+
                             let textLoc;
                             if(isPoint)
                                 textLoc = new OpenLayers.Geometry.Point(venue.geometry.x, venue.geometry.y);
