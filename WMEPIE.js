@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2020.08.15.01
+// @version      2020.08.17.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Place filtering now hides the Place names along with the Places";
+    const updateMessage = "Added an option to disable the temporary Place closure highlight from Google Link Enhancer";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -186,6 +186,7 @@ var UpdateObject, MultiAction;
             '<div id="divShowNavPointClosestSegmentOnHover" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowNavPointClosestSegmentOnHover" class="pieSettingsCheckbox" /><label for="_cbShowNavPointClosestSegmentOnHover" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowNavPointClosestSegmentOnHover') + '</label></div>',
             '<div id="divShowClosestSegmentSelected" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowClosestSegmentSelected" class="pieSettingsCheckbox" /><label for="_cbShowClosestSegmentSelected" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowClosestSegmentSelected') + '</label></div>',
             '<div id="divEnableGLE" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EnableGLETitle') + '"><input type="checkbox" id="_cbEnableGLE" class="pieSettingsCheckbox"/><label for="_cbEnableGLE" style="white-space:pre-line;">' + I18n.t('pie.prefs.EnableGLE') + '</label></div>',
+            '<div id="divGLEShowTempClosed" class="controls-container pie-controls-container" style="padding-left:20px;" title=""><input type="checkbox" id="_cbGLEShowTempClosed" class="pieSettingsCheckbox" disabled/><label for="_cbGLEShowTempClosed">' + I18n.t('pie.prefs.GLEShowTempClosed') + '</label></div>',
             '<div id="divOpenPUR" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.OpenPURTitle') + '"><input type="checkbox" id="_cbOpenPUR" class="pieSettingsCheckbox"/><label for="_cbOpenPUR" style="white-space:pre-line;">' + I18n.t('pie.prefs.OpenPUR') + '</label></div>',
             '<div id="divEnablePhotoViewer" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.PhotoViewerTitle') + '"><input type="checkbox" id="_cbEnablePhotoViewer" class="pieSettingsCheckbox"/><label for="_cbEnablePhotoViewer" style="white-space:pre-line;">' + I18n.t('pie.prefs.PhotoViewer') + '</label></div>',
             '<div id="divEnlargeGeoHandles" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EnlargeGeoHandlesTitle') + '"><input type="checkbox" id="_cbEnlargeGeoHandles" class="pieSettingsCheckbox"/><label for="_cbEnlargeGeoHandles" style="white-space:pre-line;">' + I18n.t('pie.prefs.EnlargeGeoHandles') + '</label></div>',
@@ -312,22 +313,12 @@ var UpdateObject, MultiAction;
 
         $('#_cbShowPlaceNames').change(function() {
             PIEPlaceNameLayer.setVisibility(this.checked);
-            if(this.checked) {
-                $('#_cbShowPlaceNamesPoint')[0].disabled = false;
-                $('#_cbShowPlaceNamesArea')[0].disabled = false;
-                $('#_cbShowPlaceNamesPLA')[0].disabled = false;
-                $('#_cbShowPlaceNamesLock')[0].disabled = false;
-                $('#_cbhidePlaceNamesWhenPlacesHidden')[0].disabled = false;
-            }
-            else
-            {
-                $('#_cbShowPlaceNamesPoint')[0].disabled = true;
-                $('#_cbShowPlaceNamesArea')[0].disabled = true;
-                $('#_cbShowPlaceNamesPLA')[0].disabled = true;
-                $('#_cbShowPlaceNamesLock')[0].disabled = true;
-                $('#_cbhidePlaceNamesWhenPlacesHidden')[0].disabled = true;
-            }
-            console.log(this.checked);
+            $('#_cbShowPlaceNamesPoint')[0].disabled = !this.checked;
+            $('#_cbShowPlaceNamesArea')[0].disabled = !this.checked;
+            $('#_cbShowPlaceNamesPLA')[0].disabled = !this.checked;
+            $('#_cbShowPlaceNamesLock')[0].disabled = !this.checked;
+            $('#_cbhidePlaceNamesWhenPlacesHidden')[0].disabled = !this.checked;
+
             DisplayPlaceNames();
         });
 
@@ -441,6 +432,11 @@ var UpdateObject, MultiAction;
                 GLE.enable();
             else
                 GLE.disable();
+            $('#_cbGLEShowTempClosed')[0].disabled = !this.checked;
+        });
+
+        $('#_cbGLEShowTempClosed').change(function(){
+            GLE.showTempClosedPOIs = this.checked;
         });
 
         $('#_cbEnablePhotoViewer').change(function(){
@@ -513,6 +509,9 @@ var UpdateObject, MultiAction;
         setChecked('_cbHideShopAndServices', settings.HideShopAndServices);
         setChecked('_cbEnlargeGeoHandles', settings.EnlargeGeoHandles);
         setChecked('_cbhidePlaceNamesWhenPlacesHidden', settings.hidePlaceNamesWhenPlacesHidden);
+        setChecked('_cbGLEShowTempClosed', settings.GLEShowTempClosed);
+
+        $('#_cbGLEShowTempClosed')[0].disabled = !settings.EnableGLE;
         if(settings.ShowPlaceNames){
             $('#_cbShowPlaceNamesPoint')[0].disabled = false;
             $('#_cbShowPlaceNamesArea')[0].disabled = false;
@@ -1650,7 +1649,7 @@ var UpdateObject, MultiAction;
             showStopPointsLayer.removeAllFeatures();
         }
         catch(err){
-            console.log(err.message);
+            console.error(err.message);
         }
     }
 
@@ -1906,7 +1905,6 @@ var UpdateObject, MultiAction;
             for(var i=0;i<splitName.length;i++)
                 newName += splitName[i] + (i != splitName.length-1 ? '\n' : '');
         }
-        console.log();
         return newName;
     }
 
@@ -3070,7 +3068,6 @@ var UpdateObject, MultiAction;
                         var multiaction = new MultiAction();
                         multiaction.setModel(W.model);
 
-                        console.log(address);
                         newAttributes = {
                             countryID: address.attributes.country.id,
                             stateID: address.attributes.state.id,
@@ -3622,7 +3619,8 @@ var UpdateObject, MultiAction;
             HideShopAndServices: true,
             EnlargeGeoHandles: false,
             hidePlaceNamesWhenPlacesHidden: false,
-            lastSaved: 0
+            lastSaved: 0,
+            GLEShowTempClosed: true
         };
         /*settings = loadedSettings ? loadedSettings : defaultSettings;
         for (var prop in defaultSettings) {
@@ -3713,7 +3711,8 @@ var UpdateObject, MultiAction;
                 HideShopAndServices: settings.HideShopAndServices,
                 EnlargeGeoHandles: settings.EnlargeGeoHandles,
                 hidePlaceNamesWhenPlacesHidden: settings.hidePlaceNamesWhenPlacesHidden,
-                lastSaved: Date.now()
+                lastSaved: Date.now(),
+                GLEShowTempClosed: settings.GLEShowTempClosed
             };
 
             for (var name in W.accelerators.Actions) {
@@ -3867,7 +3866,9 @@ var UpdateObject, MultiAction;
                     EnlargeGeoHandles: "Enlarge geometry handles",
                     EnlargeGeoHandlesTitle: "Makes the geometry handles on area Places larger so they are easier to grab to adjust the size",
                     hidePlaceNamesWhenPlacesHidden: "Hide Place names for hidden Places",
-                    hidePlaceNamesWhenPlacesHiddenTitle: "When enabled, any Place that is hidden (either via the filter or hiding area Places shortcut) will not show their name on the map"
+                    hidePlaceNamesWhenPlacesHiddenTitle: "When enabled, any Place that is hidden (either via the filter or hiding area Places shortcut) will not show their name on the map",
+                    GLEShowTempClosed: "Highlight temporarily closed Places",
+                    GLEShowTempClosedTitle: "Highlights temporarily closed Places"
                 },
                 filter: {
                     PlaceFilterPanel: 'Place Filtering',
