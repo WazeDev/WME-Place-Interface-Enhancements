@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2020.08.17.01
+// @version      2020.08.17.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Added an option to disable the temporary Place closure highlight from Google Link Enhancer";
+    const updateMessage = "Bug fix<br><br><b>.01</b><br>Added an option to disable the temporary Place closure highlight from Google Link Enhancer";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -605,6 +605,8 @@ var UpdateObject, MultiAction;
 
         if(settings.OpenPUR)
             WazeWrap.Events.register('selectionchanged', null, openPUR);
+
+        GLE.showTempClosedPOIs = settings.showTempClosedPOIs;
 
         if(settings.EnableGLE)
             GLE.enable();
@@ -3740,7 +3742,7 @@ var UpdateObject, MultiAction;
             WazeWrap.Remote.SaveSettings("WME_PIE", localsettings);
         }
     }
-	
+
     function checkShortcutsChanged(){
         let triggerSave = false;
         for (let name in W.accelerators.Actions) {
