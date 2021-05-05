@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2020.08.17.02
+// @version      2021.05.05.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -42,7 +42,7 @@ var UpdateObject, MultiAction;
 
     var curr_ver = GM_info.script.version;
     var settings = {};
-    var placeMenuSelector = "#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
+    var placeMenuSelector = "#primary-toolbar > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
     var placementMode = false;
     var resCategory = "RESIDENCE_HOME";
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Bug fix<br><br><b>.01</b><br>Added an option to disable the temporary Place closure highlight from Google Link Enhancer";
+    const updateMessage = "Updates for latest WME changes";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -961,13 +961,13 @@ var UpdateObject, MultiAction;
         //Icon near chat
         let launchDiv=document.createElement('div');
         launchDiv.id='launchDiv';
-        $(launchDiv).css({'z-index':'10000 !important', 'title':'test','bottom':'26px','left':'70px','position':'absolute','font-weight':'400', 'display': (settings.EnablePhotoViewer ? 'block' : 'none')});
+        $(launchDiv).css({'z-index':'10000 !important', 'title':'test','bottom':'20px','left':'70px','position':'absolute','font-weight':'400', 'display': (settings.EnablePhotoViewer ? 'block' : 'none')});
         let tmpdiv=document.createElement('div');
         $(tmpdiv).css({'height':'40px','position':'absolute','bottom':'0px','transition':'all 0.3s'});
         tmpdiv.onmouseenter=togglePhotoViewerMouseEvent;
         launchDiv.appendChild(tmpdiv);
         let launchButton=document.createElement('button');
-        $(launchButton).css({'filter':'filter:grayscale(100%)','border':'none','background-color':'white','border-radius':'5px 5px 0px 0px','width':'43px','height':'40px'});
+        $(launchButton).css({'filter':'filter:grayscale(100%)','border':'none','background-color':'white','border-radius':'8px 8px 8px 8px','width':'43px','height':'40px'});
         launchButton.innerHTML='<i style="color:#666;font-size:20px;" class="fa fa-image"></i>';
         launchButton.id = "photoViewerButton";
         tmpdiv.appendChild(launchButton);
@@ -1786,7 +1786,7 @@ var UpdateObject, MultiAction;
               //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive" style="' + (icon !== "" ? "padding-left:0px;" : "") + ' height:40px;" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><span class="menu-title ' + icon + '" style="font-size:26px;"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span><div class="drawing-controls"><span class="drawing-control polygon secondary-control" id="piePlaceAreaItem' + (i+1) + '" data-category="' + cat + '" title="Place (area)"></span><span class="drawing-control main-control point" id="piePlacePointItem' + (i+1) + '" data-category="' + cat + '" title="Place (point)"></span></div></div>');            else{
                 if(cat === resCategory) //force point
                     //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
-                    $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon + '" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-container"><div class="item-icon"></div><span class="menu-title"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span></div></div>');
+                    $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon + '" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-container"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div></div>');
                 else //Parking lot & gas station - force area
                     $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-container"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div></div>');
                     //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive"             id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '">                             <span class="menu-title" style="flex-grow:1;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
@@ -3477,15 +3477,15 @@ var UpdateObject, MultiAction;
             '<option value="POOL" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.POOL + '</option>',
             '<option value="SCENIC_LOOKOUT_VIEWPOINT" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.SCENIC_LOOKOUT_VIEWPOINT + '</option>',
             '<option value="SKI_AREA" data-icon="outdoors">' + I18n.translations[I18n.currentLocale()].venues.categories.SKI_AREA + '</option>',
-            '<option value="NATURAL_FEATURES" data-icon="natural-feature" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.NATURAL_FEATURES + '</option>',
-            '<option value="ISLAND" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.ISLAND + '</option>',
-            '<option value="SEA_LAKE_POOL" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.SEA_LAKE_POOL + '</option>',
-            '<option value="RIVER_STREAM" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.RIVER_STREAM + '</option>',
-            '<option value="FOREST_GROVE" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.FOREST_GROVE + '</option>',
-            '<option value="FARM" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.FARM + '</option>',
-            '<option value="CANAL" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.CANAL + '</option>',
-            '<option value="SWAMP_MARSH" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.SWAMP_MARSH + '</option>',
-            '<option value="DAM" data-icon="natural-feature">' + I18n.translations[I18n.currentLocale()].venues.categories.DAM + '</option>',
+            '<option value="NATURAL_FEATURES" data-icon="natural-features" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.NATURAL_FEATURES + '</option>',
+            '<option value="ISLAND" data-icon="natural-features">' + I18n.translations[I18n.currentLocale()].venues.categories.ISLAND + '</option>',
+            '<option value="SEA_LAKE_POOL" data-icon="natural-features">' + I18n.translations[I18n.currentLocale()].venues.categories.SEA_LAKE_POOL + '</option>',
+            '<option value="RIVER_STREAM" data-icon="natural-features">' + I18n.translations[I18n.currentLocale()].venues.categories.RIVER_STREAM + '</option>',
+            '<option value="FOREST_GROVE" data-icon="natural-features">' + I18n.translations[I18n.currentLocale()].venues.categories.FOREST_GROVE + '</option>',
+            '<option value="FARM" data-icon="natural-features">' + I18n.translations[I18n.currentLocale()].venues.categories.FARM + '</option>',
+            '<option value="CANAL" data-icon="natural-features">' + I18n.translations[I18n.currentLocale()].venues.categories.CANAL + '</option>',
+            '<option value="SWAMP_MARSH" data-icon="natural-features">' + I18n.translations[I18n.currentLocale()].venues.categories.SWAMP_MARSH + '</option>',
+            '<option value="DAM" data-icon="natural-features">' + I18n.translations[I18n.currentLocale()].venues.categories.DAM + '</option>',
             '<option value="PARKING_LOT" data-icon="parking-lot" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.PARKING_LOT + '</option>',
             '<option value="RESIDENCE_HOME" data-icon="residential" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.RESIDENCE_HOME + '</option>',
             '</select>'
@@ -3530,7 +3530,7 @@ var UpdateObject, MultiAction;
             '.pie-natural-features {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -16px -21px; width: 17px; height: 15px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-natural-features {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
             '.pie-parking-lot {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -65px -48px; width: 13px; height: 13px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-parking-lot {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
             '.pie-residential {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -37px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-residential {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
-            '#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -37px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
+            '#primary-toolbar .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -38px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
             '.makePrimary {border:1px solid gray; display:inline-block; cursor:pointer; margin-left:5px; border-radius:5px; padding:0px 4px 0px 4px; user-select: none; font-size:11px;}',
             '.makePrimary:hover {border-color: #26bae8; color: #26bae8}',
             '.photoViewerOptionsContainer { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; grid-template-areas: "header header" "optionText optionSetting" "footer footer"}',
