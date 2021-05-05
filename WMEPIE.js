@@ -2183,9 +2183,25 @@ var UpdateObject, MultiAction;
             };
 
             if(settings.UseStreetFromClosestSeg)
+            {
                 newAttributes.streetName = address.attributes.street.name;
+                if(address.attributes.country.id == 14 && /^[BL]{1}[0-9]{1}.*/.test(address.attributes.street.name)){
+                    if(address.attributes.altStreets.length > 0){ //segment has alt names
+                        for(var jj=0;jj<closestSeg.attributes.streetIDs.length;jj++){
+                            var jaltCity = W.model.cities.getObjectById(W.model.streets.getObjectById(closestSeg.attributes.streetIDs[jj]).cityID).attributes;
+                            if(jaltCity.name === "")continue;
+                            if(/^[BL]{1}[0-9]{1}.*/.test(W.model.streets.getObjectById(closestSeg.attributes.streetIDs[jj]).name))continue;
+
+                            var altStreet = W.model.streets.getObjectById(closestSeg.attributes.streetIDs[jj]).name;
+                            newAttributes.streetName = altStreet;
+                        }
+                    }
+                }
+            }
             else
+            {
                 newAttributes.emptyStreet = true;
+            }
 
             if(settings.UseCityFromClosestSeg){
                 var cityName = address.attributes.city.attributes.name;
