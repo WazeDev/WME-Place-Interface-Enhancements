@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2021.05.05.01
+// @version      2021.06.16.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Updates for latest WME changes";
+    const updateMessage = "Moar WME update fixes";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -1481,6 +1481,11 @@ var UpdateObject, MultiAction;
         var pasteHours = $('#PIE-hourspaste').val();
         if (pasteHours.trim() === "")
             return;
+
+        if(!I18n.translations[I18n.locale].date.day_names){
+            I18n.translations[I18n.locale].date.day_names = [];
+            _.forOwn(I18n.translations[I18n.locale].date, (v,k) => { if(k.indexOf("day_names_") > -1) { I18n.translations[I18n.locale].date.day_names.push(v)}});
+        }
 
         var englishNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
         var lngDate = I18n.translations[I18n.locale].date.day_names.map(function(value) { return value.toLowerCase(); })
