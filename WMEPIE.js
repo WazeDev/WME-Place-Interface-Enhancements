@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2021.06.16.01
+// @version      2021.06.27.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Moar WME update fixes";
+    const updateMessage = "Restoring 'Make Primary' button for alternate Place names.<br/><br/>Waze, please stop needlessly changing things. kthxbai.";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -3102,21 +3102,19 @@ var UpdateObject, MultiAction;
 
     function ShowSearchButton(){
         $('#pieSearchButton').remove();
-        if(WazeWrap.getSelectedFeatures().length > 0){
-            if(WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
-                var $search = $('<i class="fa fa-search" id="pieSearchButton" title="Fills the search bar with the address" aria-hidden="true" style="display:inline; margin:5px;"></i>');
-                $('.address-edit-view').parent().parent().find('.control-label').attr("style", "display:inline");
-                $('.address-edit').before($search);
-                $('#pieSearchButton').click(function(){
-                    var address = $('.full-address')[0].innerHTML;
-                    var noCity = I18n.translations[I18n.currentLocale()].edit.address.no_city;
-                    var noStreet = I18n.translations[I18n.currentLocale()].edit.address.no_street;
+        if(WazeWrap.hasPlaceSelected()){
+            var $search = $('<i class="fa fa-search" id="pieSearchButton" title="Fills the search bar with the address" aria-hidden="true" style="display:inline; margin:5px;"></i>');
+            $('.address-edit-view').parent().parent().find('.control-label').attr("style", "display:inline");
+            $('.address-edit').before($search);
+            $('#pieSearchButton').click(function(){
+                var address = $('.full-address')[0].innerHTML;
+                var noCity = I18n.translations[I18n.currentLocale()].edit.address.no_city;
+                var noStreet = I18n.translations[I18n.currentLocale()].edit.address.no_street;
 
-                    address = address.replace(noCity + ",","");
-                    if(address !== I18n.translations[I18n.currentLocale()].edit.venue.no_address)
-                        $('.search-query')[0].value = address;
-                });
-            }
+                address = address.replace(noCity + ",","");
+                if(address !== I18n.translations[I18n.currentLocale()].edit.venue.no_address)
+                    $('.search-query')[0].value = address;
+            });
         }
     }
 
@@ -3129,22 +3127,20 @@ var UpdateObject, MultiAction;
     }
 
     function MoveAddress(){
-        if(WazeWrap.getSelectedFeatures().length > 0)
-            if(WazeWrap.getSelectedFeatures()[0].model.type === "venue")
-                $('#venue-edit-general').prepend($('.address-edit.side-panel-section'));
+        if(WazeWrap.hasPlaceSelected())
+            $('#venue-edit-general').prepend($('.address-edit.side-panel-section'));
     }
 
     function MoveHNEntry(){
-        if(WazeWrap.getSelectedFeatures().length > 0)
-            if(WazeWrap.getSelectedFeatures()[0].model.type === "venue")
-                $('.full-address').click(function(){
-                    $('.street-name').parent().parent().before($('.form-control.house-number').parent().parent());
-                });
+        if(WazeWrap.hasPlaceSelected())
+            $('.full-address').click(function(){
+                $('.street-name').parent().parent().before($('.form-control.house-number').parent().parent());
+            });
     }
 
     function AddMakePrimaryButtons(){
-        if(WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].model.type === "venue"){
-            if($('#venue-edit-general > form > div:nth-child(1) > div:nth-child(1) > div > div > div > ul > li').length > 0){
+        if(WazeWrap.hasPlaceSelected()){
+            if($('.aliases-view > div > ul > div > li').length > 0){
                 var $button = $('<div>', {class:'makePrimary'}).text("Make primary").click(function(){
                     let obj = WazeWrap.getSelectedFeatures()[0].model;
                     let toPrimary = $(this).prev().prev().val();
@@ -3158,7 +3154,7 @@ var UpdateObject, MultiAction;
                     multiaction.doSubAction(new UpdateObject(obj, {name: toPrimary}));
                     W.model.actionManager.add(multiaction);
                 });
-                $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(1) > div > div > div > ul > li').find('.delete').after($button);
+                $('.aliases-view > div > ul > div > li').find('.delete').after($button);
             }
         }
     }
@@ -3536,7 +3532,7 @@ var UpdateObject, MultiAction;
             '.pie-parking-lot {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -65px -48px; width: 13px; height: 13px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-parking-lot {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
             '.pie-residential {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -37px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-residential {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
             '#primary-toolbar .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -38px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
-            '.makePrimary {border:1px solid gray; display:inline-block; cursor:pointer; margin-left:5px; border-radius:5px; padding:0px 4px 0px 4px; user-select: none; font-size:11px;}',
+            '.makePrimary {border:1px solid gray; display:inline-block; cursor:pointer; margin-left:3px; border-radius:5px; padding:0px 2px 0px 2px; user-select: none; font-size:11px;}',
             '.makePrimary:hover {border-color: #26bae8; color: #26bae8}',
             '.photoViewerOptionsContainer { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; grid-template-areas: "header header" "optionText optionSetting" "footer footer"}',
             '.photoViewerOptionsHeader { text-align: center; grid-area: header; }',
