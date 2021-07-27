@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2021.06.27.01
+// @version      2021.07.27.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Restoring 'Make Primary' button for alternate Place names.<br/><br/>Waze, please stop needlessly changing things. kthxbai.";
+    const updateMessage = "WME update fixes";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -2478,7 +2478,7 @@ var UpdateObject, MultiAction;
             }
             coord = currPlaceGeom[i];
             if(i < currPlaceGeom.length-1){
-                coord = coord.transform(W.map.getProjectionObject(), W.map.displayProjection);
+                coord = coord.transform(W.map.getProjectionObject(), W.map.getOLMap().displayProjection);
                 standardGeom += `${coord.y}, ${coord.x}`
                 WMEGeom += `${coord.x} ${coord.y}`;
             }
