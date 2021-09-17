@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2021.07.27.01
+// @version      2021.09.17.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "WME update fixes";
+    const updateMessage = "WME update fixes (zoom level)";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -141,7 +141,7 @@ var UpdateObject, MultiAction;
             //!WazeWrap.isBetaEditor ? '<div class="controls-container pie-controls-container" id="divShowLockButtonsRPP" title="' + I18n.t('pie.prefs.ShowRPPLockButtonsTitle') + '"><input type="checkbox" id="_cbShowLockButtonsRPP" class="pieSettingsCheckbox" /><label for="_cbShowLockButtonsRPP" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowRPPLockButtons') + '</label></div>' : '',
             '<div class="controls-container pie-controls-container" id="divShowPlaceLocatorCrosshair" title="' + I18n.t('pie.prefs.ShowPlaceLocatorCrosshairTitle') + '" ><input type="checkbox" id="_cbShowPlaceLocatorCrosshair" class="pieSettingsCheckbox" /><label for="_cbShowPlaceLocatorCrosshair" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowPlaceLocatorCrosshair') + '</label></br>',
             '<span class="controls-container pie-controls-container" style="padding-left:30px;" title=""><input type="checkbox" id="_cbPlaceLocatorCrosshairProdPL" class="pieSettingsCheckbox" /><label for="_cbPlaceLocatorCrosshairProdPL" style="white-space:pre-line;">' + I18n.t('pie.prefs.ProdPL') + '</label></span></br>',
-            '<span class="controls-container pie-controls-container" style="padding-left:30px;" title="' + I18n.t('pie.prefs.ZoomTitle') + '">' + I18n.t('pie.prefs.Zoom') + ' <select id="piePlaceZoom"><option value="10">10</option><option value="9">9</option><option value="8">8</option><option value="7">7</option><option value="6">6</option><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option><option value="0">0</option></select></span></div>',
+            '<span class="controls-container pie-controls-container" style="padding-left:30px;" title="' + I18n.t('pie.prefs.ZoomTitle') + '">' + I18n.t('pie.prefs.Zoom') + ' <select id="piePlaceZoom"><option value="22">22</option><option value="21">21</option><option value="20">20</option><option value="19">19</option><option value="18">18</option><option value="17">17</option><option value="16">16</option><option value="15">15</option><option value="14">14</option><option value="13">13</option><option value="12">12</option></select></span></div>',
             '<div class="controls-container pie-controls-container" id="divShowSearchButton" title="' + I18n.t('pie.prefs.ShowAddressSearchTitle') + '"><input type="checkbox" id="_cbShowSearchButton" class="pieSettingsCheckbox"/><label for="_cbShowSearchButton" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowAddressSearch') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divAddPlaceCategoriesButtons"><input type="checkbox" id="_cbAddPlaceCategoriesButtons" class="pieSettingsCheckbox"/><label for="_cbAddPlaceCategoriesButtons" style="white-space:pre-line;" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowPlaceCategoryButtons') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divShowParkingLotButton" title="' + I18n.t('pie.prefs.ShowPLAButtonTitle') + '" ><input type="checkbox" id="_cbShowParkingLotButton" class="pieSettingsCheckbox" /><label for="_cbShowParkingLotButton" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowPLAButton') + '</label></div>',
@@ -519,6 +519,8 @@ var UpdateObject, MultiAction;
             $('#_cbShowPlaceNamesLock')[0].disabled = false;
             $('#_cbhidePlaceNamesWhenPlacesHidden')[0].disabled = false;
         }
+        if (settings.PlaceZoom < 12)
+            settings.PlaceZoom += 12;
         $('#piePlaceZoom')[0].value = settings.PlaceZoom;
         $('#pieDefaultLockLevel')[0].value = settings.DefaultLockLevel;
         $('#piePlaceNameFontSize')[0].value = settings.PlaceNameFontSize;
@@ -1623,7 +1625,7 @@ var UpdateObject, MultiAction;
                 showStopPointsLayer.removeAllFeatures();
         highlightedVenue = W.map.venueLayer.getFeatureBy("renderIntent","highlight");
 
-        if(highlightedVenue !== null && highlightedVenue.model && highlighting === false && W.map.getZoom() >= 4){
+        if(highlightedVenue !== null && highlightedVenue.model && highlighting === false && W.map.getZoom() >= 16){
             let isArea = !highlightedVenue.model.isPoint();
             let navPoint;
 
@@ -1652,7 +1654,7 @@ var UpdateObject, MultiAction;
                 showStopPointsLayer.addFeatures([lineFeature, pointFeature]);
 
         }
-        if(highlightedVenue === null || W.map.getZoom() < 4)
+        if(highlightedVenue === null || W.map.getZoom() < 16)
             showStopPointsLayer.removeAllFeatures();
         }
         catch(err){
@@ -1683,7 +1685,7 @@ var UpdateObject, MultiAction;
 	}
 
     function checkConditions() {
-		var a = W.map.getZoom() > 3,
+		var a = W.map.getZoom() > 15,
 			b = W.map.venueLayer.getVisibility(),
 			c = closestSegmentLayer.getVisibility(),
 			d = !$('#map-lightbox > div').is(':visible'),//$('#map-lightbox > div').length === 0,/* Check for HN editing */
@@ -1875,7 +1877,7 @@ var UpdateObject, MultiAction;
             for (var placeID in W.model.venues.objects) {
                 var venue = W.model.venues.getObjectById(placeID);
                 isPoint = venue.isPoint();
-                if((isPoint && W.map.getZoom() >= 5) || (!isPoint && W.map.getZoom() >= 3)){
+                if((isPoint && W.map.getZoom() >= 17) || (!isPoint && W.map.getZoom() >= 15)){
                     if(WazeWrap.Geometry.isGeometryInMapExtent(venue.geometry)){
                         if( (isPoint && showPoint) || (!isPoint && showArea && !venue.isParkingLot()) || (!isPoint && showPLA && venue.isParkingLot())){
                             let placeFilter = $('#piePlaceFilter').val();
@@ -3340,11 +3342,11 @@ var UpdateObject, MultiAction;
         var adjustedPL = currPl.substr(currPl.lastIndexOf('editor')).replace(/&[^&]*Filter=[^&]*|&s=(\d+)/ig,'');
         var lon = adjustedPL.match(/lon=(-?\d+\.\d+)/)[1];
         var lat = adjustedPL.match(/lat=(-?\d+\.\d+)/)[1];
-        var zoom = adjustedPL.match(/zoom=\d+/)[0];
+        var zoom = adjustedPL.match(/zoom[Levl]*=\d+/)[0];
         var centroid = WazeWrap.getSelectedFeatures()[0].model.geometry.getCentroid();
         adjustedPL = adjustedPL.replace(lon, WazeWrap.Geometry.ConvertTo4326(centroid.x,centroid.y).lon);
         adjustedPL = adjustedPL.replace(lat, WazeWrap.Geometry.ConvertTo4326(centroid.x,centroid.y).lat);
-        adjustedPL = adjustedPL.replace(zoom, "zoom="+settings.PlaceZoom);
+        adjustedPL = adjustedPL.replace(zoom, "zoomLevel="+settings.PlaceZoom);
         if(settings.PlaceLocatorCrosshairProdPL)
             return 'https://www.waze.com/' + adjustedPL;
         else
@@ -3563,7 +3565,7 @@ var UpdateObject, MultiAction;
             UseStreetFromClosestSeg: false,
             UseCityFromClosestSeg: false,
             ShowPlaceLocatorCrosshair: false,
-            PlaceZoom: 6,
+            PlaceZoom: 18,
             DefaultLockLevel: 0,
             CreateResidentialPlaceShortcut: "A+r",
             CreateParkingLotShortcut: "A+p",
