@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2021.09.17.01
+// @version      2021.09.18.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -520,7 +520,7 @@ var UpdateObject, MultiAction;
             $('#_cbhidePlaceNamesWhenPlacesHidden')[0].disabled = false;
         }
         if (settings.PlaceZoom < 12)
-            settings.PlaceZoom += 12;
+            settings.PlaceZoom = parseInt(settings.PlaceZoom) + 12;
         $('#piePlaceZoom')[0].value = settings.PlaceZoom;
         $('#pieDefaultLockLevel')[0].value = settings.DefaultLockLevel;
         $('#piePlaceNameFontSize')[0].value = settings.PlaceNameFontSize;
