@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2021.09.18.01
+// @version      2022.02.14.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -2231,8 +2231,14 @@ var UpdateObject, MultiAction;
     function editRPPAddress(rppTries = 1){
         if ($('.address-edit-view').length > 0) {
             $('.full-address').trigger("click");
-            $('.house-number:first').focus();
-
+            if ($('#empty-street').is(":checked")){
+                $('#empty-street').click();
+            }
+            if (settings.MoveHNEntry){
+                $('.house-number:first').focus();
+            } else {
+                $('.street-name').focus();
+            }
         } else if (rppTries < 1000) {
             console.log("not found");
             setTimeout(function () {editRPPAddress(++rppTries);}, 200);
