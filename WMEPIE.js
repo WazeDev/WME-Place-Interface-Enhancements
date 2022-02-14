@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2021.09.18.01
+// @version      2022.02.14.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -33,6 +33,7 @@
 /* global HoursParser */
 /* global require */
 /* global idbPVKeyval */
+/* global NavigationPoint */
 /* eslint curly: ["warn", "multi-or-nest"] */
 
 var UpdateObject, MultiAction;
@@ -50,7 +51,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "WME update fixes (zoom level)";
+    const updateMessage = "Option to automatically add RPP navigation point";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -160,6 +161,7 @@ var UpdateObject, MultiAction;
             '<fieldset id="fieldNewPlaces" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
             '<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>' + I18n.t('pie.prefs.NewPlaces') + '</h4></legend>',
             '<div id="divEditRPPAfterCreated" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EditRPPAfterCreateTitle') + '"><input type="checkbox" id="_cbEditRPPAfterCreated" class="pieSettingsCheckbox"><label for="_cbEditRPPAfterCreated" style="white-space:pre-line;">' + I18n.t('pie.prefs.EditRPPAfterCreate') + '</label></div>',
+            '<div id="divAddEntryExitPoint" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.AddEntryExitPoint') + '"><input type="checkbox" id="_cbAddEntryExitPoint" class="pieSettingsCheckbox"><label for="_cbAddEntryExitPoint" style="white-space:pre-line;">' + I18n.t('pie.prefs.AddEntryExitPoint') + '</label></div>',
             '<div id="divUseStreetFromClosestSeg" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.UseStreetFromClosestSegmentTitle') + '"><input type="checkbox" id="_cbUseStreetFromClosestSeg" class="pieSettingsCheckbox"><label for="_cbUseStreetFromClosestSeg" style="white-space:pre-line;">' + I18n.t('pie.prefs.UseStreetFromClosestSegment') + '</label></div>',
             '<div id="divUseCityFromClosestSeg" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.UseCityFromClosestSegmentTitle') + '"><input type="checkbox" id="_cbUseCityFromClosestSeg" class="pieSettingsCheckbox"><label for="_cbUseCityFromClosestSeg" style="white-space:pre-line;">' + I18n.t('pie.prefs.UseCityFromClosestSegment') + '</label></div>',
             '<div id="divUseAltCity" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.ClosestSegmentAltCityTitle') + '" style="padding-left:20px; word-wrap: break-word;"><input type="checkbox" id="_cbUseAltCity" class="pieSettingsCheckbox"><label for="_cbUseAltCity" style="white-space:pre-line;">' + I18n.t('pie.prefs.ClosestSegmentAltCity') + '</label></div>',
@@ -478,6 +480,7 @@ var UpdateObject, MultiAction;
         setChecked('_cbShowAreaPlaceSizeMetric', settings.ShowAreaPlaceSizeMetric);
         setChecked('_cbShowLockButtonsRPP', settings.ShowLockButtonsRPP);
         setChecked('_cbEditRPPAfterCreated', settings.EditRPPAfterCreated);
+        setChecked('_cbAddEntryExitPoint', settings.AddEntryExitPoint);
         setChecked('_cbUseStreetFromClosestSeg', settings.UseStreetFromClosestSeg);
         setChecked('_cbUseCityFromClosestSeg', settings.UseCityFromClosestSeg);
         setChecked('_cbShowPlaceLocatorCrosshair', settings.ShowPlaceLocatorCrosshair);
@@ -2170,17 +2173,27 @@ var UpdateObject, MultiAction;
         if(category === resCategory){
             NewPlace._originalResidential = true;
             NewPlace.attributes.residential = true;
-            let eep = new NavigationPoint(new OpenLayers.Geometry.Point(pos.lon, pos.lat));
-            NewPlace.attributes.entryExitPoints.push(eep);
+            const closestSeg = WazeWrap.Geometry.findClosestSegment(new OpenLayers.Geometry.Point(pos.lon, pos.lat));
+            if (closestSeg && settings.AddEntryExitPoint){
+                const seg = W.model.segments.getObjectById(closestSeg.attributes.id);
+                const distanceToSegment = NewPlace.geometry.distanceTo(seg.geometry, {details: true});
+                const halfDistancePoint = new OpenLayers.Geometry.Point(
+                    distanceToSegment.x1 / 2 + distanceToSegment.x0 / 2,
+                    distanceToSegment.y1 / 2 + distanceToSegment.y0 / 2
+                );
+                if (halfDistancePoint) {
+                    const eep = new NavigationPoint(halfDistancePoint);
+                    NewPlace.attributes.entryExitPoints.push(eep);
+                }
+            }
         }
         NewPlace.attributes.lockRank = Number(settings.DefaultLockLevel);
 
-        var closestSeg = WazeWrap.Geometry.findClosestSegment(new OpenLayers.Geometry.Point(pos.lon, pos.lat), settings.SkipPLR, settings.SkipPLR);
-
         W.model.actionManager.add(new AddPlace(NewPlace));
 
-        if(closestSeg){ //if we were able to find a segment, try to pull the city and/or street name if the options are enabled
-            var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = closestSeg.getAddress();
+        const closestNamedSeg = WazeWrap.Geometry.findClosestSegment(new OpenLayers.Geometry.Point(pos.lon, pos.lat), settings.SkipPLR, settings.SkipPLR);
+        if(closestNamedSeg){ //if we were able to find a segment, try to pull the city and/or street name if the options are enabled
+            var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = closestNamedSeg.getAddress();
 
             newAttributes = {
                 countryID: address.attributes.country.id,
@@ -2199,8 +2212,8 @@ var UpdateObject, MultiAction;
 
                 if(settings.UseAltCity && cityName === ""){
                     if(address.attributes.altStreets.length > 0){ //segment has alt names
-                        for(var j=0;j<closestSeg.attributes.streetIDs.length;j++){
-                            var altCity = W.model.cities.getObjectById(W.model.streets.getObjectById(closestSeg.attributes.streetIDs[j]).cityID).attributes;
+                        for(var j=0;j<closestNamedSeg.attributes.streetIDs.length;j++){
+                            var altCity = W.model.cities.getObjectById(W.model.streets.getObjectById(closestNamedSeg.attributes.streetIDs[j]).cityID).attributes;
 
                             if(altCity.name !== null && altCity.englishName !== ""){
                                 cityName = altCity.name;
@@ -3562,6 +3575,7 @@ var UpdateObject, MultiAction;
             ShowLockButtonsRPP: true,
             NewPlacesList: [].concat(W.Config.venues.categories),
             EditRPPAfterCreated: false,
+            AddEntryExitPoint: false,
             UseStreetFromClosestSeg: false,
             UseCityFromClosestSeg: false,
             ShowPlaceLocatorCrosshair: false,
@@ -3654,6 +3668,7 @@ var UpdateObject, MultiAction;
                 ShowLockButtonsRPP: settings.ShowLockButtonsRPP,
                 NewPlacesList: settings.NewPlacesList,
                 EditRPPAfterCreated: settings.EditRPPAfterCreated,
+                AddEntryExitPoint: settings.AddEntryExitPoint,
                 UseStreetFromClosestSeg: settings.UseStreetFromClosestSeg,
                 UseCityFromClosestSeg: settings.UseCityFromClosestSeg,
                 ShowPlaceLocatorCrosshair: settings.ShowPlaceLocatorCrosshair,
@@ -3801,6 +3816,7 @@ var UpdateObject, MultiAction;
                     NewPlaces: 'New Places',
                     EditRPPAfterCreate: 'Edit RPP address after created',
                     EditRPPAfterCreateTitle: "Automatically opens the RPP address edit window and focuses on the House Number entry",
+                    AddEntryExitPoint: 'Automatically add an Entry Point',
                     UseStreetFromClosestSegment: 'Use street name from closest segment',
                     UseStreetFromClosestSegmentTitle: "Pulls the street name from the closest visible segment and inserts into the new Place's address",
                     UseCityFromClosestSegment: 'Use city name from closest segment',
@@ -3925,6 +3941,7 @@ var UpdateObject, MultiAction;
                     NewPlaces: 'Nuevos lugares',
                     EditRPPAfterCreate: 'Editar la dirección del RPP una vez creada',
                     EditRPPAfterCreateTitle: "Automáticamente abre la ventana de edición en la dirección del lugar residencial y se enfoca en el campo de número de casa",
+                    AddEntryExitPoint: 'Automatically add an Entry Point',
                     UseStreetFromClosestSegment: 'Utilizar el nombre de la calle del segmento más cercano',
                     UseStreetFromClosestSegmentTitle: "Extrae el nombre de la calle del segmento visible más cercano y lo agrega en la dirección del nuevo lugar",
                     UseCityFromClosestSegment: 'Usar el nombre de la ciudad del segmento más cercano',
@@ -4047,6 +4064,7 @@ var UpdateObject, MultiAction;
                     NewPlaces: 'Nouveaux Lieux',
                     EditRPPAfterCreate: "Editer l'adresse du résidentiel après création",
                     EditRPPAfterCreateTitle: "Ouvre automatiquement la zone d'édition de l'adresse du lieu résidentiel et se positionne sur la saisie du n° de rue",
+                    AddEntryExitPoint: 'Automatically add an Entry Point',
                     UseStreetFromClosestSegment: 'Utiliser le nom de rue du segment le plus proche',
                     UseStreetFromClosestSegmentTitle: "Prend le nom de rue du segment visible le plus proche et l'insère dans l'adresse du nouveau lieu",
                     UseCityFromClosestSegment: 'Utiliser le nom de ville du segment le plus proche',
