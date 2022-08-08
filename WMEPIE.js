@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "";
+    const updateMessage = "Partial fix for linked Google place highlighting. Hover over the linked Google place name to see its location in Google Maps. After adding a new link, requires reselecting the place before the highlight works.";
     var lastSelectedFeature;
 
     //Layer definitions
