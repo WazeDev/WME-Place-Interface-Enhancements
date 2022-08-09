@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2022.08.08.02
+// @version      2022.08.09.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Partial fix for linked Google place highlighting. Hover over the linked Google place name to see its location in Google Maps. After adding a new link, requires reselecting the place before the highlight works.";
+    const updateMessage = "Hovering over a linked Google place (in the dropdown list or after a place is linked) should correctly highlight the Google place location now.";
     var lastSelectedFeature;
 
     //Layer definitions
