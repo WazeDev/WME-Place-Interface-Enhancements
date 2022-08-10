@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2022.08.10.01
+// @version      2022.08.10.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Hovering over a linked Google place (in the dropdown list or after a place is linked) should correctly highlight the Google place location now.";
+    const updateMessage = "";
     var lastSelectedFeature;
 
     //Layer definitions
