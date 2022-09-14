@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2022.08.16.01
+// @version      2022.09.14.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Fixed highlighting of linked Google places in the left panel (permanently/temporarily closed places and places that appear to be too far away)";
+    const updateMessage = "";
     var lastSelectedFeature;
 
     //Layer definitions
