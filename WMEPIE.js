@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2022.09.14.01
+// @version      2022.11.02.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
