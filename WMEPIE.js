@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2022.11.17.02
+// @version      2022.11.17.03
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Oh my gerd what a mess.  Getting the Place menu working again, and adding a 12th item to match the native item count.  Fixing auto focusing in the HN field when creating a RPP. <br><br> Geometry Modification section displaying again.  <br><br> More to come!";
+    const updateMessage = "Oh my gerd what a mess.  Getting the Place menu working again, and adding a 12th item to match the native item count.  Fixing auto focusing in the HN field when creating a RPP. <br><br> More to come!";
     var lastSelectedFeature;
 
     //Layer definitions
