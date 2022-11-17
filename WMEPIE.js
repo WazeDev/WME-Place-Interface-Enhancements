@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2022.11.17.01
+// @version      2022.11.17.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Oh my gerd what a mess.  Getting the Place menu working again, and adding a 12th item to match the native item count.  Fixing auto focusing in the HN field when creating a RPP. <br><br> More to come!";
+    const updateMessage = "Oh my gerd what a mess.  Getting the Place menu working again, and adding a 12th item to match the native item count.  Fixing auto focusing in the HN field when creating a RPP. <br><br> Geometry Modification section displaying again.  <br><br> More to come!";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -2499,16 +2499,17 @@ var UpdateObject, MultiAction;
         $('#piePlaceGeomWaze').val(WMEGeom);
     }
 
-    function InsertGeometryMods(){
+    async function InsertGeometryMods(){
         $('#pieGeometryMods').remove();
         $('#pieViewEditGeom').remove(); //remove the Place geometry window when the option is disabled or a Place is de-selected
         //debugger;
         if((WazeWrap.hasPlaceSelected() || WazeWrap.hasMapCommentSelected()) && WazeWrap.getSelectedFeatures()[0].model.geometry.toString().match(/^POLYGON/)){
+            await new Promise(r => setTimeout(r, 150));
             let $GeomMods = $(`<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls">${!WazeWrap.hasMapCommentSelected() ? '<i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="piesimplifyplace" title="Simplify" class="fa fa-magic fa-2x" aria-hidden="true" style="cursor:pointer;"></i>' : ''} <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Rotate ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieresize" title="Allow resizing the Place. While enabled the geometry cannot be modified" class="fa fa-expand fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Resize ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieEditGeom" class="fa fa-pencil-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pieClearGeom" title="Clear geometry" class="fa fa-times fa-2x" aria-hidden="true" style="cursor:pointer; color:red;"></i></div></div>`);
             if(W.selectionManager.getSelectedFeatures()[0].model.type === "mapComment")
-                $('#edit-panel > div > div > div.tab-content > form > div:nth-child(3)').after($GeomMods);
+                $('#edit-panel > div > div > div.tab-content > div > form > div:nth-child(4)').after($GeomMods);
             else
-                $('#venue-edit-general > form > div:nth-child(6)').after($GeomMods);
+                $('#venue-edit-general > div:nth-child(9)').after($GeomMods);
 
             $('#pieorthogonalize').click(function(){
                 OrthogonalizePlace();
