@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2022.11.02.01
+// @version      2022.11.17.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -42,7 +42,7 @@ var UpdateObject, MultiAction;
 
     var curr_ver = GM_info.script.version;
     var settings = {};
-    var placeMenuSelector = "#primary-toolbar > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
+    var placeMenuSelector = "#primary-toolbar > div > div.toolbar-group.toolbar-group-venues > wz-menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
     var placementMode = false;
     var resCategory = "RESIDENCE_HOME";
@@ -50,7 +50,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "";
+    const updateMessage = "Oh my gerd what a mess.  Getting the Place menu working again, and adding a 12th item to match the native item count.  Fixing auto focusing in the HN field when creating a RPP. <br><br> More to come!";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -204,6 +204,7 @@ var UpdateObject, MultiAction;
             buildItemOption(9),
             buildItemOption(10),
             buildItemOption(11),
+            buildItemOption(12),
             '</div>'
         ].join(' '));
 
@@ -697,7 +698,7 @@ var UpdateObject, MultiAction;
         var i;
         //Whenever a Place item is changed, read the settings and save to localStorage
         $('[id^="pieItem"]').change(function(){
-            for(i=0;i<11;i++)
+            for(i=0;i<12;i++)
                 settings.NewPlacesList[i] = $('#pieItem'+(i+1))[0].value;
 
             saveSettings();
@@ -705,13 +706,16 @@ var UpdateObject, MultiAction;
         });
 
         //Load settings into Place Customization list options
-        for(i=0; i<11;i++)
+        for(i=0; i<12;i++)
             $('#pieItem'+(i+1))[0].value = settings.NewPlacesList[i];
 
         //Build our new menu
         buildNewPlaceList();
         //coming back from the HN edit mode now rebuilds the Place menu.
         W.editingMediator.on('change:editingHouseNumbers', buildNewPlaceList);
+
+        // Rebuild the places menu options after saving
+        W.editingMediator.on('change:editingEnabled', buildNewPlaceList);
 
         /********* SHORTCUTS *********/
         new WazeWrap.Interface.Shortcut('CreateResidentialPlaceShortcut', 'Creates a resdiential Place point', 'wmepie', 'Place Interface Enhancements', settings.CreateResidentialPlaceShortcut, function(){startPlacementMode(resCategory, true);}, null).add();
@@ -733,6 +737,7 @@ var UpdateObject, MultiAction;
         new WazeWrap.Interface.Shortcut('CreateItem9Shortcut', 'Create Item 9', 'wmepie', 'Place Interface Enhancements', settings.CreateItem9Shortcut, function(){PlaceMenuShortcut(9);}, null).add();
         new WazeWrap.Interface.Shortcut('CreateItem10Shortcut', 'Create Item 10', 'wmepie', 'Place Interface Enhancements', settings.CreateItem10Shortcut, function(){PlaceMenuShortcut(10);}, null).add();
         new WazeWrap.Interface.Shortcut('CreateItem11Shortcut', 'Create Item 11', 'wmepie', 'Place Interface Enhancements', settings.CreateItem11Shortcut, function(){PlaceMenuShortcut(11);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem12Shortcut', 'Create Item 12', 'wmepie', 'Place Interface Enhancements', settings.CreateItem12Shortcut, function(){PlaceMenuShortcut(12);}, null).add();
 
         $("#piePlaceFilter").on("propertychange keyup paste input", UpdatePlaceFilter);
         $('input[type=radio][name=PlaceFilterToggle]').change(UpdatePlaceFilter);
@@ -1784,18 +1789,19 @@ var UpdateObject, MultiAction;
         var cat = "";
         var icon = "";
         var i;
-        for(i=0;i<11;i++){
+        for(i=0;i<12;i++){
             icon = "";
             cat = $('#pieItem' + (i+1))[0].value;
             icon = $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].getAttribute("data-icon");
             if(cat !== "PARKING_LOT" && cat !== resCategory && cat !== "GAS_STATION")
-                $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-container"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span><div class="drawing-controls"><span class="drawing-control polygon secondary-control waze-tooltip" data-toggle="tooltip" title="" id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '" data-original-title="Create Area"></span><span class="drawing-control main-control point waze-tooltip" data-toggle="tooltip" title="" data-original-title="Create Point"></span></div></div></div>');            else{
+                $(placeMenuSelector).append('<wz-menu-item class="toolbar-group-item WazeControlDrawFeature  ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-container"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span><div class="drawing-controls"><wz-basic-tooltip class="sc-wz-basic-tooltip-h sc-wz-basic-tooltip-s"><wz-tooltip class="sc-wz-basic-tooltip sc-wz-basic-tooltip-s"><wz-tooltip-source><wz-button color="clear-icon" size="sm" class="point"><wz-tooltip-target></wz-tooltip-target><i class="w-icon w-icon-node"></i></wz-button></wz-tooltip-source><wz-tooltip-content>Create Point</wz-tooltip-content></wz-tooltip></wz-basic-tooltip><wz-basic-tooltip class="sc-wz-basic-tooltip-h sc-wz-basic-tooltip-s"><wz-tooltip class="sc-wz-basic-tooltip sc-wz-basic-tooltip-s"><wz-tooltip-source><wz-button color="clear-icon" size="sm" class="polygon" id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '"><wz-tooltip-target></wz-tooltip-target><i class="w-icon w-icon-polygon"></i></wz-button></wz-tooltip-source><wz-tooltip-content>Create Area</wz-tooltip-content></wz-tooltip></wz-basic-tooltip></div></div></div></wz-menu-item>');
+            else{
               //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive" style="' + (icon !== "" ? "padding-left:0px;" : "") + ' height:40px;" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><span class="menu-title ' + icon + '" style="font-size:26px;"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span><div class="drawing-controls"><span class="drawing-control polygon secondary-control" id="piePlaceAreaItem' + (i+1) + '" data-category="' + cat + '" title="Place (area)"></span><span class="drawing-control main-control point" id="piePlacePointItem' + (i+1) + '" data-category="' + cat + '" title="Place (point)"></span></div></div>');            else{
                 if(cat === resCategory) //force point
                     //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
-                    $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon + '" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-container"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div></div>');
+                    $(placeMenuSelector).append('<wz-menu-item class="toolbar-group-item WazeControlDrawFeature  ' + icon + '" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-container"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div></wz-menu-item>');
                 else //Parking lot & gas station - force area
-                    $(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-container"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div></div>');
+                    $(placeMenuSelector).append('<wz-menu-item class="toolbar-group-item WazeControlDrawFeature  ' + icon +'" id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-container"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div></wz-menu-item>');
                     //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive"             id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '">                             <span class="menu-title" style="flex-grow:1;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
             }
         }
@@ -2228,10 +2234,11 @@ var UpdateObject, MultiAction;
             setTimeout(editRPPAddress, 50);
     }
 
-    function editRPPAddress(rppTries = 1){
+    async function editRPPAddress(rppTries = 1){
         if ($('.address-edit-view').length > 0) {
             $('.full-address').trigger("click");
-            $('.house-number:first').focus();
+            await new Promise(r => setTimeout(r, 150));
+            $('#id', $('.house-number')[0].shadowRoot).focus();
 
         } else if (rppTries < 1000) {
             console.log("not found");
@@ -2495,12 +2502,13 @@ var UpdateObject, MultiAction;
     function InsertGeometryMods(){
         $('#pieGeometryMods').remove();
         $('#pieViewEditGeom').remove(); //remove the Place geometry window when the option is disabled or a Place is de-selected
+        //debugger;
         if((WazeWrap.hasPlaceSelected() || WazeWrap.hasMapCommentSelected()) && WazeWrap.getSelectedFeatures()[0].model.geometry.toString().match(/^POLYGON/)){
             let $GeomMods = $(`<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls">${!WazeWrap.hasMapCommentSelected() ? '<i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="piesimplifyplace" title="Simplify" class="fa fa-magic fa-2x" aria-hidden="true" style="cursor:pointer;"></i>' : ''} <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Rotate ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieresize" title="Allow resizing the Place. While enabled the geometry cannot be modified" class="fa fa-expand fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Resize ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieEditGeom" class="fa fa-pencil-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pieClearGeom" title="Clear geometry" class="fa fa-times fa-2x" aria-hidden="true" style="cursor:pointer; color:red;"></i></div></div>`);
             if(W.selectionManager.getSelectedFeatures()[0].model.type === "mapComment")
                 $('#edit-panel > div > div > div.tab-content > form > div:nth-child(3)').after($GeomMods);
             else
-                $('#venue-edit-general > form > div:nth-child(4) > div:nth-child(2)').after($GeomMods);
+                $('#venue-edit-general > form > div:nth-child(6)').after($GeomMods);
 
             $('#pieorthogonalize').click(function(){
                 OrthogonalizePlace();
@@ -3533,7 +3541,6 @@ var UpdateObject, MultiAction;
             '.pie-natural-features {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -16px -21px; width: 17px; height: 15px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-natural-features {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
             '.pie-parking-lot {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -65px -48px; width: 13px; height: 13px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-parking-lot {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
             '.pie-residential {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -37px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-residential {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
-            '#primary-toolbar .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -38px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {#edit-buttons .residential .item-icon::after {background-image: url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }',
             '.makePrimary {border:1px solid gray; display:inline-block; cursor:pointer; margin-left:3px; border-radius:5px; padding:0px 2px 0px 2px; user-select: none; font-size:11px;}',
             '.makePrimary:hover {border-color: #26bae8; color: #26bae8}',
             '.photoViewerOptionsContainer { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; grid-template-areas: "header header" "optionText optionSetting" "footer footer"}',
@@ -3617,6 +3624,7 @@ var UpdateObject, MultiAction;
             CreateItem9Shortcut: '',
             CreateItem10Shortcut: '',
             CreateItem11Shortcut: '',
+            CreateItem12Shortcut: '',
             EnablePhotoViewer: true,
             sortBy: "sortbyname",
             sortOrder: "sortAsc",
@@ -3708,6 +3716,7 @@ var UpdateObject, MultiAction;
                 CreateItem9Shortcut: settings.CreateItem9Shortcut,
                 CreateItem10Shortcut: settings.CreateItem10Shortcut,
                 CreateItem11Shortcut: settings.CreateItem11Shortcut,
+                CreateItem12Shortcut: settings.CreateItem12Shortcut,
                 EnablePhotoViewer: settings.EnablePhotoViewer,
                 sortBy: settings.sortBy,
                 sortOrder: settings.sortOrder,
