@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.03.03.02
+// @version      2023.03.07.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -51,7 +51,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Fixing 12th item bug.  Hours parser should be displaying again.";
+    const updateMessage = "Hours parser was showing again, but now it actually works, too!";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -1461,11 +1461,10 @@ var UpdateObject, MultiAction;
                 ].join(' '));
                 var appendDiv = (function() {
                     $('.opening-hours-add').parent().append($PIEHoursParser.html());
+                	$('#PIEAppendHours').click(function(){ addHours(false);});
+                	$('#PIEReplaceHours').click(function(){ addHours(true);});
                 });
                 delayFire(150, appendDiv);
-
-                $('#PIEAppendHours').click(function(){ addHours(false);});
-                $('#PIEReplaceHours').click(function(){ addHours(true);});
 
                 // Enter = Add hours, shift || ctrl + Enter = new line
                 $("#PIE-hourspaste").keydown(function(event){
