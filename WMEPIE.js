@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.03.07.01
+// @version      2023.03.11.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -51,7 +51,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Hours parser was showing again, but now it actually works, too!";
+    const updateMessage = "Google Link Enhancer should be partially working again (only the side panel highlights). Map highlights of places that are closed, too far, etc are not working yet.";
     var lastSelectedFeature;
 
     //Layer definitions
