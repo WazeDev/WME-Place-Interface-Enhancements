@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.03.11.01
+// @version      2023.03.15.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -51,7 +51,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Google Link Enhancer should be partially working again (only the side panel highlights). Map highlights of places that are closed, too far, etc are not working yet.";
+    const updateMessage = "Update for WazeWrap changes, implementing part of the new WME API.";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -271,7 +271,7 @@ var UpdateObject, MultiAction;
         GLE.strings.tooFar = I18n.t('pie.GLE.tooFar');
 
         injectCss();
-        new WazeWrap.Interface.Tab('PIE', $section.html(), init2);
+        WazeWrap.Interface.Tab('PIE', $section.html(), init2, 'PIE');
     }
 
     function getActiveEditor(tries = 1) {
