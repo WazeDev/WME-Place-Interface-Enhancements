@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.03.20.01
+// @version      2023.03.31.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -51,7 +51,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Oops, they did it again<br>they played with our scripts<br>I got lost in the code<br> Oh baby, baby<br><br><br>WME update fixes<br>";
+    const updateMessage = "";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -780,38 +780,40 @@ var UpdateObject, MultiAction;
             if(W.selectionManager.getSelectedFeatures.length > 0)
                 lastSelectedFeature = W.selectionManager.getSelectedFeatures()[0].model.type;
             if(WazeWrap.hasPlaceSelected()){
-                //Trim whitespace from start and end of house number field on Places
-                $('.form-control.house-number').focusout(function(){
-                    $('.form-control.house-number')[0].value = $('.form-control.house-number')[0].value.trim();
-                });
+                setTimeout(() => {
+                    //Trim whitespace from start and end of house number field on Places
+                    $('.form-control.house-number').focusout(function(){
+                        $('.form-control.house-number')[0].value = $('.form-control.house-number')[0].value.trim();
+                    });
 
-                //Make Website label a clickable link to the set website
-                let placeURL = WazeWrap.getSelectedFeatures()[0].model.attributes.url || "";
+                    //Make Website label a clickable link to the set website
+                    let placeURL = WazeWrap.getSelectedFeatures()[0].model.attributes.url || "";
 
-                $('input[name="url"]').focusout(function(){
-                    placeURL = $('input[name="url"]')[0].value.trim();
-                    if(placeURL == ""){
-                        $('input[name="url"]').parent().parent().find('label').unwrap();
-                        return;
-                    }
-                    if(!placeURL.startsWith("http"))
-                        placeURL = "https://" + placeURL;
-                    if($('#websiteLink').length == 0)
+                    $('input[name="url"]').focusout(function(){
+                        placeURL = $('input[name="url"]')[0].value.trim();
+                        if(placeURL == ""){
+                            $('input[name="url"]').parent().parent().find('label').unwrap();
+                            return;
+                        }
+                        if(!placeURL.startsWith("http"))
+                            placeURL = "https://" + placeURL;
+                        if($('#websiteLink').length == 0)
+                            $('input[name="url"]').parent().parent().find('label').wrap('<a href="' + placeURL + '" id="websiteLink" target="_blank" style="cursor:pointer;"></a>');
+                        else
+                            $('#websiteLink').attr('href', placeURL);
+                    });
+                    if(placeURL != ""){
+                        if(!placeURL.startsWith("http"))
+                            placeURL = "https://" + placeURL;
                         $('input[name="url"]').parent().parent().find('label').wrap('<a href="' + placeURL + '" id="websiteLink" target="_blank" style="cursor:pointer;"></a>');
-                    else
-                        $('#websiteLink').attr('href', placeURL);
-                });
-                if(placeURL != ""){
-                    if(!placeURL.startsWith("http"))
-                        placeURL = "https://" + placeURL;
-                    $('input[name="url"]').parent().parent().find('label').wrap('<a href="' + placeURL + '" id="websiteLink" target="_blank" style="cursor:pointer;"></a>');
-                    $('input[name="url"]').parent().parent().find('label').css('text-decoration', 'underline');
-                    $('input[name="url"]').parent().parent().find('label').css('cursor', 'pointer');
-                }
+                        $('input[name="url"]').parent().parent().find('label').css('text-decoration', 'underline');
+                        $('input[name="url"]').parent().parent().find('label').css('cursor', 'pointer');
+                    }
 
-                //Hide the suggested categories for Shopping / Services due to the amount of vertical space it takes up - is often used as a valid category
-                if (settings.HideShopAndServices && WazeWrap.getSelectedFeatures()[0].model.attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].model.attributes.categories[0] === 'SHOPPING_AND_SERVICES' )
-                    $('.suggested-categories').remove();
+                    //Hide the suggested categories for Shopping / Services due to the amount of vertical space it takes up - is often used as a valid category
+                    if (settings.HideShopAndServices && WazeWrap.getSelectedFeatures()[0].model.attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].model.attributes.categories[0] === 'SHOPPING_AND_SERVICES' )
+                        $('wz-card.categories-card:eq(1)').hide();
+                }, 0);
             }
         });
 
@@ -3118,11 +3120,13 @@ var UpdateObject, MultiAction;
     }
 
     function ShowClearDescription(){
-        $('#venue-edit-general textarea').parent().append('<i class="fa fa-times-circle clearButton" style="position:absolute; top:0; right:0;"></i>');
-        $('#venue-edit-general textarea').parent().css('position', 'relative');
-        $('.clearButton').click(function(){
-            W.model.actionManager.add(new UpdateObject( WazeWrap.getSelectedFeatures()[0].model, { description: "" }));
-        });
+        setTimeout(() => {
+            $('div.description-control').append('<i class="fa fa-times-circle clearButton" style="position:absolute; top:0; right:0;"></i>');
+            $('div.description-control').css('position', 'relative');
+            $('.clearButton').click(function(){
+                W.model.actionManager.add(new UpdateObject( WazeWrap.getSelectedFeatures()[0].model, { description: "" }));
+            });
+        }, 0);
     }
 
     function MoveAddress(){
