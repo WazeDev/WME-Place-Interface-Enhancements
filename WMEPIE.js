@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.03.31.02
+// @version      2023.04.01.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -3016,8 +3016,8 @@ var UpdateObject, MultiAction;
             if(WazeWrap.getSelectedFeatures()[0].model.type === "venue"){// && (typeof WazeWrap.getSelectedFeatures()[0].model.attributes.id === "string")){ //id is only a string if the Place has been saved - don't allow copying unsaved Places
                 var $PlaceCopyButton;
                 if(!_.includes(WazeWrap.getSelectedFeatures()[0].model.attributes.categories,"RESIDENCE_HOME")){
-                    $PlaceCopyButton = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" id="pieCopyPlaceButton" title="Creates a copy of this Place"><i class="fa fa-files-o fa-lg" aria-hidden="true"></i></div>');
-                    $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($PlaceCopyButton);
+                    $PlaceCopyButton = $('<div style="float:right; z-index:100; cursor:pointer; position: absolute; top:0; right:0; margin-left:1px; margin-right:1px;" id="pieCopyPlaceButton" title="Creates a copy of this Place"><i class="fa fa-files-o fa-lg" aria-hidden="true"></i></div>');
+                    $('#venue-edit-general wz-text-input[name="name"]').before($PlaceCopyButton);
 
                     $('#pieCopyPlaceButton').click(function(){
                         var PlaceObject = require("Waze/Feature/Vector/Landmark");
