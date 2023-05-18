@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.05.16.01
+// @version      2023.05.18.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -857,7 +857,7 @@ var UpdateObject, MultiAction;
 
         //Shamelessly copied from URO+
         var MO_MPLayer = new MutationObserver(MPLayerChanged);
-        MO_MPLayer.observe(W.map.problemLayer.div,{childList : true});
+        MO_MPLayer.observe(W.map.getLayerByName("mapProblems").div,{childList : true});
 
         wazePL = document.querySelector('.WazeControlPermalink>a.fa-link');
         if(wazePL == null)
@@ -1927,8 +1927,8 @@ var UpdateObject, MultiAction;
 
     //Shamelessly copied from URO+
     function MPLayerChanged(){
-        for(var mObj in W.map.problemLayer.markers){
-            var mIcon = W.map.problemLayer.markers[mObj].icon.div;
+        for(var mObj in W.map.getLayerByName("mapProblems").markers){
+            var mIcon = W.map.getLayerByName("mapProblems").markers[mObj].icon.div;
             mIcon.addEventListener("click", MarkerClick, false);
         }
     }
