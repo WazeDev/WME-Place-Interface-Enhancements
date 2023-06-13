@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.05.22.01
+// @version      2023.06.13.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -51,7 +51,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "";
+    const updateMessage = "The native menu has changed enough that PIE's menu customization does not work correctly when building the new menu.<br><br>Perhaps staff will add submenus for all the main categories like they did Car Services, but for now I have lost several hours trying to make it work to no avail so it will be disabled until I can find more time, or the native menu is modified enough that it is no longer a benefit.";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -688,7 +688,7 @@ var UpdateObject, MultiAction;
                 settings.NewPlacesList[i] = $('#pieItem'+(i+1))[0].value;
 
             saveSettings();
-            buildNewPlaceList();
+            //buildNewPlaceList();
         });
 
         //Load settings into Place Customization list options
@@ -696,12 +696,12 @@ var UpdateObject, MultiAction;
             $('#pieItem'+(i+1))[0].value = settings.NewPlacesList[i];
 
         //Build our new menu
-        buildNewPlaceList();
+        //buildNewPlaceList();
         //coming back from the HN edit mode now rebuilds the Place menu.
-        W.editingMediator.on('change:editingHouseNumbers', buildNewPlaceList);
+        //W.editingMediator.on('change:editingHouseNumbers', buildNewPlaceList);
 
         // Rebuild the places menu options after saving
-        W.editingMediator.on('change:editingEnabled', buildNewPlaceList);
+        //W.editingMediator.on('change:editingEnabled', buildNewPlaceList);
 
         /********* SHORTCUTS *********/
         new WazeWrap.Interface.Shortcut('CreateResidentialPlaceShortcut', 'Creates a resdiential Place point', 'wmepie', 'Place Interface Enhancements', settings.CreateResidentialPlaceShortcut, function(){startPlacementMode(resCategory, true);}, null).add();
