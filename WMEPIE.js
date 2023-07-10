@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.06.13.01
+// @version      2023.07.10.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -51,7 +51,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "The native menu has changed enough that PIE's menu customization does not work correctly when building the new menu.<br><br>Perhaps staff will add submenus for all the main categories like they did Car Services, but for now I have lost several hours trying to make it work to no avail so it will be disabled until I can find more time, or the native menu is modified enough that it is no longer a benefit.";
+    const updateMessage = "Place category buttons are back, back again. <br><br>Place geometry screen was showing coordinates in 900913 format, which failed to set.  Change to display in 4326 format.";
     var lastSelectedFeature;
 
     //Layer definitions
@@ -2437,7 +2437,7 @@ var UpdateObject, MultiAction;
         });
 
         $('#pieBtnApplyWKTGeom').click(function(){
-            let lines = $('#piePlaceGeomWKT').val().match(/POLYGON\(\((.*)\)\)/)[1].split(',');
+            let lines = $('#piePlaceGeomWKT').val().match(/POLYGON\((.*)\)/)[1].split(',');
 
             for(var i = 0;i < lines.length;i++){
                 if(! /^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/.test(lines[i].trim())){
@@ -2485,7 +2485,7 @@ var UpdateObject, MultiAction;
             }
             coord = currPlaceGeom[i];
             if(i < currPlaceGeom.length-1){
-                coord = coord.transform(W.map.getProjectionObject(), W.map.getOLMap().displayProjection);
+                coord = coord.transform(W.Config.map.projection.local, W.Config.map.projection.remote);
                 standardGeom += `${coord.y}, ${coord.x}`
                 WMEGeom += `${coord.x} ${coord.y}`;
             }
@@ -3170,9 +3170,10 @@ var UpdateObject, MultiAction;
         }
     }
 
-    function AddPlaceCategoriesButtons(){
+    async function AddPlaceCategoriesButtons(){
         $('#piePlaceCategoriesButtonsContainer').remove();
         if(WazeWrap.getSelectedFeatures().length > 0){
+            await new Promise(r => setTimeout(r, 150));
             var $container = $('<div>',{id:'piePlaceCategoriesButtonsContainer', style:'white-space: nowrap;'});
             if(WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.type === "venue"){
                 var categoryOptions = $('[id^=pieItem]');
@@ -3195,7 +3196,7 @@ var UpdateObject, MultiAction;
                 }
             }
 
-            $('.categories.controls').before($container);
+            $('.categories-autocomplete').before($container);
         }
     }
 
