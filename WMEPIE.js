@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.07.14.01
+// @version      2023.07.18.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -11,7 +11,7 @@
 // @exclude      https://www.waze.com/dashboard/editor
 // @icon         data:image/jpeg;base64,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
 // @author       JustinS83
-// @grant        none
+// @grant       GM_xmlhttpRequest
 // @require      https://greasyfork.org/scripts/24851-wazewrap/code/WazeWrap.js
 // @require      https://greasyfork.org/scripts/27023-jscolor/code/JSColor.js
 // @require      https://greasyfork.org/scripts/37486-wme-utils-hoursparser.js
@@ -51,8 +51,11 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Updated to new WazeWrap features that wrap native functionality that I don't trust won't change again randomly.";
+    const updateMessage = "Fixing copypasta";
     var lastSelectedFeature;
+    const SCRIPT_VERSION = GM_info.script.version.toString();
+    const SCRIPT_NAME = GM_info.script.name;
+    const DOWNLOAD_URL = GM_info.script.downloadURL;
 
     //Layer definitions
     {
@@ -103,18 +106,26 @@ var UpdateObject, MultiAction;
     }
 
     function bootstrap(tries = 1) {
-        if (W &&
-            W.map &&
-            W.model &&
-            W.loginManager.user &&
-            $ && jscolor &&
-            WazeWrap.Ready)
+        if (W && W.map && W.model && W.loginManager.user && $ && jscolor && WazeWrap.Ready){
+            loadScriptUpdateMonitor();
             init();
+        }
         else if (tries < 1000)
             setTimeout(function () {bootstrap(tries++);}, 200);
     }
 
     bootstrap();
+
+    function loadScriptUpdateMonitor() {
+        let updateMonitor;
+        try {
+            updateMonitor = new WazeWrap.Alerts.ScriptUpdateMonitor(SCRIPT_NAME, SCRIPT_VERSION, DOWNLOAD_URL, GM_xmlhttpRequest);
+            updateMonitor.start();
+        } catch (ex) {
+            // Report, but don't stop if ScriptUpdateMonitor fails.
+            console.error(`${SCRIPT_NAME}:`, ex);
+        }
+    }
 
     async function init(){
         loadTranslations();
@@ -769,12 +780,12 @@ var UpdateObject, MultiAction;
                        }
                });
            });
-        
+
         W.model.venues.on('objectschanged', venues => {
             //Hide the suggested categories for Shopping / Services due to the amount of vertical space it takes up - is often used as a valid category
-            try { 
+            try {
                 if (WazeWrap.hasPlaceSelected())
-                    if (settings.HideShopAndServices && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories[0] === 'SHOPPING_AND_SERVICES')
+                    if (settings.HideShopAndServices && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories[0] === 'SHOPPING_AND_SERVICES')
                         $('wz-card.categories-card:eq(1)').hide();
             } catch (ex) {
                 // Log error and move on.
@@ -795,7 +806,7 @@ var UpdateObject, MultiAction;
                     });
 
                     //Make Website label a clickable link to the set website
-                    let placeURL = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.url || "";
+                    let placeURL = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.url || "";
 
                     $('input[name="url"]').focusout(function(){
                         placeURL = $('input[name="url"]')[0].value.trim();
@@ -819,7 +830,7 @@ var UpdateObject, MultiAction;
                     }
 
                     //Hide the suggested categories for Shopping / Services due to the amount of vertical space it takes up - is often used as a valid category
-                    if (settings.HideShopAndServices && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories[0] === 'SHOPPING_AND_SERVICES' )
+                    if (settings.HideShopAndServices && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories.length === 1 && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories[0] === 'SHOPPING_AND_SERVICES' )
                         $('wz-card.categories-card:eq(1)').hide();
                 }, 0);
             }
@@ -1421,7 +1432,7 @@ var UpdateObject, MultiAction;
 
     function PlaceMenuShortcut(itemNum){
         if(WazeWrap.hasPlaceSelected()){ //add the category to the Place
-            let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel;
+            let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
             let newCategories = [].concat(selected.attributes.categories);
             let catToAdd;
             if($(`#piePlaceMainItem${itemNum}`).length > 0)
@@ -1505,10 +1516,10 @@ var UpdateObject, MultiAction;
         }
 
         if(!replaceAll)
-            pasteHours = pasteHours + ',' + getOpeningHours(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel).join(',');
+            pasteHours = pasteHours + ',' + getOpeningHours(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel()).join(',');
         var parserResult = hoursparser.parseHours(pasteHours);
         if (parserResult.hours && parserResult.overlappingHours === false && parserResult.sameOpenAndCloseTimes === false && parserResult.parseError === false) {
-            W.model.actionManager.add(new UpdateObject(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel, { openingHours: parserResult.hours }));
+            W.model.actionManager.add(new UpdateObject(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), { openingHours: parserResult.hours }));
             $('#PIEHoursParserError').empty();
         } else {
             $('#PIE-hourspaste').css({'background-color':'#FDD'});//.attr({title:bannButt.noHours.getTitle(parserResult.hours)});
@@ -1739,7 +1750,7 @@ var UpdateObject, MultiAction;
                         removeDragCallbacks();
                         clearClosesetSegmentLayerFeatures();
                     } else {
-                        placeIsPoint = selectedItem.WW.getObjectModel.isPoint();
+                        placeIsPoint = selectedItem.WW.getObjectModel().isPoint();
                         if (placeIsPoint) {
                             //Event when the Place is moved
                             /*
@@ -1750,16 +1761,16 @@ var UpdateObject, MultiAction;
                                     entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
                                 findNearestSegment(entryExitPoint);
                             };*/
-                            let entryExitPoint = selectedItem.WW.getObjectModel.geometry.clone();
-                            if(selectedItem.WW.getObjectModel.getNavigationPoints().length > 0)
-                                entryExitPoint = selectedItem.WW.getObjectModel.attributes.entryExitPoints[0]._point;
+                            let entryExitPoint = selectedItem.WW.getObjectModel().geometry.clone();
+                            if(selectedItem.WW.getObjectModel().getNavigationPoints().length > 0)
+                                entryExitPoint = selectedItem.WW.getObjectModel().attributes.entryExitPoints[0]._point;
                             findNearestSegment(entryExitPoint);
                         } else {
-                            if(selectedItem.WW.getObjectModel.getNavigationPoints().length === 0)
-                                findNearestSegment(selectedItem.WW.getObjectModel.geometry.getCentroid());
+                            if(selectedItem.WW.getObjectModel().getNavigationPoints().length === 0)
+                                findNearestSegment(selectedItem.WW.getObjectModel().geometry.getCentroid());
                             else{
-                                for(let i=0;i<selectedItem.WW.getObjectModel.getNavigationPoints().length;i++)
-                                    findNearestSegment(selectedItem.WW.getObjectModel.getNavigationPoints()[i]._point);
+                                for(let i=0;i<selectedItem.WW.getObjectModel().getNavigationPoints().length;i++)
+                                    findNearestSegment(selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point);
                             }
                         }
                     }
@@ -1980,7 +1991,7 @@ var UpdateObject, MultiAction;
 
     function highlightObsoleteHospitalCategory(){
         if(WazeWrap.getSelectedFeatures().length > 0 && WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue"){
-                if(_.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories,"HOSPITAL_MEDICAL_CARE")){
+                if(_.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,"HOSPITAL_MEDICAL_CARE")){
                     $('.select2-choices').css('animation-iteration-count', 'infinite');
                     $('.select2-choices').attr('title', 'The "Hospital / Medical Care" category is no longer valid.\n\nPlease change it to "Hospital / Urgent Care" or "Doctor / Clinic", whichever is most appropriate');
                     $('.select2-choices').tooltip();
@@ -2292,14 +2303,14 @@ var UpdateObject, MultiAction;
 
     function openPUR(){
         if(WazeWrap.hasPlaceSelected() && $('.pending-changes-alert').length > 0){
-            if(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.venueUpdateRequests.length > 0 && (typeof WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.state === 'undefined' || WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.state === null))
-                W.commands.execute("place_updates:list", WazeWrap.getSelectedFeatures()[0].WW.getObjectModel); // W.model.venues.get(WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.id)
+            if(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.venueUpdateRequests.length > 0 && (typeof WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().state === 'undefined' || WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().state === null))
+                W.commands.execute("place_updates:list", WazeWrap.getSelectedFeatures()[0].WW.getObjectModel()); // W.model.venues.get(WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.id)
         }
     }
 
     function _hidePaymentType(){
-        if(WazeWrap.hasSelectedFeatures() && _.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories, "PARKING_LOT")){
-            let attr = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes;
+        if(WazeWrap.hasSelectedFeatures() && _.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories, "PARKING_LOT")){
+            let attr = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes;
             if(attr.categoryAttributes.PARKING_LOT.costType && attr.categoryAttributes.PARKING_LOT.costType === "FREE"){
                 if(!$('#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').hasClass("collapse"))
                     $('#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)').addClass("collapse");
@@ -2317,8 +2328,8 @@ var UpdateObject, MultiAction;
     }
 
     function OrthogonalizePlace(){
-        if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.geometry.toString().match(/^POLYGON/)){
-            let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel;
+        if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().geometry.toString().match(/^POLYGON/)){
+            let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
             var newGeom = WazeWrap.Util.OrthogonalizeGeometry(selected.geometry.clone().components[0].components);
             var UFG = require("Waze/Action/UpdateFeatureGeometry");
             var originalGeometry = selected.geometry.clone();
@@ -2358,8 +2369,8 @@ var UpdateObject, MultiAction;
     }
 
     function SimplifyPlace(){
-        if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.geometry.toString().match(/^POLYGON/)){
-            let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel;
+        if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().geometry.toString().match(/^POLYGON/)){
+            let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
             let originalGeometry = selected.geometry.clone();
             let ls = new OpenLayers.Geometry.LineString(originalGeometry.components[0].components);
             ls = ls.simplify(settings.SimplifyFactor);
@@ -2459,7 +2470,7 @@ var UpdateObject, MultiAction;
     }
 
     function saveNewPlaceGeometry(newGeom){
-        let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel;
+        let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
         let originalGeometry = selected.geometry.clone();
         let ls = new OpenLayers.Geometry.LineString(newGeom);
         let newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
@@ -2501,7 +2512,7 @@ var UpdateObject, MultiAction;
         $('#pieGeometryMods').remove();
         $('#pieViewEditGeom').remove(); //remove the Place geometry window when the option is disabled or a Place is de-selected
         //debugger;
-        if((WazeWrap.hasPlaceSelected() || WazeWrap.hasMapCommentSelected()) && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.geometry.toString().match(/^POLYGON/)){
+        if((WazeWrap.hasPlaceSelected() || WazeWrap.hasMapCommentSelected()) && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().geometry.toString().match(/^POLYGON/)){
             await new Promise(r => setTimeout(r, 150));
             let $GeomMods = $(`<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls">${!WazeWrap.hasMapCommentSelected() ? '<i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="piesimplifyplace" title="Simplify" class="fa fa-magic fa-2x" aria-hidden="true" style="cursor:pointer;"></i>' : ''} <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Rotate ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieresize" title="Allow resizing the Place. While enabled the geometry cannot be modified" class="fa fa-expand fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Resize ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieEditGeom" class="fa fa-pencil-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pieClearGeom" title="Clear geometry" class="fa fa-times fa-2x" aria-hidden="true" style="cursor:pointer; color:red;"></i></div></div>`);
             if(W.selectionManager.getSelectedFeatures()[0].WW.getType() === "mapComment")
@@ -2522,7 +2533,7 @@ var UpdateObject, MultiAction;
             });
 
             $('#pieClearGeom').click(function(){
-                let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel;
+                let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
                 let centerLonLat = selected.geometry.bounds.getCenterLonLat();
                 let newGeom = OpenLayers.Geometry.Polygon.createRegularPolygon(new OpenLayers.Geometry.Point(centerLonLat.lon, centerLonLat.lat), 20, 4, null).components[0].components;
                 let UFG = require("Waze/Action/UpdateFeatureGeometry");
@@ -2590,7 +2601,7 @@ var UpdateObject, MultiAction;
         if(WazeWrap.getSelectedFeatures().length > 0){
             if(WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue"){
                 var $crosshairs;
-                if(_.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories,"RESIDENCE_HOME")){
+                if(_.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,"RESIDENCE_HOME")){
                     $('.venue > .tab-content').css('position', 'relative');
                     $crosshairs = $('<div style="position:absolute; z-index:100; cursor:pointer; top:0; right:0;" id="pieCrosshairs" title="Zoom and center on Place"><i class="fa fa-crosshairs fa-lg" id="placeCrosshair" aria-hidden="true"></i></div>');
                     //$('.address-edit.side-panel-section').before($crosshairs);
@@ -2601,7 +2612,7 @@ var UpdateObject, MultiAction;
                     $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($crosshairs);
                 }
                 $('#pieCrosshairs').click(function(){
-                    CenterOnPlace(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel, settings.PlaceZoom);
+                    CenterOnPlace(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), settings.PlaceZoom);
                 });
 
                 $('#pieCrosshairs').mouseenter(function(e) {
@@ -2627,15 +2638,15 @@ var UpdateObject, MultiAction;
         if(WazeWrap.getSelectedFeatures().length > 0){
             if(WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue"){
                 var $PLAButton;
-                if(!(_.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories,"RESIDENCE_HOME") || _.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories,"PARKING_LOT"))){
+                if(!(_.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,"RESIDENCE_HOME") || _.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,"PARKING_LOT"))){
                     $PLAButton = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="piePLAButton" title="Create a Parking Lot Area for this Place"><i class="fa fa-product-hunt fa-lg" aria-hidden="true"></i></div>');
                     $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($PLAButton);
 
                     $('#piePLAButton').click(function(){
                         if(!BusinessPLAMode){
                             BusinessPLAMode = true;
-                            businessPLAPlaceName = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.name;
-                            businessPLAPlaceAddress = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.getAddress().attributes;
+                            businessPLAPlaceName = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.name;
+                            businessPLAPlaceAddress = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getAddress().attributes;
                             //businessPLAPlacePhone = WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.phone;
                             //businessPLAPlaceURL = WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.url;
                             startBusinessPLAPlacementMode();
@@ -2668,7 +2679,7 @@ var UpdateObject, MultiAction;
         $('.PIEParkingSpotEstimatorButton').remove();
 
         if(WazeWrap.getSelectedFeatures().length > 0){
-            if(WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue" && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories.includes("PARKING_LOT")){
+            if(WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue" && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories.includes("PARKING_LOT")){
                 var $ParkingSpotEstimatorButton;
                 $ParkingSpotEstimatorButton = $('<div style="font-size:18px; float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" class="PIEParkingSpotEstimatorButton" title="' + I18n.t('pie.prefs.PSEDisplayButtonTitle') + '">#</div>');
                 $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($ParkingSpotEstimatorButton);
@@ -2821,7 +2832,7 @@ var UpdateObject, MultiAction;
             $('#PIEParkingSpotEstimator').remove();
         else{
             if(WazeWrap.getSelectedFeatures().length > 0){
-                if(WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue" && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories.includes("PARKING_LOT")){
+                if(WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue" && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories.includes("PARKING_LOT")){
                     W.map.addLayer(PLSpotEstimatorLayer);
                     PLSpotEstimatorLayer.setZIndex(1000);
                     var $PLSpotEstimator = $('<div>');
@@ -2870,7 +2881,7 @@ var UpdateObject, MultiAction;
                     $('#PIESetParkingSpacesToPlace').click(function(){
                         let spotCount = $('#PIEPLSpotEstimatorTotal')[0].innerText;
                         if(spotCount != "0"){
-                            let myPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel;
+                            let myPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
                             let existingAttr = myPlace.attributes.categoryAttributes.PARKING_LOT;
                             let newAttr = {};
                             if (existingAttr) {
@@ -3015,7 +3026,7 @@ var UpdateObject, MultiAction;
             //WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.id.match(/(\d+\.){2}\d+/)
             if(WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue"){// && (typeof WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.id === "string")){ //id is only a string if the Place has been saved - don't allow copying unsaved Places
                 var $PlaceCopyButton;
-                if(!_.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories,"RESIDENCE_HOME")){
+                if(!_.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,"RESIDENCE_HOME")){
                     $PlaceCopyButton = $('<div style="float:right; z-index:100; cursor:pointer; position: absolute; top:0; right:0; margin-left:1px; margin-right:1px;" id="pieCopyPlaceButton" title="Creates a copy of this Place"><i class="fa fa-files-o fa-lg" aria-hidden="true"></i></div>');
                     $('#venue-edit-general wz-text-input[name="name"]').before($PlaceCopyButton);
 
@@ -3024,7 +3035,7 @@ var UpdateObject, MultiAction;
                         var AddPlace = require("Waze/Action/AddLandmark");
 
                         var NewPlace = new PlaceObject();
-                        var oldPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel;
+                        var oldPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
 
                         NewPlace.attributes.name = oldPlace.attributes.name + " (copy)";
                         NewPlace.attributes.phone = oldPlace.attributes.phone;
@@ -3132,7 +3143,7 @@ var UpdateObject, MultiAction;
             $('div.description-control').append('<i class="fa fa-times-circle clearButton" style="position:absolute; top:0; right:0;"></i>');
             $('div.description-control').css('position', 'relative');
             $('.clearButton').click(function(){
-                W.model.actionManager.add(new UpdateObject( WazeWrap.getSelectedFeatures()[0].WW.getObjectModel, { description: "" }));
+                W.model.actionManager.add(new UpdateObject( WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), { description: "" }));
             });
         }, 0);
     }
@@ -3153,7 +3164,7 @@ var UpdateObject, MultiAction;
         if(WazeWrap.hasPlaceSelected()){
             if($('.aliases-view > div > ul > div > li').length > 0){
                 var $button = $('<div>', {class:'makePrimary'}).text("Make primary").click(function(){
-                    let obj = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel;
+                    let obj = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
                     let toPrimary = $(this).prev().prev().val();
                     let aliases = obj.attributes.aliases.filter(function(i) {
                         return i != toPrimary;
@@ -3206,13 +3217,13 @@ var UpdateObject, MultiAction;
             //console.log(blankCategories.length);
             //blankCategories.splice(0, blankCategories.length);
             //console.log(blankCategories);
-            W.model.actionManager.add(new UpdateObject(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel, { categories: blankCategories }));
+            W.model.actionManager.add(new UpdateObject(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), { categories: blankCategories }));
         }
         else{
-            var newCategories = [].concat(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.attributes.categories);
+            var newCategories = [].concat(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories);
             //console.log($('#'+buttonid)[0].getAttribute("data-category"));
             newCategories.push($('#'+buttonid)[0].getAttribute("data-category"));
-            W.model.actionManager.add(new UpdateObject(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel, {categories: newCategories}));
+            W.model.actionManager.add(new UpdateObject(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), {categories: newCategories}));
         }
     }
 
@@ -3245,7 +3256,7 @@ var UpdateObject, MultiAction;
             if(venue.WW.getType() === "venue" && isArea){
                 if($('#AreaSize'))
                     $('#AreaSize').remove();
-                metersArea = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.geometry.getGeodesicArea(W.map.getProjectionObject());
+                metersArea = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().geometry.getGeodesicArea(W.map.getProjectionObject());
 
                 if(metersArea > 0 && isArea){
                     var ftArea = Math.round(metersArea * 10.76391 *100)/100;
@@ -3294,7 +3305,7 @@ var UpdateObject, MultiAction;
         var lon = adjustedPL.match(/lon=(-?\d+\.\d+)/)[1];
         var lat = adjustedPL.match(/lat=(-?\d+\.\d+)/)[1];
         var zoom = adjustedPL.match(/zoom[Levl]*=\d+/)[0];
-        var centroid = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel.geometry.getCentroid();
+        var centroid = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().geometry.getCentroid();
         adjustedPL = adjustedPL.replace(lon, WazeWrap.Geometry.ConvertTo4326(centroid.x,centroid.y).lon);
         adjustedPL = adjustedPL.replace(lat, WazeWrap.Geometry.ConvertTo4326(centroid.x,centroid.y).lat);
         adjustedPL = adjustedPL.replace(zoom, "zoomLevel="+settings.PlaceZoom);
