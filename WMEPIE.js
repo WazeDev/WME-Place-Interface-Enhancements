@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.07.27.02
+// @version      2023.08.23.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -52,7 +52,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Google Link Enhancer is fixed";
+    const updateMessage = "Fixed some thangs";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -2201,16 +2201,16 @@ var UpdateObject, MultiAction;
 
         if(closestSeg){ //if we were able to find a segment, try to pull the city and/or street name if the options are enabled
             var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = closestSeg.getAddress();
-
+debugger;
             newAttributes = {
-                countryID: address.attributes.country.id,
-                stateID: address.attributes.state.id,
+                countryID: address.attributes.country.attributes.id,
+                stateID: address.attributes.state.attributes.id,
                 emptyCity: address.attributes.city.attributes.name ? null : true,
-                emptyStreet: address.attributes.street.name ? null : true
+                emptyStreet: address.attributes.street.attributes.name ? null : true
             };
 
             if(settings.UseStreetFromClosestSeg)
-                newAttributes.streetName = address.attributes.street.name;
+                newAttributes.streetName = address.attributes.street.attributes.name;
             else
                 newAttributes.emptyStreet = true;
 
@@ -3125,8 +3125,8 @@ var UpdateObject, MultiAction;
         $('#pieSearchButton').remove();
         if(WazeWrap.hasPlaceSelected()){
             var $search = $('<i class="fa fa-search" id="pieSearchButton" title="Fills the search bar with the address" aria-hidden="true" style="display:inline; margin:5px;"></i>');
-            $('.address-edit-view').parent().parent().find('.control-label').attr("style", "display:inline");
-            $('.address-edit').before($search);
+
+            $('.address-edit-view').parent().parent().find('wz-label').append($search);
             $('#pieSearchButton').click(function(){
                 var address = $('.full-address')[0].innerHTML;
                 var noCity = I18n.translations[I18n.currentLocale()].edit.address.no_city;
@@ -3155,10 +3155,12 @@ var UpdateObject, MultiAction;
     }
 
     function MoveHNEntry(){
-        if(WazeWrap.hasPlaceSelected())
-            $('.full-address').click(function(){
-                $('.street-name').parent().parent().before($('.form-control.house-number').parent().parent());
-            });
+        if(WazeWrap.hasPlaceSelected()){
+            let move = function(){
+                delayFire(500, function(){$('.street-name').parent().parent().before($('wz-text-input.house-number').parent())});
+            };
+            $('.address-edit-view').click(move);
+        }
     }
 
     function AddMakePrimaryButtons(){
