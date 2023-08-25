@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.08.25.01
+// @version      2023.08.25.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -52,7 +52,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Bug fixes for displaying/setting place geometry";
+    const updateMessage = "Removing Move HN entry... option - interfers with native functionality";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -162,7 +162,7 @@ var UpdateObject, MultiAction;
             '<div class="controls-container pie-controls-container" id="divShowExternalProviderTooltip" title="' + I18n.t('pie.prefs.ShowGPIDTooltipTitle') + '" ><input type="checkbox" id="_cbShowExternalProviderTooltip" class="pieSettingsCheckbox" /><label for="_cbShowExternalProviderTooltip" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowGPIDTooltip') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divClearDescription" title="' + I18n.t('pie.prefs.ClearDescriptionTitle') + '" ><input type="checkbox" id="_cbClearDescription" class="pieSettingsCheckbox" /><label for="_cbClearDescription" style="white-space:pre-line;">' + I18n.t('pie.prefs.ClearDescription') + '</label></div>',
             //'<div class="controls-container pie-controls-container" id="divMoveAddress" title="' + I18n.t('pie.prefs.MoveAddressTitle') + '"><input type="checkbox" id="_cbMoveAddress" class="pieSettingsCheckbox"/><label for="_cbMoveAddress" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveAddress') + '</label></div>',
-            '<div class="controls-container pie-controls-container" id="divMoveHNEntry" title="' + I18n.t('pie.prefs.MoveHNEntryTitle') + '"><input type="checkbox" id="_cbMoveHNEntry" class="pieSettingsCheckbox"/><label for="_cbMoveHNEntry" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveHNEntry') + '</label></div>',
+            //'<div class="controls-container pie-controls-container" id="divMoveHNEntry" title="' + I18n.t('pie.prefs.MoveHNEntryTitle') + '"><input type="checkbox" id="_cbMoveHNEntry" class="pieSettingsCheckbox"/><label for="_cbMoveHNEntry" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveHNEntry') + '</label></div>',
             '<br>',
             '<div class="controls-container pie-controls-container" id="divHidePaymentType" title="' + I18n.t('pie.prefs.HidePaymentTypeTitle') + '"><input type="checkbox" id="_cbHidePaymentType" class="pieSettingsCheckbox" /><label for="_cbHidePaymentType" style="white-space:pre-line;">' + I18n.t('pie.prefs.HidePaymentType') + '</label></div>',
             `<div class="controls-container pie-controls-container" id="divGeometryMods" title="${I18n.t('pie.prefs.GeometryModsTitle')}"><input type="checkbox" id="_cbGeometryMods" class="pieSettingsCheckbox" /><label for="_cbGeometryMods" style="white-space:pre-line;">${I18n.t('pie.prefs.GeometryMods')}</label></div>`,
@@ -383,12 +383,12 @@ var UpdateObject, MultiAction;
                 unregisterEvents(AddPlaceCategoriesButtons);
         });
 
-        $('#_cbMoveHNEntry').change(function(){
-            if(this.checked)
-                registerEvents(MoveHNEntry);
-            else
-                unregisterEvents(MoveHNEntry);
-        });
+//         $('#_cbMoveHNEntry').change(function(){
+//             if(this.checked)
+//                 registerEvents(MoveHNEntry);
+//             else
+//                 unregisterEvents(MoveHNEntry);
+//         });
 
         $('#_cbClearDescription').change(function(){
             if(this.checked)
@@ -502,7 +502,7 @@ var UpdateObject, MultiAction;
         setChecked('_cbClearDescription', settings.ClearDescription);
         setChecked('_cbPlaceNameFontBold', settings.PlaceNameFontBold);
         setChecked('_cbPlaceLocatorCrosshairProdPL', settings.PlaceLocatorCrosshairProdPL);
-        setChecked('_cbMoveHNEntry', settings.MoveHNEntry);
+        //setChecked('_cbMoveHNEntry', settings.MoveHNEntry);
         setChecked('_cbShowPLSpotEstimatorButton', settings.ShowPLSpotEstimatorButton);
         setChecked('_cbShowNavPointClosestSegmentOnHover', settings.ShowNavPointClosestSegmentOnHover);
         setChecked('_cbShowClosestSegmentSelected', settings.ShowClosestSegmentSelected);
@@ -584,10 +584,10 @@ var UpdateObject, MultiAction;
             ShowClearDescription();
         }
 
-        if(settings.MoveHNEntry){
-            registerEvents(MoveHNEntry);
-            MoveHNEntry();
-        }
+//         if(settings.MoveHNEntry){
+//             registerEvents(MoveHNEntry);
+//             MoveHNEntry();
+//         }
 
         if(settings.ShowPLSpotEstimatorButton){
             registerEvents(ShowPLSpotEstimatorButton);
@@ -3153,14 +3153,14 @@ var UpdateObject, MultiAction;
             $('#venue-edit-general').prepend($('.address-edit.side-panel-section'));
     }
 
-    function MoveHNEntry(){
-        if(WazeWrap.hasPlaceSelected()){
-            let move = function(){
-                delayFire(500, function(){$('.street-name').parent().parent().before($('wz-text-input.house-number').parent())});
-            };
-            $('.address-edit-view').click(move);
-        }
-    }
+//     function MoveHNEntry(){
+//         if(WazeWrap.hasPlaceSelected()){
+//             let move = function(){
+//                 delayFire(200, function(){$('.street-name').parent().parent().before($('wz-text-input.house-number').parent())});
+//             };
+//             $('.address-edit-view').click(move);
+//         }
+//     }
 
     function AddMakePrimaryButtons(){
         if(WazeWrap.hasPlaceSelected()){
