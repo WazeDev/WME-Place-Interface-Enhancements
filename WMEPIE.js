@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.08.23.01
+// @version      2023.08.25.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -52,7 +52,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Fixed some thangs";
+    const updateMessage = "Bug fixes for displaying/setting place geometry";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -1454,7 +1454,6 @@ var UpdateObject, MultiAction;
     }
 
     function AddHoursParserInterface(){
-        //debugger;
         if(WazeWrap.hasPlaceSelected()){
             var $PIEHoursParser = $("<div>", {style:"min-height:20px"});
             if(!$('#PIEHoursParserDiv').length){
@@ -2201,7 +2200,7 @@ var UpdateObject, MultiAction;
 
         if(closestSeg){ //if we were able to find a segment, try to pull the city and/or street name if the options are enabled
             var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = closestSeg.getAddress();
-debugger;
+
             newAttributes = {
                 countryID: address.attributes.country.attributes.id,
                 stateID: address.attributes.state.attributes.id,
@@ -2481,8 +2480,8 @@ debugger;
     }
 
     function updateGeometryInputs(){
-        let currPlace = W.selectionManager.getSelectedFeatures()[0];
-        let currPlaceGeom = currPlace.model.geometry.components[0].clone().components;
+        let currPlaceModel = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+        let currPlaceGeom = currPlaceModel.geometry.components[0].clone().components;
         let standardGeom = "", WMEGeom = "", WKTGeom = "";
         WKTGeom = "POLYGON(";
 
@@ -2512,7 +2511,7 @@ debugger;
     async function InsertGeometryMods(){
         $('#pieGeometryMods').remove();
         $('#pieViewEditGeom').remove(); //remove the Place geometry window when the option is disabled or a Place is de-selected
-        //debugger;
+
         if((WazeWrap.hasPlaceSelected() || WazeWrap.hasMapCommentSelected()) && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().geometry.toString().match(/^POLYGON/)){
             await new Promise(r => setTimeout(r, 150));
             let $GeomMods = $(`<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls">${!WazeWrap.hasMapCommentSelected() ? '<i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="piesimplifyplace" title="Simplify" class="fa fa-magic fa-2x" aria-hidden="true" style="cursor:pointer;"></i>' : ''} <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Rotate ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieresize" title="Allow resizing the Place. While enabled the geometry cannot be modified" class="fa fa-expand fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Resize ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieEditGeom" class="fa fa-pencil-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pieClearGeom" title="Clear geometry" class="fa fa-times fa-2x" aria-hidden="true" style="cursor:pointer; color:red;"></i></div></div>`);
