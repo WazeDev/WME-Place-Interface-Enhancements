@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.11.15.01
+// @version      2023.12.01.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -21,6 +21,8 @@
 // @connect     greasyfork.org
 // @contributionURL https://github.com/WazeDev/Thank-The-Authors
 // @license      GPLv3
+// @downloadURL https://update.greasyfork.org/scripts/26340/WME%20Place%20Interface%20Enhancements.user.js
+// @updateURL https://update.greasyfork.org/scripts/26340/WME%20Place%20Interface%20Enhancements.meta.js
 // ==/UserScript==
 
 /* global W */
@@ -52,7 +54,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Updating HoursParser require url";
+    const updateMessage = "Some fixes for recent WME geometry object changes.  Probably missed something.  Don't worry, they'll change something else that needs fixed soon and it'll be caught then.";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -1214,7 +1216,7 @@ var UpdateObject, MultiAction;
                     venueList.push(W.model.venues.objects[id]);
                     W.selectionManager.setSelectedModels(venueList);
                 }
-            }(vattr.geometry.bounds, catalog[i]), false);
+            }(vattr.getOLGeometry().bounds, catalog[i]), false);
             venueDiv.appendChild(venuePos);
             let tmp=document.createElement('div'); tmp.style.clear='both';venueDiv.appendChild(tmp);
 
@@ -1364,8 +1366,8 @@ var UpdateObject, MultiAction;
     }
 
     function onScreen(obj) {
-        if (obj.geometry)
-            return(W.map.getExtent().intersectsBounds(obj.geometry.getBounds()));
+        if (obj.getOLGeometry())
+            return(W.map.getExtent().intersectsBounds(obj.getOLGeometry().getBounds()));
         return(false);
     }
 
@@ -1614,7 +1616,7 @@ var UpdateObject, MultiAction;
                 filter: new OpenLayers.Filter.Comparison({
                     type: '==',
                     evaluate: function(venue) {
-                        return (venue.geometry != null ? /POLYGON/i.test(venue.geometry.id) : false);
+                        return (venue.getOLGeometry() != null ? /POLYGON/i.test(venue.getOLGeometry().id) : false);
                     }
                 }),
                 symbolizer: {
@@ -1651,9 +1653,9 @@ var UpdateObject, MultiAction;
                 navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getNavigationPoints()[0]._point;
             else{
                 if(isArea)
-                    navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).geometry.getCentroid();
+                    navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().getCentroid();
                 else
-                    navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).geometry.clone();
+                    navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().clone();
             }
 
             //nav point to closest segment
@@ -1665,7 +1667,7 @@ var UpdateObject, MultiAction;
             //place center to nav point
             let startPt = highlightedVenue.geometry;
             if(isArea)
-                startPt = WazeWrap.Model.getObjectModel(highlightedVenue).geometry.getCentroid();
+                startPt = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().getCentroid();
             lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([startPt, navPoint]), {}, lineStyleToNavPoint);
             pointFeature = new OpenLayers.Feature.Vector(navPoint, {}, pointStyleNavPoint);
             if(WazeWrap.Model.getObjectModel(highlightedVenue).attributes.entryExitPoints.length > 0 || isArea)
@@ -1761,13 +1763,13 @@ var UpdateObject, MultiAction;
                                     entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
                                 findNearestSegment(entryExitPoint);
                             };*/
-                            let entryExitPoint = selectedItem.WW.getObjectModel().geometry.clone();
+                            let entryExitPoint = selectedItem.WW.getObjectModel().getOLGeometry().clone();
                             if(selectedItem.WW.getObjectModel().getNavigationPoints().length > 0)
                                 entryExitPoint = selectedItem.WW.getObjectModel().attributes.entryExitPoints[0]._point;
                             findNearestSegment(entryExitPoint);
                         } else {
                             if(selectedItem.WW.getObjectModel().getNavigationPoints().length === 0)
-                                findNearestSegment(selectedItem.WW.getObjectModel().geometry.getCentroid());
+                                findNearestSegment(selectedItem.WW.getObjectModel().getOLGeometry().getCentroid());
                             else{
                                 for(let i=0;i<selectedItem.WW.getObjectModel().getNavigationPoints().length;i++)
                                     findNearestSegment(selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point);
@@ -1897,7 +1899,7 @@ var UpdateObject, MultiAction;
                 var venue = W.model.venues.getObjectById(placeID);
                 isPoint = venue.isPoint();
                 if((isPoint && W.map.getZoom() >= 17) || (!isPoint && W.map.getZoom() >= 15)){
-                    if(WazeWrap.Geometry.isGeometryInMapExtent(venue.geometry)){
+                    if(WazeWrap.Geometry.isGeometryInMapExtent(venue.getOLGeometry())){
                         if( (isPoint && showPoint) || (!isPoint && showArea && !venue.isParkingLot()) || (!isPoint && showPLA && venue.isParkingLot())){
                             let placeFilter = $('#piePlaceFilter').val();
                             if(placeFilter.length > 0){
@@ -1909,10 +1911,11 @@ var UpdateObject, MultiAction;
                             }
 
                             let textLoc;
+
                             if(isPoint)
-                                textLoc = new OpenLayers.Geometry.Point(venue.geometry.x, venue.geometry.y);
+                                textLoc = new OpenLayers.Geometry.Point(venue.getOLGeometry().x, venue.getOLGeometry().y);
                             else
-                                textLoc = venue.geometry.getCentroid();
+                                textLoc = venue.getOLGeometry().getCentroid();
                             let placeName =WordWrap(venue.attributes.name.trim() + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : ''));
                             if(venue.attributes.categories[0] === "RESIDENCE_HOME")
                                 placeName = venue.attributes.houseNumber + (venue.attributes.name.trim() !== '' ? ' - ' + venue.attributes.name : '') + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : '');
@@ -2328,17 +2331,17 @@ var UpdateObject, MultiAction;
     }
 
     function OrthogonalizePlace(){
-        if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().geometry.toString().match(/^POLYGON/)){
+        if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().toString().match(/^POLYGON/)){
             let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-            var newGeom = WazeWrap.Util.OrthogonalizeGeometry(selected.geometry.clone().components[0].components);
+            var newGeom = WazeWrap.Util.OrthogonalizeGeometry(selected.getOLGeometry().clone().components[0].components);
             var UFG = require("Waze/Action/UpdateFeatureGeometry");
-            var originalGeometry = selected.geometry.clone();
+            var originalGeometry = selected.getOLGeometry().clone();
 
             if(!GeomArraysEqual(originalGeometry.components[0].components, newGeom)){
-                selected.geometry.components[0].components = [].concat(newGeom);
-                selected.geometry.components[0].clearBounds();
+                selected.getOLGeometry().components[0].components = [].concat(newGeom);
+                selected.getOLGeometry().components[0].clearBounds();
 
-                var action = new UFG(selected, W.model.venues, originalGeometry, selected.geometry);
+                var action = new UFG(selected, W.model.venues, W.userscripts.toGeoJSONGeometry(originalGeometry), W.userscripts.toGeoJSONGeometry(selected.getOLGeometry()));
                 W.model.actionManager.add(action);
             }
         }
@@ -2369,16 +2372,16 @@ var UpdateObject, MultiAction;
     }
 
     function SimplifyPlace(){
-        if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().geometry.toString().match(/^POLYGON/)){
+        if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().toString().match(/^POLYGON/)){
             let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-            let originalGeometry = selected.geometry.clone();
+            let originalGeometry = selected.getOLGeometry().clone();
             let ls = new OpenLayers.Geometry.LineString(originalGeometry.components[0].components);
             ls = ls.simplify(settings.SimplifyFactor);
             let newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
 
             if (newGeometry.components[0].components.length < originalGeometry.components[0].components.length) {
                 let UFG = require("Waze/Action/UpdateFeatureGeometry");
-                W.model.actionManager.add(new UFG(selected, W.model.venues, originalGeometry, newGeometry));
+                W.model.actionManager.add(new UFG(selected, W.model.venues, W.userscripts.toGeoJSONGeometry(originalGeometry), W.userscripts.toGeoJSONGeometry(newGeometry)));
             }
         }
     }
@@ -2471,17 +2474,18 @@ var UpdateObject, MultiAction;
 
     function saveNewPlaceGeometry(newGeom){
         let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-        let originalGeometry = selected.geometry.clone();
+        let originalGeometry = selected.getOLGeometry().clone();
         let ls = new OpenLayers.Geometry.LineString(newGeom);
         let newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
 
         let UFG = require("Waze/Action/UpdateFeatureGeometry");
-        W.model.actionManager.add(new UFG(selected, W.model.venues, originalGeometry, newGeometry));
+        debugger;
+        W.model.actionManager.add(new UFG(selected, W.model.venues, W.userscripts.toGeoJSONGeometry(originalGeometry), W.userscripts.toGeoJSONGeometry(newGeometry)));
     }
 
     function updateGeometryInputs(){
         let currPlaceModel = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-        let currPlaceGeom = currPlaceModel.geometry.components[0].clone().components;
+        let currPlaceGeom = currPlaceModel.getOLGeometry().components[0].clone().components;
         let standardGeom = "", WMEGeom = "", WKTGeom = "";
         WKTGeom = "POLYGON(";
 
@@ -2512,7 +2516,7 @@ var UpdateObject, MultiAction;
         $('#pieGeometryMods').remove();
         $('#pieViewEditGeom').remove(); //remove the Place geometry window when the option is disabled or a Place is de-selected
 
-        if((WazeWrap.hasPlaceSelected() || WazeWrap.hasMapCommentSelected()) && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().geometry.toString().match(/^POLYGON/)){
+        if((WazeWrap.hasPlaceSelected() || WazeWrap.hasMapCommentSelected()) && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().toString().match(/^POLYGON/)){
             await new Promise(r => setTimeout(r, 150));
             let $GeomMods = $(`<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls">${!WazeWrap.hasMapCommentSelected() ? '<i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="piesimplifyplace" title="Simplify" class="fa fa-magic fa-2x" aria-hidden="true" style="cursor:pointer;"></i>' : ''} <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Rotate ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieresize" title="Allow resizing the Place. While enabled the geometry cannot be modified" class="fa fa-expand fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Resize ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieEditGeom" class="fa fa-pencil-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pieClearGeom" title="Clear geometry" class="fa fa-times fa-2x" aria-hidden="true" style="cursor:pointer; color:red;"></i></div></div>`);
             if(W.selectionManager.getSelectedFeatures()[0].WW.getType() === "mapComment")
@@ -2534,15 +2538,15 @@ var UpdateObject, MultiAction;
 
             $('#pieClearGeom').click(function(){
                 let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-                let centerLonLat = selected.geometry.bounds.getCenterLonLat();
+                let centerLonLat = selected.getOLGeometry().bounds.getCenterLonLat();
                 let newGeom = OpenLayers.Geometry.Polygon.createRegularPolygon(new OpenLayers.Geometry.Point(centerLonLat.lon, centerLonLat.lat), 20, 4, null).components[0].components;
                 let UFG = require("Waze/Action/UpdateFeatureGeometry");
-                let originalGeometry = selected.geometry.clone();
+                let originalGeometry = selected.getOLGeometry().clone();
 
-                selected.geometry.components[0].components = [].concat(newGeom);
-                selected.geometry.components[0].clearBounds();
+                selected.getOLGeometry().components[0].components = [].concat(newGeom);
+                selected.getOLGeometry().components[0].clearBounds();
 
-                let action = new UFG(selected, W.model.venues, originalGeometry, selected.geometry);
+                let action = new UFG(selected, W.model.venues, W.userscripts.toGeoJSONGeometry(originalGeometry), W.userscripts.toGeoJSONGeometry(selected.getOLGeometry()));
                 W.model.actionManager.add(action);
 
             });
@@ -2806,7 +2810,7 @@ var UpdateObject, MultiAction;
         let totalLength = 0;
 
         PLSpotEstimatorCalibrationLayer.features.forEach(function(f) {
-            let length = Math.round(WazeWrap.Geometry.calculateDistance(f.geometry.components)*100)/100;
+            let length = Math.round(WazeWrap.Geometry.calculateDistance(f.getOLGeometry().components)*100)/100;
             totalLength += length;
         });
 
@@ -3045,18 +3049,18 @@ var UpdateObject, MultiAction;
                         NewPlace.attributes.description = oldPlace.attributes.description;
                         NewPlace.attributes.houseNumber = oldPlace.attributes.houseNumber;
                         NewPlace.attributes.lockRank = oldPlace.attributes.lockRank;
-                        NewPlace.attributes.geometry = oldPlace.attributes.geometry.clone();
+                        NewPlace.attributes.geometry = oldPlace.attributes.getOLGeometry().clone();
 
                         let convertedCoords;
-                        if(oldPlace.attributes.geometry.toString().match(/^POLYGON/)){
-                            for(var i=0; i<NewPlace.attributes.geometry.components[0].components.length - 1; i++){
-                                convertedCoords = WazeWrap.Geometry.ConvertTo4326(NewPlace.attributes.geometry.components[0].components[i].x, NewPlace.attributes.geometry.components[0].components[i].y);
+                        if(oldPlace.attributes.getOLGeometry().toString().match(/^POLYGON/)){
+                            for(var i=0; i<NewPlace.attributes.getOLGeometry().components[0].components.length - 1; i++){
+                                convertedCoords = WazeWrap.Geometry.ConvertTo4326(NewPlace.attributes.getOLGeometry().components[0].components[i].x, NewPlace.attributes.getOLGeometry().components[0].components[i].y);
                                 convertedCoords.lon += WazeWrap.Geometry.CalculateLongOffsetGPS(5, convertedCoords.long, convertedCoords.lat);
-                                NewPlace.attributes.geometry.components[0].components[i].x = WazeWrap.Geometry.ConvertTo900913(convertedCoords.lon, convertedCoords.lat).lon;
+                                NewPlace.attributes.getOLGeometry().components[0].components[i].x = WazeWrap.Geometry.ConvertTo900913(convertedCoords.lon, convertedCoords.lat).lon;
                             }
                         }
                         else{
-                            convertedCoords = WazeWrap.Geometry.ConvertTo4326(oldPlace.attributes.geometry.x, oldPlace.attributes.geometry.y);
+                            convertedCoords = WazeWrap.Geometry.ConvertTo4326(oldPlace.attributes.getOLGeometry().x, oldPlace.attributes.getOLGeometry().y);
                             convertedCoords.lon += WazeWrap.Geometry.CalculateLongOffsetGPS(5, convertedCoords.long, convertedCoords.lat);
                             NewPlace.attributes.geometry.x = WazeWrap.Geometry.ConvertTo900913(convertedCoords.lon, convertedCoords.lat).lon;
                         }
@@ -3230,7 +3234,7 @@ var UpdateObject, MultiAction;
     }
 
     function CenterOnPlace(venue, zoom){
-        var centroid = venue.geometry.getCentroid();
+        var centroid = venue.getOLGeometry().getCentroid();
         W.map.setCenter([centroid.x, centroid.y], zoom);
     }
 
@@ -3258,7 +3262,7 @@ var UpdateObject, MultiAction;
             if(venue.WW.getType() === "venue" && isArea){
                 if($('#AreaSize'))
                     $('#AreaSize').remove();
-                metersArea = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().geometry.getGeodesicArea(W.map.getProjectionObject());
+                metersArea = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().getGeodesicArea(W.map.getProjectionObject());
 
                 if(metersArea > 0 && isArea){
                     var ftArea = Math.round(metersArea * 10.76391 *100)/100;
@@ -3307,7 +3311,7 @@ var UpdateObject, MultiAction;
         var lon = adjustedPL.match(/lon=(-?\d+\.\d+)/)[1];
         var lat = adjustedPL.match(/lat=(-?\d+\.\d+)/)[1];
         var zoom = adjustedPL.match(/zoom[Levl]*=\d+/)[0];
-        var centroid = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().geometry.getCentroid();
+        var centroid = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().getCentroid();
         adjustedPL = adjustedPL.replace(lon, WazeWrap.Geometry.ConvertTo4326(centroid.x,centroid.y).lon);
         adjustedPL = adjustedPL.replace(lat, WazeWrap.Geometry.ConvertTo4326(centroid.x,centroid.y).lat);
         adjustedPL = adjustedPL.replace(zoom, "zoomLevel="+settings.PlaceZoom);
