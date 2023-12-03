@@ -15,7 +15,7 @@
 // @require      https://greasyfork.org/scripts/24851-wazewrap/code/WazeWrap.js
 // @require      https://greasyfork.org/scripts/27023-jscolor/code/JSColor.js
 // @require      https://update.greasyfork.org/scripts/37486/1158035/WME%20Utils%20-%20HoursParser.js
-// @require      https://greasyfork.org/scripts/38421-wme-utils-navigationpoint/code/WME%20Utils%20-%20NavigationPoint.js?version=251065
+// @require      https://greasyfork.org/scripts/38421-wme-utils-navigationpoint/code/WME%20Utils%20-%20NavigationPoint.js
 // @require      https://greasyfork.org/scripts/39208-wme-utils-google-link-enhancer/code/WME%20Utils%20-%20Google%20Link%20Enhancer.js
 // @require      https://greasyfork.org/scripts/375202-photo-viewer-db-interface/code/Photo%20Viewer%20DB%20Interface.js
 // @connect     greasyfork.org
@@ -1650,7 +1650,7 @@ var UpdateObject, MultiAction;
             let navPoint;
 
             if(WazeWrap.Model.getObjectModel(highlightedVenue).getNavigationPoints().length > 0)
-                navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getNavigationPoints()[0]._point;
+                navPoint = W.userscripts.toOLGeometry(WazeWrap.Model.getObjectModel(highlightedVenue).getNavigationPoints()[0]._point);
             else{
                 if(isArea)
                     navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().getCentroid();
@@ -1976,7 +1976,6 @@ var UpdateObject, MultiAction;
 
         var PlaceObject = require("Waze/Feature/Vector/Landmark");
         var AddPlace = require("Waze/Action/AddLandmark");
-        var NewPlace = new PlaceObject();
 
         var points = [];
         var i;
@@ -1984,7 +1983,7 @@ var UpdateObject, MultiAction;
             points.push(new OpenLayers.Geometry.Point(pos.components[0].components[i].x, pos.components[0].components[i].y));
 
         var ring = new OpenLayers.Geometry.LinearRing(points);
-        NewPlace.geometry = new OpenLayers.Geometry.Polygon([ring]);
+        var NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(new OpenLayers.Geometry.Polygon([ring])) });
 
         NewPlace.attributes.categories.push("PARKING_LOT");
 
@@ -2066,14 +2065,13 @@ var UpdateObject, MultiAction;
         var multiaction = new MultiAction();
         multiaction.setModel(W.model);
 
-        var NewPlace = new PlaceObject();
         var points = [];
         var i;
         for(i=0;i<geom.components[0].components.length;i++)
             points.push(new OpenLayers.Geometry.Point(geom.components[0].components[i].x, geom.components[0].components[i].y));
 
         var ring = new OpenLayers.Geometry.LinearRing(points);
-        NewPlace.geometry = new OpenLayers.Geometry.Polygon([ring]);
+        var NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(new OpenLayers.Geometry.Polygon([ring])) });
         NewPlace.attributes.categories.push("PARKING_LOT");
 
         NewPlace.attributes.lockRank = Number(settings.DefaultLockLevel);
@@ -2174,9 +2172,9 @@ var UpdateObject, MultiAction;
         var multiaction = new MultiAction();
         multiaction.setModel(W.model);
 
-        var NewPlace = new PlaceObject();
+        var newOLgeometry;
         if(isPoint)
-            NewPlace.geometry = new OpenLayers.Geometry.Point(pos.lon, pos.lat);
+            newOLgeometry = new OpenLayers.Geometry.Point(pos.lon, pos.lat);
         else{
             var points = [];
             var i;
@@ -2184,15 +2182,16 @@ var UpdateObject, MultiAction;
                 points.push(new OpenLayers.Geometry.Point(pos.components[0].components[i].x, pos.components[0].components[i].y));
 
             var ring = new OpenLayers.Geometry.LinearRing(points);
-            NewPlace.geometry = new OpenLayers.Geometry.Polygon([ring]);
-
+            newOLgeometry = new OpenLayers.Geometry.Polygon([ring]);
         }
+
+        var NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(newOLgeometry) });
 
         NewPlace.attributes.categories.push(category);
         if(category === resCategory){
             NewPlace._originalResidential = true;
             NewPlace.attributes.residential = true;
-            let eep = new NavigationPoint(new OpenLayers.Geometry.Point(pos.lon, pos.lat));
+            let eep = new NavigationPoint(W.userscripts.toGeoJSONGeometry(new OpenLayers.Geometry.Point(pos.lon, pos.lat)));
             NewPlace.attributes.entryExitPoints.push(eep);
         }
         NewPlace.attributes.lockRank = Number(settings.DefaultLockLevel);
@@ -3038,8 +3037,8 @@ var UpdateObject, MultiAction;
                         var PlaceObject = require("Waze/Feature/Vector/Landmark");
                         var AddPlace = require("Waze/Action/AddLandmark");
 
-                        var NewPlace = new PlaceObject();
                         var oldPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+                        var NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(oldPlace.attributes.getOLGeometry().clone()) });
 
                         NewPlace.attributes.name = oldPlace.attributes.name + " (copy)";
                         NewPlace.attributes.phone = oldPlace.attributes.phone;
@@ -3049,7 +3048,6 @@ var UpdateObject, MultiAction;
                         NewPlace.attributes.description = oldPlace.attributes.description;
                         NewPlace.attributes.houseNumber = oldPlace.attributes.houseNumber;
                         NewPlace.attributes.lockRank = oldPlace.attributes.lockRank;
-                        NewPlace.attributes.geometry = oldPlace.attributes.getOLGeometry().clone();
 
                         let convertedCoords;
                         if(oldPlace.attributes.getOLGeometry().toString().match(/^POLYGON/)){
