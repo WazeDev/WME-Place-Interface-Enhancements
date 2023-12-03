@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.12.01.01
+// @version      2023.12.01.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1216,7 +1216,7 @@ var UpdateObject, MultiAction;
                     venueList.push(W.model.venues.objects[id]);
                     W.selectionManager.setSelectedModels(venueList);
                 }
-            }(vattr.getOLGeometry().bounds, catalog[i]), false);
+            }(vattr.geometry.bounds, catalog[i]), false);
             venueDiv.appendChild(venuePos);
             let tmp=document.createElement('div'); tmp.style.clear='both';venueDiv.appendChild(tmp);
 
