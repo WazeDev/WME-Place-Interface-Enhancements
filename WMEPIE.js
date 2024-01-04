@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2023.12.01.02
+// @version      2024.01.04.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -54,7 +54,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Some fixes for recent WME geometry object changes.  Probably missed something.  Don't worry, they'll change something else that needs fixed soon and it'll be caught then.";
+    const updateMessage = "Fixed bug getting city from alt names.";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -2221,7 +2221,7 @@ var UpdateObject, MultiAction;
                 if(settings.UseAltCity && cityName === ""){
                     if(address.attributes.altStreets.length > 0){ //segment has alt names
                         for(var j=0;j<closestSeg.attributes.streetIDs.length;j++){
-                            var altCity = W.model.cities.getObjectById(W.model.streets.getObjectById(closestSeg.attributes.streetIDs[j]).cityID).attributes;
+                            var altCity = W.model.cities.getObjectById(W.model.streets.getObjectById(closestSeg.attributes.streetIDs[j]).attributes.cityID).attributes;
 
                             if(altCity.name !== null && altCity.englishName !== ""){
                                 cityName = altCity.name;
