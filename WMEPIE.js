@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2024.01.04.01
+// @version      2023.01.25.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -54,7 +54,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Fixed bug getting city from alt names.";
+    const updateMessage = "Fixes to make it work with WME v 2.206.";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -2063,7 +2063,6 @@ var UpdateObject, MultiAction;
         var PlaceObject = require("Waze/Feature/Vector/Landmark");
         var AddPlace = require("Waze/Action/AddLandmark");
         var multiaction = new MultiAction();
-        multiaction.setModel(W.model);
 
         var points = [];
         var i;
@@ -2107,7 +2106,7 @@ var UpdateObject, MultiAction;
 
         var UFA = new UpdateFeatureAddress(NewPlace, newAttributes);
         UFA.options.updateHouseNumber = true;
-        multiaction.doSubAction(UFA);
+        multiaction.doSubAction(W.model, UFA);
         W.model.actionManager.add(multiaction);
 
         W.selectionManager.setSelectedModels([NewPlace]);
@@ -2170,7 +2169,6 @@ var UpdateObject, MultiAction;
         var PlaceObject = require("Waze/Feature/Vector/Landmark");
         var AddPlace = require("Waze/Action/AddLandmark");
         var multiaction = new MultiAction();
-        multiaction.setModel(W.model);
 
         var newOLgeometry;
         if(isPoint)
@@ -2238,7 +2236,7 @@ var UpdateObject, MultiAction;
                 newAttributes.emptyCity = true;
 
 
-            multiaction.doSubAction(new UpdateFeatureAddress(NewPlace, newAttributes));
+            multiaction.doSubAction(W.model, new UpdateFeatureAddress(NewPlace, newAttributes));
             W.model.actionManager.add(multiaction);
             W.selectionManager.setSelectedModels([NewPlace]);
         }
@@ -3095,7 +3093,6 @@ var UpdateObject, MultiAction;
 
                         var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = oldPlace.getAddress();
                         var multiaction = new MultiAction();
-                        multiaction.setModel(W.model);
 
                         newAttributes = {
                             countryID: address.attributes.country.id,
@@ -3113,7 +3110,7 @@ var UpdateObject, MultiAction;
 
                         var UFA = new UpdateFeatureAddress(NewPlace, newAttributes);
                         UFA.options.updateHouseNumber = true;
-                        multiaction.doSubAction(UFA);
+                        multiaction.doSubAction(W.model, UFA);
                         W.model.actionManager.add(multiaction);
                         W.selectionManager.setSelectedModels([NewPlace]);
                     });
@@ -3175,9 +3172,8 @@ var UpdateObject, MultiAction;
                     });
                     aliases.push(obj.attributes.name);
                     var multiaction = new MultiAction();
-                    multiaction.setModel(W.model);
-                    multiaction.doSubAction(new UpdateObject(obj, {aliases: aliases}));
-                    multiaction.doSubAction(new UpdateObject(obj, {name: toPrimary}));
+                    multiaction.doSubAction(W.model, new UpdateObject(obj, {aliases: aliases}));
+                    multiaction.doSubAction(W.model, new UpdateObject(obj, {name: toPrimary}));
                     W.model.actionManager.add(multiaction);
                 });
                 $('.aliases-view > div > ul > div > li').find('.delete').after($button);
