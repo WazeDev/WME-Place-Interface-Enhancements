@@ -2256,7 +2256,7 @@ var UpdateObject, MultiAction;
         if ($('.address-edit-view').length > 0) {
             $('.full-address').trigger("click");
             await new Promise(r => setTimeout(r, 150));
-            $('#id', $('.house-number')[0].shadowRoot).focus();
+            $('input', $('.house-number')[0].shadowRoot).focus();
 
         } else if (rppTries < 1000) {
             console.log("not found");
