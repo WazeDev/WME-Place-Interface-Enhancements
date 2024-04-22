@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2024.03.20.01
+// @version      2024.04.22.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -54,7 +54,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "I'll be honest...I don't remember what was fixed.  A few small things.  Want to get these fixes out there before I forget I made them and they get wiped out.  <br><br>Distance calcs will be fixed next, which will reduce console error spammage.";
+    const updateMessage = "Fixing the place copy functionality.  Until they change the geometry access again, at least.";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -3037,7 +3037,7 @@ var UpdateObject, MultiAction;
                         var AddPlace = require("Waze/Action/AddLandmark");
 
                         var oldPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-                        var NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(oldPlace.attributes.getOLGeometry().clone()) });
+                        var NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(oldPlace.getOLGeometry().clone()) });
 
                         NewPlace.attributes.name = oldPlace.attributes.name + " (copy)";
                         NewPlace.attributes.phone = oldPlace.attributes.phone;
@@ -3049,15 +3049,15 @@ var UpdateObject, MultiAction;
                         NewPlace.attributes.lockRank = oldPlace.attributes.lockRank;
 
                         let convertedCoords;
-                        if(oldPlace.attributes.getOLGeometry().toString().match(/^POLYGON/)){
-                            for(var i=0; i<NewPlace.attributes.getOLGeometry().components[0].components.length - 1; i++){
-                                convertedCoords = WazeWrap.Geometry.ConvertTo4326(NewPlace.attributes.getOLGeometry().components[0].components[i].x, NewPlace.attributes.getOLGeometry().components[0].components[i].y);
+                        if(oldPlace.getOLGeometry().toString().match(/^POLYGON/)){
+                            for(var i=0; i<NewPlace.getOLGeometry().components[0].components.length - 1; i++){
+                                convertedCoords = WazeWrap.Geometry.ConvertTo4326(NewPlace.getOLGeometry().components[0].components[i].x, NewPlace.getOLGeometry().components[0].components[i].y);
                                 convertedCoords.lon += WazeWrap.Geometry.CalculateLongOffsetGPS(5, convertedCoords.long, convertedCoords.lat);
-                                NewPlace.attributes.getOLGeometry().components[0].components[i].x = WazeWrap.Geometry.ConvertTo900913(convertedCoords.lon, convertedCoords.lat).lon;
+                                NewPlace.getOLGeometry().components[0].components[i].x = WazeWrap.Geometry.ConvertTo900913(convertedCoords.lon, convertedCoords.lat).lon;
                             }
                         }
                         else{
-                            convertedCoords = WazeWrap.Geometry.ConvertTo4326(oldPlace.attributes.getOLGeometry().x, oldPlace.attributes.getOLGeometry().y);
+                            convertedCoords = WazeWrap.Geometry.ConvertTo4326(oldPlace.getOLGeometry().x, oldPlace.getOLGeometry().y);
                             convertedCoords.lon += WazeWrap.Geometry.CalculateLongOffsetGPS(5, convertedCoords.long, convertedCoords.lat);
                             NewPlace.attributes.geometry.x = WazeWrap.Geometry.ConvertTo900913(convertedCoords.lon, convertedCoords.lat).lon;
                         }
