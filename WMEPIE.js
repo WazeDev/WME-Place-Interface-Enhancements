@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2024.04.22.01
+// @version      2024.04.23.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -54,7 +54,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Fixing the place copy functionality.  Until they change the geometry access again, at least.";
+    const updateMessage = "Fixing Edit RPP address after created to autofocus HN field";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -2257,7 +2257,7 @@ var UpdateObject, MultiAction;
         if ($('.address-edit-view').length > 0) {
             $('.full-address').trigger("click");
             await new Promise(r => setTimeout(r, 150));
-            $('#id', $('.house-number')[0].shadowRoot).focus();
+            $('input', $('.house-number')[0].shadowRoot).focus();
 
         } else if (rppTries < 1000) {
             console.log("not found");
