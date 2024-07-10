@@ -207,7 +207,7 @@ var UpdateObject, MultiAction;
             '<div id="divEnlargeGeoHandles" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EnlargeGeoHandlesTitle') + '"><input type="checkbox" id="_cbEnlargeGeoHandles" class="pieSettingsCheckbox"/><label for="_cbEnlargeGeoHandles" style="white-space:pre-line;">' + I18n.t('pie.prefs.EnlargeGeoHandles') + '</label></div>',
             '</fieldset>',
             '<div class="controls-container" id="divPlaceMenuCustomization">',
-            '<b>' + I18n.t('pie.prefs.PlaceMenuCustomization') + '</b></br>',
+            /* '<b>' + I18n.t('pie.prefs.PlaceMenuCustomization') + '</b></br>',
             buildItemOption(1),
             buildItemOption(2),
             buildItemOption(3),
@@ -219,7 +219,7 @@ var UpdateObject, MultiAction;
             buildItemOption(9),
             buildItemOption(10),
             buildItemOption(11),
-            buildItemOption(12),
+            buildItemOption(12), */
             '</div>'
         ].join(' '));
 
@@ -706,8 +706,8 @@ var UpdateObject, MultiAction;
         });
 
         //Load settings into Place Customization list options
-        for(i=0; i<12;i++)
-            $('#pieItem'+(i+1))[0].value = settings.NewPlacesList[i];
+        // for(i=0; i<12;i++)
+        //     $('#pieItem'+(i+1))[0].value = settings.NewPlacesList[i];
 
         //Build our new menu
         //buildNewPlaceList();
@@ -725,7 +725,7 @@ var UpdateObject, MultiAction;
         new WazeWrap.Interface.Shortcut('OrthogonalizeShortcut', 'Orthogonalize Area Place', 'wmepie', 'Place Interface Enhancements', settings.OrthogonalizeShortcut, OrthogonalizePlace, null).add();
         new WazeWrap.Interface.Shortcut('SimplifyPlaceShortcut', 'Simplify Area Place', 'wmepie', 'Place Interface Enhancements', settings.SimplifyPlaceShortcut, SimplifyPlace, null).add();
 
-
+        /*
         new WazeWrap.Interface.Shortcut('CreateItem1Shortcut', 'Create Item 1', 'wmepie', 'Place Interface Enhancements', settings.CreateItem1Shortcut, function(){PlaceMenuShortcut(1);}, null).add();
         new WazeWrap.Interface.Shortcut('CreateItem2Shortcut', 'Create Item 2', 'wmepie', 'Place Interface Enhancements', settings.CreateItem2Shortcut, function(){PlaceMenuShortcut(2);}, null).add();
         new WazeWrap.Interface.Shortcut('CreateItem3Shortcut', 'Create Item 3', 'wmepie', 'Place Interface Enhancements', settings.CreateItem3Shortcut, function(){PlaceMenuShortcut(3);}, null).add();
@@ -738,6 +738,7 @@ var UpdateObject, MultiAction;
         new WazeWrap.Interface.Shortcut('CreateItem10Shortcut', 'Create Item 10', 'wmepie', 'Place Interface Enhancements', settings.CreateItem10Shortcut, function(){PlaceMenuShortcut(10);}, null).add();
         new WazeWrap.Interface.Shortcut('CreateItem11Shortcut', 'Create Item 11', 'wmepie', 'Place Interface Enhancements', settings.CreateItem11Shortcut, function(){PlaceMenuShortcut(11);}, null).add();
         new WazeWrap.Interface.Shortcut('CreateItem12Shortcut', 'Create Item 12', 'wmepie', 'Place Interface Enhancements', settings.CreateItem12Shortcut, function(){PlaceMenuShortcut(12);}, null).add();
+        */
 
         $("#piePlaceFilter").on("propertychange keyup paste input", UpdatePlaceFilter);
         $('input[type=radio][name=PlaceFilterToggle]').change(UpdatePlaceFilter);
