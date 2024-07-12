@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2024.06.11.01
+// @version      2024.07.11.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -54,11 +54,12 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Fixed a few minor issues, removed some parking lot options that are no longer used/needed, moved the photo viewer button out from under the online editors bubble";
+    const updateMessage = "Nobody was asking for it, but it is back anyway: The closest segment line again shows when you select a place <b>AND</b> while dragging!<br><br>The closest segment line for navigation points is also back! :woohoo: Sadly, still no mechanism to allow it to show while dragging *womp womp*<br><br><br>Did you know?  The unicorn is Scotland's national animal!";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
     const DOWNLOAD_URL = GM_info.script.fileURL;
+    var nativeolControlMoveCallback;
 
     //Layer definitions
     {
@@ -839,32 +840,6 @@ var UpdateObject, MultiAction;
             }
         });
 
-        //No one really uses this and it is causing issues due to the rotate handle persisting after de-selecting a MC
-        /*W.selectionManager.events.register("selectionchanged", null, function(){
-            let selectedItems = WazeWrap.getSelectedFeatures();
-            if(selectedItems.length > 0 && selectedItems[0].attributes.repositoryObject.type === "mapComment")
-                getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.ROTATE) == 0){
-                        val.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
-                        val.resetVertices();
-                    }
-                });
-        });*/
-
-        //Obsoleted by WME update released 2017-10-24
-        /*var observer = new MutationObserver(function(mutations) {
-               mutations.forEach(function(mutation) {
-                   if ($('#dialog-region').find('.venue-image-dialog').length > 0 && $('#detailsWrap').length == 0) ImageDialogEnhancement();
-               });
-           });*/
-
-        //observer.observe(document.getElementById('dialog-region'), { childList: true, subtree: true });
-
-        //Highlight the categories box when the old hospital category is present
-        /*W.selectionManager.events.register("selectionchanged", null, highlightObsoleteHospitalCategory);
-        W.model.actionManager.events.register("afterundoaction",null, highlightObsoleteHospitalCategory);
-        W.model.actionManager.events.register("afterclearactions",null, highlightObsoleteHospitalCategory);
-        W.model.actionManager.events.register("afteraction",null, highlightObsoleteHospitalCategory);*/
 
         WazeWrap.Events.register("zoomend", null, DisplayPlaceNames);
         WazeWrap.Events.register("changelayer", null, DisplayPlaceNames);
@@ -1686,7 +1661,7 @@ var UpdateObject, MultiAction;
     function ObjectsChanged(){
         if(W.map.getLayerByUniqueName('venues').selectedFeatures.length >0)
             getActiveEditor().then(val => {
-                if(placeIsPoint && val.vertices.length > 0){
+                if(placeIsPoint && val.olControl.vertices.length > 0){
                     removeDragCallbacks();
                     checkSelection();
                 }
@@ -1756,24 +1731,33 @@ var UpdateObject, MultiAction;
                         placeIsPoint = selectedItem.WW.getObjectModel().isPoint();
                         if (placeIsPoint) {
                             //Event when the Place is moved
-                            /*
-                            val.dragControl.onDrag = function (e, t) {
-                                val.dragVertex.apply(val, [e, t]);
-                                let entryExitPoint = selectedItem.model.geometry.clone();
-                                if(selectedItem.model.getNavigationPoints().length > 0)
-                                    entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
+                            if(nativeolControlMoveCallback == null)
+                                nativeolControlMoveCallback = val.olControl.handlers.drag.callbacks.move;
+
+                            val.olControl.handlers.drag.callbacks.move = function(e){
+                                nativeolControlMoveCallback.call(val.olControl, e);
+                                let screenCoord = W.map.getLonLatFromViewPortPx(e);
+                                let geom = WazeWrap.Geometry.ConvertTo900913(screenCoord.lon, screenCoord.lat);
+                                if(selectedItem.WW.getObjectModel().getNavigationPoints().length > 0)
+                                    geom = WazeWrap.Geometry.ConvertTo900913(selectedItem.WW.getObjectModel().attributes.entryExitPoints[0]._point.coordinates[0], selectedItem.WW.getObjectModel().attributes.entryExitPoints[0]._point.coordinates[1]);
+                                let entryExitPoint = new OpenLayers.Geometry.Point(geom.lon, geom.lat);
                                 findNearestSegment(entryExitPoint);
-                            };*/
+                            }
+  
                             let entryExitPoint = selectedItem.WW.getObjectModel().getOLGeometry().clone();
-                            if(selectedItem.WW.getObjectModel().getNavigationPoints().length > 0)
-                                entryExitPoint = selectedItem.WW.getObjectModel().attributes.entryExitPoints[0]._point;
+                            if(selectedItem.WW.getObjectModel().getNavigationPoints().length > 0){
+                                let geom = WazeWrap.Geometry.ConvertTo900913(selectedItem.WW.getObjectModel().getNavigationPoints()[0]._point.coordinates[0], selectedItem.WW.getObjectModel().getNavigationPoints()[0]._point.coordinates[1]);
+                                entryExitPoint = new OpenLayers.Geometry.Point(geom.lon, geom.lat);
+                            }
                             findNearestSegment(entryExitPoint);
                         } else {
                             if(selectedItem.WW.getObjectModel().getNavigationPoints().length === 0)
                                 findNearestSegment(selectedItem.WW.getObjectModel().getOLGeometry().getCentroid());
                             else{
-                                for(let i=0;i<selectedItem.WW.getObjectModel().getNavigationPoints().length;i++)
-                                    findNearestSegment(selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point);
+                                for(let i=0;i<selectedItem.WW.getObjectModel().getNavigationPoints().length;i++){
+                                    let geom = WazeWrap.Geometry.ConvertTo900913(selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point.coordinates[0], selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point.coordinates[1]);
+                                    findNearestSegment(new OpenLayers.Geometry.Point(geom.lon, geom.lat)); //selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point);
+                                }
                             }
                         }
                     }
@@ -1787,9 +1771,7 @@ var UpdateObject, MultiAction;
 
     function removeDragCallbacks() {
         if(!W.geometryEditing.activeEditor == null){
-            W.geometryEditing.activeEditor.dragControl.onDrag = function (e, t) {
-                W.geometryEditing.activeEditor.dragVertex.apply(W.geometryEditing.activeEditor, [e, t]);
-            };
+             W.geometryEditing.activeEditor.olControl.handlers.drag.callbacks.move = nativeolControlMoveCallback;
             if (null !== typeof ClosestSegmentNavPoint) {
                 try {
                     ClosestSegmentNavPoint.events.unregister('drag', W.geometryEditing.activeEditor, findNearestSegment);
@@ -2554,11 +2536,11 @@ var UpdateObject, MultiAction;
                 $('#pierotate').css('color', settings.Rotate ? 'rgb(0,180,0)': 'black');
                 saveSettings();
                 getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.ROTATE) == 0)
-                        val.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
+                    if((val.olControl.mode & OpenLayers.Control.ModifyFeature.ROTATE) == 0)
+                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
                     else
-                        val.mode &= ~OpenLayers.Control.ModifyFeature.ROTATE;
-                    val.resetVertices();
+                        val.olControl.mode &= ~OpenLayers.Control.ModifyFeature.ROTATE;
+                    val.olControl.resetVertices();
                 });
             });
 
@@ -2567,28 +2549,28 @@ var UpdateObject, MultiAction;
                 $('#pieresize').css('color', settings.Resize ? 'rgb(0,180,0)': 'black');
                 saveSettings();
                 getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.RESIZE) == 0)
-                        val.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
+                    if((val.olControl.mode & OpenLayers.Control.ModifyFeature.RESIZE) == 0)
+                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
                     else
-                        val.mode &= ~OpenLayers.Control.ModifyFeature.RESIZE;
-                    val.resetVertices();
+                        val.olControl.mode &= ~OpenLayers.Control.ModifyFeature.RESIZE;
+                    val.olControl.resetVertices();
                 });
             });
 
             //activate the changes when a Place is selected
             if(settings.Rotate){
                 getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.ROTATE) == 0)
-                        val.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
-                    val.resetVertices();
+                    if((val.olControl.mode & OpenLayers.Control.ModifyFeature.ROTATE) == 0)
+                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
+                    val.olControl.resetVertices();
                 });
             }
 
             if(settings.Resize){
                 getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.RESIZE) == 0)
-                        val.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
-                    val.resetVertices();
+                    if((val.olControl.mode & OpenLayers.Control.ModifyFeature.RESIZE) == 0)
+                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
+                    val.olControl.resetVertices();
                 });
             }
         }
