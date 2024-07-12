@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2024.06.11.01
+// @version      2024.07.11.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -54,7 +54,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Fixed a few minor issues, removed some parking lot options that are no longer used/needed, moved the photo viewer button out from under the online editors bubble";
+    const updateMessage = "Fixed a minor issue, removed some things that are not being used anymore.";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -1687,7 +1687,9 @@ var UpdateObject, MultiAction;
     function ObjectsChanged(){
         if(W.map.getLayerByUniqueName('venues').selectedFeatures.length >0)
             getActiveEditor().then(val => {
-                if(placeIsPoint && val.vertices.length > 0){
+                // 2024-07-11 - use optional chaining since vertices doesnt seem to be there anymore
+                //  and onDrag not being set anymore in checkSelection()
+                if(placeIsPoint && val.vertices?.length > 0){
                     removeDragCallbacks();
                     checkSelection();
                 }
