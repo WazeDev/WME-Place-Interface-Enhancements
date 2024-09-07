@@ -54,7 +54,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Nobody was asking for it, but it is back anyway: The closest segment line again shows when you select a place <b>AND</b> while dragging!<br><br>The closest segment line for navigation points is also back! :woohoo: Sadly, still no mechanism to allow it to show while dragging *womp womp*<br><br><br>Did you know?  The unicorn is Scotland's national animal!";
+    const updateMessage = "";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
