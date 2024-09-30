@@ -3712,7 +3712,7 @@ var UpdateObject, MultiAction;
                 } else {
                     TempKeys = "-1";
                 }
-                if(settings[name] != Tempkeys){
+                if(settings[name] != TempKeys){
                     triggerSave = true;
                     break;
                 }
