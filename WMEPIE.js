@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2024.09.07.01
+// @version      2024.09.29.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -3712,7 +3712,7 @@ var UpdateObject, MultiAction;
                 } else {
                     TempKeys = "-1";
                 }
-                if(settings[name] != Tempkeys){
+                if(settings[name] != TempKeys){
                     triggerSave = true;
                     break;
                 }
