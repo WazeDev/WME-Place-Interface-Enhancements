@@ -871,7 +871,7 @@ var UpdateObject, MultiAction;
             }
         });
 
-        WazeWrap.Interface.ShowScriptUpdate("WME Place Interface Enhancements", GM_info.script.version, updateMessage, "", "https://www.waze.com/forum/viewtopic.php?f=819&t=215990");
+        WazeWrap.Interface.ShowScriptUpdate("WME Place Interface Enhancements", GM_info.script.version, updateMessage, "", "https://www.waze.com/discuss/t/217315");
     }
 
     function handleEventModeChange(){
