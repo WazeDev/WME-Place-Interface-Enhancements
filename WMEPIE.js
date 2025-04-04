@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2025.01.24.00
+// @version      2025.04.04.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -54,7 +54,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "The 'Google Link Enhancer' feature that displays orange lines between places with duplicate links has been restored.";
+    const updateMessage = "Restoring alt name 'To Name' button.";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -3144,24 +3144,27 @@ var UpdateObject, MultiAction;
 //         }
 //     }
 
-    function AddMakePrimaryButtons(){
-        if(WazeWrap.hasPlaceSelected()){
-            if($('.aliases-view > div > ul > div > li').length > 0){
-                var $button = $('<div>', {class:'makePrimary'}).text("Make primary").click(function(){
-                    let obj = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-                    let toPrimary = $(this).prev().prev().val();
-                    let aliases = obj.attributes.aliases.filter(function(i) {
-                        return i != toPrimary;
-                    });
-                    aliases.push(obj.attributes.name);
-                    var multiaction = new MultiAction();
-                    multiaction.doSubAction(W.model, new UpdateObject(obj, {aliases: aliases}));
-                    multiaction.doSubAction(W.model, new UpdateObject(obj, {name: toPrimary}));
-                    W.model.actionManager.add(multiaction);
-                });
-                $('.aliases-view > div > ul > div > li').find('.delete').after($button);
-            }
-        }
+function AddMakePrimaryButtons(){
+	if(!WazeWrap.hasPlaceSelected() || ($('.alias-item-content').length = 0)){
+	    return;
+	}
+	$('.alias-item').each(function(){
+	    let altItem = $(this);
+	    if($(altItem).find('.makePrimary').length == 0){
+		let $button = $('<div>', {class:'makePrimary'}).text("To Name").click(function(){
+		    let obj = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+		    let toPrimary = $(altItem).find('.alias-item-content').text();
+		    let aliases = obj.attributes.aliases.filter(a => a != toPrimary);
+		    aliases.push(obj.attributes.name);
+
+		    let multiaction = new MultiAction();
+		    multiaction.doSubAction(W.model, new UpdateObject(obj, {aliases}));
+		    multiaction.doSubAction(W.model, new UpdateObject(obj, {name: toPrimary}));
+		    W.model.actionManager.add(multiaction);
+		});
+		$(altItem).find('.alias-item-action-delete').after($button);
+	    }
+	});
     }
 
     async function AddPlaceCategoriesButtons(){
