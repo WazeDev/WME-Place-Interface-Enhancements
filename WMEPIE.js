@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2025.04.04.01
+// @version      2025.04.04.02
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -1181,7 +1181,6 @@ var UpdateObject, MultiAction;
             venuePos.addEventListener("click", function (geo, id) {
                 return function () {
                     hide_visio();
-                    debugger;
                     let venueList = [];
                     venueList.push(W.model.venues.objects[id]);
 
@@ -2459,7 +2458,6 @@ var UpdateObject, MultiAction;
         let newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
 
         let UFG = require("Waze/Action/UpdateFeatureGeometry");
-        debugger;
         W.model.actionManager.add(new UFG(selected, W.model.venues, W.userscripts.toGeoJSONGeometry(originalGeometry), W.userscripts.toGeoJSONGeometry(newGeometry)));
     }
 
