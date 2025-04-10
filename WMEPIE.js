@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2025.04.06.01
+// @version      2025.04.10.00
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -54,7 +54,7 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Setting WME native classes on the Make Primary button so it is handled properly";
+    const updateMessage = "Fixed the Google Link Enhancer feature to show the Google place location when hovering over an External Provider.";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
