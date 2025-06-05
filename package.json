@@ -1,0 +1,8 @@
+{
+    "devDependencies": {
+        "wme-sdk-typings": "https://web-assets.waze.com/wme_sdk_docs/beta/latest/wme-sdk-typings.tgz"
+    },
+    "dependencies": {
+        "jquery": "^3.7.1"
+    }
+}
