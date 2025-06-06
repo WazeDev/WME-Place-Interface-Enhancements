@@ -39,8 +39,12 @@
 /* global idbPVKeyval */
 /* eslint curly: ["warn", "multi-or-nest"] */
 
-var UpdateObject, MultiAction;
+let UpdateObject;
+let MultiAction;
 
+/**
+ * @type WmeSDK
+ */
 let sdk;
 unsafeWindow.SDK_INITIALIZED.then(() => {
     if (!unsafeWindow.getWmeSdk) {
@@ -55,43 +59,34 @@ unsafeWindow.SDK_INITIALIZED.then(() => {
     sdk.Events.once({ eventName: "wme-ready" }).then(pie);
 });
 
-function pie(tries = 1) {
-    'use strict';
-    
+function pie(tries = 1) {    
     if(!jscolor || !WazeWrap.Ready) {
-        setTimeout(function () {pie(tries++);}, 200);
+        setTimeout(() => {pie(tries+1);}, 200);
     }
 
-    var curr_ver = GM_info.script.version;
-    var settings = {};
-    var placeMenuSelector = "#primary-toolbar > div > div.toolbar-group.toolbar-group-venues > wz-menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
+    const curr_ver = GM_info.script.version;
+    let settings = {};
+    const placeMenuSelector = "#primary-toolbar > div > div.toolbar-group.toolbar-group-venues > wz-menu";//"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
 //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
-    var placementMode = false;
-    var resCategory = "RESIDENCE_HOME";
-    var wazePL;
+    const placementMode = false;
+    const resCategory = "RESIDENCE_HOME";
+    let wazePL;
     let hoursparser;
     let GLE;
-    var catalog = [];
+    let catalog = [];
     const updateMessage = "Fixing the place copy functionality.  Until they change the geometry access again, at least.";
-    var lastSelectedFeature;
+    let lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
     const DOWNLOAD_URL = GM_info.script.fileURL;
-
-    //Layer definitions
-    {
-        var layerName = "WME PIE";
-        var newPlaceLayer, PLSpotEstimatorLayer, PLSpotEstimatorCalibrationLayer;
-        var PIEPlaceNameLayer;
-        var showStopPointsLayer;
-        var closestSegmentLayer;
-    }
-
-    //Drawing definitions
-    {
-        var drawPoly, PLSpotEstimatordrawControl, PLSpotEstimatorCalibrationdrawControl;
-        var isDrawing;
-        var pointStyle = {
+        const mainLayerName = "WME PIE";
+        let newPlaceLayer, PLSpotEstimatorLayer, PLSpotEstimatorCalibrationLayer;
+        let PIEPlaceNameLayer;
+        let showStopPointsLayer;
+        let closestSegmentLayer;
+        let drawPoly, PLSpotEstimatordrawControl, PLSpotEstimatorCalibrationdrawControl;
+        let isDrawing;
+        let pointStyle = {
             pointRadius: 6,
             fillOpacity: 0,
             strokeColor: '#00ece3',
@@ -100,7 +95,7 @@ function pie(tries = 1) {
         };
 
         //Closest segment
-        var lineStyleToNavPoint = {
+        const lineStyleToNavPoint = {
             strokeWidth: 3,
             strokeColor: '#00ece3',
             strokeLinecap: 'round',
@@ -124,7 +119,6 @@ function pie(tries = 1) {
                 strokeWidth: '3',
                 strokeLinecap: 'round'
             };
-    }
 
         
     loadScriptUpdateMonitor();
@@ -146,23 +140,23 @@ function pie(tries = 1) {
         GLE = new GoogleLinkEnhancer();
         hoursparser = new HoursParser();
 
-        var $section = $("<div>", {style:"padding:8px 16px", id:"WMEPIESettings"});
+        const $section = $("<div>", {style:"padding:8px 16px", id:"WMEPIESettings"});
         $section.html([
-            '<h4 style="margin-bottom:0px;"><b>' + I18n.t('pie.prefs.title') + '</b></h4>',
-            '<h6 style="margin-top:0px;">' + curr_ver + '</h6>',
+            `<h4 style="margin-bottom:0px;"><b>${I18n.t('pie.prefs.title')}</b></h4>`,
+            `<h6 style="margin-top:0px;">${curr_ver}</h6>`,
             '<fieldset id="fieldPlaceFilter" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-            '<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>' + I18n.t('pie.filter.PlaceFilterPanel') + '</h4></legend>',
-            '<div class="controls-container pie-controls-container" id="divPlaceFilter">' + I18n.t('pie.filter.filter') + ' <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>',
+            `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t('pie.filter.PlaceFilterPanel')}</h4></legend>`,
+            `<div class="controls-container pie-controls-container" id="divPlaceFilter">${I18n.t('pie.filter.filter')} <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>`,
             '</br>',
-            '<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">' + I18n.t('pie.filter.Hide') + '</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">' + I18n.t('pie.filter.Show') + '</label></div>',
+            `<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">${I18n.t('pie.filter.Hide')}</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">${I18n.t('pie.filter.Show')}</label></div>`,
             '</fieldset>',
 
             '<fieldset id="fieldPlacePanel" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-            '<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>' + I18n.t('pie.prefs.PropertiesPanel') + '</h4></legend>',
+            `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t('pie.prefs.PropertiesPanel')}</h4></legend>`,
             '<div class="controls-container pie-controls-container" id="divAreaPlaceSizeControls">',
-            '<div id="divShowAreaPlaceSize" class="controls-container pie-controls-container"><input type="checkbox" id="_cbShowAreaPlaceSize" class="pieSettingsCheckbox" /><label for="_cbShowAreaPlaceSize">' + I18n.t('pie.prefs.ShowAreaPlaceSize') + '</label></div>',
-            '<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">' + I18n.t('pie.prefs.ShowImperial') + '</label></div>',
-            '<div id="divShowAreaPlaceSizeMetric" class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeMetric" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeMetric">' + I18n.t('pie.prefs.ShowMetric') + '</label></div>',
+            `<div id="divShowAreaPlaceSize" class="controls-container pie-controls-container"><input type="checkbox" id="_cbShowAreaPlaceSize" class="pieSettingsCheckbox" /><label for="_cbShowAreaPlaceSize">${I18n.t('pie.prefs.ShowAreaPlaceSize')}</label></div>`,
+            `<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">${I18n.t('pie.prefs.ShowImperial')}</label></div>`,
+            `<div id="divShowAreaPlaceSizeMetric" class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeMetric" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeMetric">${I18n.t('pie.prefs.ShowMetric')}</label></div>`,
             '</div>',
             //!WazeWrap.isBetaEditor ? '<div class="controls-container pie-controls-container" id="divShowLockButtonsRPP" title="' + I18n.t('pie.prefs.ShowRPPLockButtonsTitle') + '"><input type="checkbox" id="_cbShowLockButtonsRPP" class="pieSettingsCheckbox" /><label for="_cbShowLockButtonsRPP" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowRPPLockButtons') + '</label></div>' : '',
             '<div class="controls-container pie-controls-container" id="divShowPlaceLocatorCrosshair" title="' + I18n.t('pie.prefs.ShowPlaceLocatorCrosshairTitle') + '" ><input type="checkbox" id="_cbShowPlaceLocatorCrosshair" class="pieSettingsCheckbox" /><label for="_cbShowPlaceLocatorCrosshair" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowPlaceLocatorCrosshair') + '</label></br>',
@@ -240,7 +234,7 @@ function pie(tries = 1) {
         //Load settings
         await loadSettings();
 
-        var style = new OpenLayers.Style({
+        const style = new OpenLayers.Style({
             pointRadius: "${pointRadius}",
             label : "${labelText}",
             fontFamily: "Tahoma, Arial, Verdana",
@@ -249,36 +243,100 @@ function pie(tries = 1) {
             labelAlign: 'cm',
             fontColor: settings.PlaceNameFontColor,
             fontOpacity: 1.0,
-            fontSize: settings.PlaceNameFontSize + "px",
+            fontSize: `${settings.PlaceNameFontSize}px`,
             labelYOffset: "${yOffset}",
             fontStyle: "${style}",
             fontWeight: (settings.PlaceNameFontBold ? 'bold' : ''),
-            pointRadius: 0
         });
 
-        PIEPlaceNameLayer = new OpenLayers.Layer.Vector("PIEPlaceNameLayer",{displayInLayerSwitcher: false,
-            uniqueName: "__PIEPlaceNameLayer", styleMap: new OpenLayers.StyleMap(style)});
-        W.map.addLayer(PIEPlaceNameLayer);
-        PIEPlaceNameLayer.setVisibility(true);
+        const layerConfig = {
+            "PIEPlaceNameLayer": {
+                layerName: "PIEPlaceNameLayer",
+                uniqueName: "__PIEPlaceNameLayer",
+                displayInLayerSwitcher: false,
+                styleRules: style,
+                
+            },
+            "WME PIE": {
+                layerName: mainLayerName,
+                displayInLayerSwitcher: false,
+                styleRules: null
+            },
+            "PIEPLSpotEstimatorLayer": {
+                layerName: "PIEPLSpotEstimatorLayer",
+                displayInLayerSwitcher: false, 
+                uniqueName: "__PIEPLSpotEstimatorLayer", 
+                styleRules: null
+            },
+            "PIEPLSpotEstimatorCalibrationLayer": {
+                styleRules: null,
+                layerName: "PIEPLSpotEstimatorCalibrationLayer", 
+                displayInLayerSwitcher: false, 
+                uniqueName: "__PIEPLSpotEstimatorCalibrationLayer"
+            },
+            "PIEShowStopPointsLayer": {layerName: "PIEShowStopPointsLayer", displayInLayerSwitcher: false, uniqueName: "__PIEShowStopPointsLayer", styleRules: null},
+            "PIEClosestSegment":  {layerName: "PIEClosestSegment", displayInLayerSwitcher: false, uniqueName:"__PIEClosesetSegmentLayer", styleRules: null}
+        }
 
-        newPlaceLayer = new OpenLayers.Layer.Vector(layerName,{displayInLayerSwitcher: false});
-        W.map.addLayer(newPlaceLayer);
+        function _setLayerVisibility(layerName, visibility) {
+            if(visibility) {
+                sdk.Map.setLayerVisibility({
+                    layerName: layerName,
+                    visibility: true
+                });
+            }
+        }
+        function _addDisplayLayer(name, visible = false) {
+            sdk.Map.addLayer(layerConfig[name])
+            if(layerConfig[name].displayInLayerSwitcher) { 
+                sdk.LayerSwitcher.addLayerCheckbox({name: layerConfig[name].layerName});
+                sdk.LayerSwitcher.setCheckboxChecked({
+                    name: layerConfig[name].layerName,
+                    isChecked: true
+                });
+            }
+            _setLayerVisibility(name, visible);
 
-        PLSpotEstimatorLayer = new OpenLayers.Layer.Vector("PIEPLSpotEstimatorLayer",{displayInLayerSwitcher: false, uniqueName: "__PIEPLSpotEstimatorLayer"});
-		//W.map.addLayer(PLSpotEstimatorLayer);
-        PLSpotEstimatorLayer.setVisibility(true);
+        }
+        // PIEPlaceNameLayer = new OpenLayers.Layer.Vector("PIEPlaceNameLayer",{displayInLayerSwitcher: false,
+        //     uniqueName: "__PIEPlaceNameLayer", styleMap: new OpenLayers.StyleMap(style)});
+        // W.map.addLayer(PIEPlaceNameLayer);
+        _addDisplayLayer(layerConfig.PIEPlaceNameLayer.layerName, true);
+        // PIEPlaceNameLayer.setVisibility(true);
 
-        PLSpotEstimatorCalibrationLayer= new OpenLayers.Layer.Vector("PIEPLSpotEstimatorCalibrationLayer",{displayInLayerSwitcher: false, uniqueName: "__PIEPLSpotEstimatorCalibrationLayer"});
-		//W.map.addLayer(PLSpotEstimatorCalibrationLayer);
-        PLSpotEstimatorCalibrationLayer.setVisibility(true);
+        _addDisplayLayer(mainLayerName)
+        // newPlaceLayer = new OpenLayers.Layer.Vector(mainLayerName,{displayInLayerSwitcher: false});
+        // W.map.addLayer(newPlaceLayer);
 
-        showStopPointsLayer = new OpenLayers.Layer.Vector("PIEShowStopPointsLayer", {displayInLayerSwitcher: false, uniqueName: "__PIEShowStopPointsLayer"});
-        W.map.addLayer(showStopPointsLayer);
-        showStopPointsLayer.setVisibility(true);
+        // PLSpotEstimatorLayer = new OpenLayers.Layer.Vector("PIEPLSpotEstimatorLayer",{displayInLayerSwitcher: false, uniqueName: "__PIEPLSpotEstimatorLayer"});
+		// //W.map.addLayer(PLSpotEstimatorLayer);
+        // PLSpotEstimatorLayer.setVisibility(true);
+        _addDisplayLayer("PIEPLSpotEstimatorLayer", true);
 
-        closestSegmentLayer = new OpenLayers.Layer.Vector("PIEClosestSegment", {displayInLayerSwitcher: false, uniqueName:"__PIEClosesetSegmentLayer"});
-        W.map.addLayer(closestSegmentLayer);
-        closestSegmentLayer.setVisibility(true);
+        // PLSpotEstimatorCalibrationLayer= new OpenLayers.Layer.Vector("PIEPLSpotEstimatorCalibrationLayer",{displayInLayerSwitcher: false, uniqueName: "__PIEPLSpotEstimatorCalibrationLayer"});
+		// //W.map.addLayer(PLSpotEstimatorCalibrationLayer);
+        // PLSpotEstimatorCalibrationLayer.setVisibility(true);
+        _addDisplayLayer("PIEPLSpotEstimatorCalibrationLayer", true);
+
+        // showStopPointsLayer = new OpenLayers.Layer.Vector("PIEShowStopPointsLayer", {displayInLayerSwitcher: false, uniqueName: "__PIEShowStopPointsLayer"});
+        // W.map.addLayer(showStopPointsLayer);
+        // showStopPointsLayer.setVisibility(true);
+        _addDisplayLayer("PIEShowStopPointsLayer", true);
+
+        // closestSegmentLayer = new OpenLayers.Layer.Vector("PIEClosestSegment", {displayInLayerSwitcher: false, uniqueName:"__PIEClosesetSegmentLayer"});
+        // W.map.addLayer(closestSegmentLayer);
+        // closestSegmentLayer.setVisibility(true);
+        _addDisplayLayer("PIEClosestSegment", true);
+
+        sdk.Events.on({
+            eventName: "wme-layer-checkbox-toggled",
+            eventHandler: (payload) => {
+                sdk.Map.setLayerVisibility({
+                    layerName: payload.name,
+                    visibility: payload.checked,
+                });
+            }
+        })
 
         /*var ctl = W.map.controls.find(function(ctrl) { return ctrl.displayClass ==="WazeControlSelectHighlightFeature"; });
         var ctlLayers = [].concat(ctl.layers);
@@ -339,7 +397,8 @@ function pie(tries = 1) {
         });
 
         $('#_cbShowPlaceNames').change(function() {
-            PIEPlaceNameLayer.setVisibility(this.checked);
+            // PIEPlaceNameLayer.setVisibility(this.checked);
+            _setLayerVisibility("PIEPlaceNameLayer", this.checked);
             $('#_cbShowPlaceNamesPoint')[0].disabled = !this.checked;
             $('#_cbShowPlaceNamesArea')[0].disabled = !this.checked;
             $('#_cbShowPlaceNamesPLA')[0].disabled = !this.checked;
@@ -349,11 +408,11 @@ function pie(tries = 1) {
             DisplayPlaceNames();
         });
 
-        $('[id^="_cbShowPlaceNames"]').change(function(){
+        $('[id^="_cbShowPlaceNames"]').change(()=> {
             DisplayPlaceNames();
         });
 
-        $('#_cbhidePlaceNamesWhenPlacesHidden').change(function(){
+        $('#_cbhidePlaceNamesWhenPlacesHidden').change(()=> {
             DisplayPlaceNames();
         });
 
@@ -422,6 +481,7 @@ function pie(tries = 1) {
                 WazeWrap.Events.register("mousemove", null, drawNavPointClosestSegmentLines);
             else
                 WazeWrap.Events.unregister("mousemove", null, drawNavPointClosestSegmentLines);
+            sdk.Events.on("wme-mouse-move")
         });
 
         $('#_cbShowClosestSegmentSelected').change(function(){
@@ -2168,13 +2228,13 @@ function pie(tries = 1) {
     }
 
     function clearLayer() {
-		var layer = W.map.getLayersByName(layerName)[0];
+		var layer = W.map.getLayersByName(mainLayerName)[0];
 		layer.removeAllFeatures();
 	}
 
     function drawCircle(e){
         var pointFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(e.lon, e.lat), {}, pointStyle);
-		W.map.getLayersByName(layerName)[0].addFeatures([pointFeature]);
+		W.map.getLayersByName(mainLayerName)[0].addFeatures([pointFeature]);
     }
 
     function createPlace(pos, category, isPoint){
@@ -3623,7 +3683,7 @@ function pie(tries = 1) {
 
      function saveSettings() {
         if (localStorage) {
-            var localsettings = {
+            const localsettings = {
                 ShowAreaPlaceSize: settings.ShowAreaPlaceSize,
                 ShowAreaPlaceSizeImperial: settings.ShowAreaPlaceSizeImperial,
                 ShowAreaPlaceSizeMetric: settings.ShowAreaPlaceSizeMetric,
