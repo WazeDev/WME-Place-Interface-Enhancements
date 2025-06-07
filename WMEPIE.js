@@ -1268,12 +1268,11 @@ function pie(tries = 1) {
                 venueCheck.style.marginRight='5px';
                 venueCheck.style.cursor='pointer';
                 venueCheck.innerHTML='<i style="color:#fff;" class="fa fa-thumbs-up" title="Whitelist this Place\'s pictures"></i>';
-                venueCheck.addEventListener("click", function (venue, venueDiv) {
-                    return async function () {
-                        await idbPVKeyval.set(`Places`, {
+                venueCheck.addEventListener("click", ((venue, venueDiv) => async function () {
+                        await idbPVKeyval.set("Places", {
                             placeID: venue.attributes.id,
                             placeName: venue.attributes.name,
-                            placePicturesIDs: venue.attributes.images.map(function(image){
+                            placePicturesIDs: venue.attributes.images.map((image)=> {
                                 if(image.attributes.approved)
                                     return image.id;
                             })
@@ -1285,12 +1284,11 @@ function pie(tries = 1) {
                             else
                                 $(this).parent().remove();
                             $("#placessqty").html($("#placessqty").html()-1);
-                            $("#imagesqty").html($("#imagesqty").html() - parseInt(venue.attributes.images.length));
+                            $("#imagesqty").html($("#imagesqty").html() - Number.parseInt(venue.attributes.images.length));
                         }
                         else if(settings.PhotoViewerShowHiddenPlaces)
                             $(this).parent().find('.approvedImage.pvImage').css('border-color', '#fff'); //turn the border white on the images that are not in a PUR
-                    }
-                }(venue, venueDiv), false);
+                    })(venue, venueDiv), false);
                 venueDiv.appendChild(venueCheck);
             }
             else{
@@ -1334,21 +1332,19 @@ function pie(tries = 1) {
             venuePos.style.cursor='pointer';
             venuePos.innerHTML='<i style="color:#aaa;" class="fa fa-crosshairs" title="Geolocate and Select"></i>'; // title="'+ I18n.translations[I18n.currentLocale()].geolocation.focus-btn +'"
             venuePos.id=catalog[i];
-            venuePos.addEventListener("click", function (geo, id) {
-                return function () {
+            venuePos.addEventListener("click", ((geo, id) => function () {
                     hide_visio();
                     debugger;
                     let venueList = [];
                     venueList.push(W.model.venues.objects[id]);
 
-                    let lon=(((geo.left+geo.right)/2)+geo.right)/2;
-                    let lat=(((geo.bottom+geo.top)/2)+geo.bottom)/2;
+                    const lon=(((geo.left+geo.right)/2)+geo.right)/2;
+                    const lat=(((geo.bottom+geo.top)/2)+geo.bottom)/2;
                     W.map.setCenter(new OpenLayers.Geometry.Point(lon, lat));
                     W.map.getOLMap().zoomTo(17);
                     W.selectionManager.unselectAll();
                     W.selectionManager.setSelectedModels(venueList);
-                }
-            }(vattr.geometry.bounds, catalog[i]), false);
+                })(vattr.geometry.bounds, catalog[i]), false);
             venueDiv.appendChild(venuePos);
             let tmp=document.createElement('div'); tmp.style.clear='both';venueDiv.appendChild(tmp);
 
