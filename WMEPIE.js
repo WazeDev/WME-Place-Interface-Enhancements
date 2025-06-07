@@ -62,6 +62,7 @@ unsafeWindow.SDK_INITIALIZED.then(() => {
 function pie(tries = 1) {    
     if(!jscolor || !WazeWrap.Ready) {
         setTimeout(() => {pie(tries+1);}, 200);
+        return;
     }
 
     const curr_ver = GM_info.script.version;
@@ -86,13 +87,13 @@ function pie(tries = 1) {
         let closestSegmentLayer;
         let drawPoly, PLSpotEstimatordrawControl, PLSpotEstimatorCalibrationdrawControl;
         let isDrawing;
-        let pointStyle = {
-            pointRadius: 6,
-            fillOpacity: 0,
-            strokeColor: '#00ece3',
-            strokeWidth: '2',
-            strokeLinecap: 'round'
-        };
+        // let pointStyle = {
+        //     pointRadius: 6,
+        //     fillOpacity: 0,
+        //     strokeColor: '#00ece3',
+        //     strokeWidth: '2',
+        //     strokeLinecap: 'round'
+        // };
 
         //Closest segment
         const lineStyleToNavPoint = {
@@ -137,7 +138,7 @@ function pie(tries = 1) {
 
     async function init(){
         loadTranslations();
-        GLE = new GoogleLinkEnhancer();
+        GLE = new GoogleLinkEnhancer(sdk);
         hoursparser = new HoursParser();
 
         const $section = $("<div>", {style:"padding:8px 16px", id:"WMEPIESettings"});
@@ -234,48 +235,85 @@ function pie(tries = 1) {
         //Load settings
         await loadSettings();
 
-        const style = new OpenLayers.Style({
-            pointRadius: "${pointRadius}",
-            label : "${labelText}",
-            fontFamily: "Tahoma, Arial, Verdana",
-            labelOutlineColor: settings.PlaceNameFontOutline,
-            labelOutlineWidth: Number(settings.PlaceNameFontOutlineWidth),
-            labelAlign: 'cm',
-            fontColor: settings.PlaceNameFontColor,
-            fontOpacity: 1.0,
-            fontSize: `${settings.PlaceNameFontSize}px`,
-            labelYOffset: "${yOffset}",
-            fontStyle: "${style}",
-            fontWeight: (settings.PlaceNameFontBold ? 'bold' : ''),
-        });
+        function applyDefaultStyle(properties) { return properties.style === "default" };
+        const styleConfig = {
+            styleContext: {
+                // shieldLabelYOffset: (context) => {
+                //     return context?.feature?.properties?.style?.labelYOffset;
+                // },
+            },
+            styleRules: [
+                {
+                    predicate: applyDefaultStyle,
+                    style: {
+                        pointRadius: "${pointRadius}",
+                        label : "${labelText}",
+                        fontFamily: "Tahoma, Arial, Verdana",
+                        labelOutlineColor: settings.PlaceNameFontOutline,
+                        labelOutlineWidth: Number(settings.PlaceNameFontOutlineWidth),
+                        labelAlign: 'cm',
+                        fontColor: settings.PlaceNameFontColor,
+                        fontOpacity: 1.0,
+                        fontSize: `${settings.PlaceNameFontSize}px`,
+                        labelYOffset: "${yOffset}",
+                        fontStyle: "${style}",
+                        fontWeight: (settings.PlaceNameFontBold ? 'bold' : ''),
+                    },
+                }
+            ],
+        };
+
+        // const style = new OpenLayers.Style({
+        //     pointRadius: "${pointRadius}",
+        //     label : "${labelText}",
+        //     fontFamily: "Tahoma, Arial, Verdana",
+        //     labelOutlineColor: settings.PlaceNameFontOutline,
+        //     labelOutlineWidth: Number(settings.PlaceNameFontOutlineWidth),
+        //     labelAlign: 'cm',
+        //     fontColor: settings.PlaceNameFontColor,
+        //     fontOpacity: 1.0,
+        //     fontSize: `${settings.PlaceNameFontSize}px`,
+        //     labelYOffset: "${yOffset}",
+        //     fontStyle: "${style}",
+        //     fontWeight: (settings.PlaceNameFontBold ? 'bold' : ''),
+        // });
 
         const layerConfig = {
             "PIEPlaceNameLayer": {
                 layerName: "PIEPlaceNameLayer",
                 uniqueName: "__PIEPlaceNameLayer",
                 displayInLayerSwitcher: false,
-                styleRules: style,
-                
+                styleRules: styleConfig.styleRules,
+                styleContext: styleConfig.styleContext
             },
             "WME PIE": {
                 layerName: mainLayerName,
                 displayInLayerSwitcher: false,
-                styleRules: null
-            },
+                styleRules: styleConfig.styleRules,
+                styleContext: styleConfig.styleContext
+                        },
             "PIEPLSpotEstimatorLayer": {
                 layerName: "PIEPLSpotEstimatorLayer",
                 displayInLayerSwitcher: false, 
                 uniqueName: "__PIEPLSpotEstimatorLayer", 
-                styleRules: null
-            },
+                styleRules: styleConfig.styleRules,
+                styleContext: styleConfig.styleContext
+                        },
             "PIEPLSpotEstimatorCalibrationLayer": {
-                styleRules: null,
-                layerName: "PIEPLSpotEstimatorCalibrationLayer", 
+                styleRules: styleConfig.styleRules,
+                styleContext: styleConfig.styleContext,
+                                layerName: "PIEPLSpotEstimatorCalibrationLayer", 
                 displayInLayerSwitcher: false, 
                 uniqueName: "__PIEPLSpotEstimatorCalibrationLayer"
             },
-            "PIEShowStopPointsLayer": {layerName: "PIEShowStopPointsLayer", displayInLayerSwitcher: false, uniqueName: "__PIEShowStopPointsLayer", styleRules: null},
-            "PIEClosestSegment":  {layerName: "PIEClosestSegment", displayInLayerSwitcher: false, uniqueName:"__PIEClosesetSegmentLayer", styleRules: null}
+            "PIEShowStopPointsLayer": {layerName: "PIEShowStopPointsLayer", displayInLayerSwitcher: false, uniqueName: "__PIEShowStopPointsLayer", 
+                                styleRules: styleConfig.styleRules,
+                styleContext: styleConfig.styleContext
+            },
+            "PIEClosestSegment":  {layerName: "PIEClosestSegment", displayInLayerSwitcher: false, uniqueName:"__PIEClosesetSegmentLayer", 
+                                styleRules: styleConfig.styleRules,
+                styleContext: styleConfig.styleContext
+            }
         }
 
         function _setLayerVisibility(layerName, visibility) {
@@ -311,22 +349,22 @@ function pie(tries = 1) {
         // PLSpotEstimatorLayer = new OpenLayers.Layer.Vector("PIEPLSpotEstimatorLayer",{displayInLayerSwitcher: false, uniqueName: "__PIEPLSpotEstimatorLayer"});
 		// //W.map.addLayer(PLSpotEstimatorLayer);
         // PLSpotEstimatorLayer.setVisibility(true);
-        _addDisplayLayer("PIEPLSpotEstimatorLayer", true);
+        _addDisplayLayer(layerConfig.PIEPLSpotEstimatorLayer.layerName, true);
 
         // PLSpotEstimatorCalibrationLayer= new OpenLayers.Layer.Vector("PIEPLSpotEstimatorCalibrationLayer",{displayInLayerSwitcher: false, uniqueName: "__PIEPLSpotEstimatorCalibrationLayer"});
 		// //W.map.addLayer(PLSpotEstimatorCalibrationLayer);
         // PLSpotEstimatorCalibrationLayer.setVisibility(true);
-        _addDisplayLayer("PIEPLSpotEstimatorCalibrationLayer", true);
+        _addDisplayLayer(layerConfig.PIEPLSpotEstimatorCalibrationLayer.layerName, true);
 
         // showStopPointsLayer = new OpenLayers.Layer.Vector("PIEShowStopPointsLayer", {displayInLayerSwitcher: false, uniqueName: "__PIEShowStopPointsLayer"});
         // W.map.addLayer(showStopPointsLayer);
         // showStopPointsLayer.setVisibility(true);
-        _addDisplayLayer("PIEShowStopPointsLayer", true);
+        _addDisplayLayer(layerConfig.PIEShowStopPointsLayer.layerName, true);
 
         // closestSegmentLayer = new OpenLayers.Layer.Vector("PIEClosestSegment", {displayInLayerSwitcher: false, uniqueName:"__PIEClosesetSegmentLayer"});
         // W.map.addLayer(closestSegmentLayer);
         // closestSegmentLayer.setVisibility(true);
-        _addDisplayLayer("PIEClosestSegment", true);
+        _addDisplayLayer(layerConfig.PIEClosestSegment.layerName, true);
 
         sdk.Events.on({
             eventName: "wme-layer-checkbox-toggled",
@@ -487,25 +525,31 @@ function pie(tries = 1) {
 
         $('#_cbShowClosestSegmentSelected').change(function(){
             if(this.checked){
-                WazeWrap.Events.register('afterundoaction', this, checkSelection);
-                WazeWrap.Events.register('afteraction', this, checkSelection);
-                WazeWrap.Events.register('selectionchanged', this, checkSelection);
-                W.model.venues.on('objectschanged', ObjectsChanged);
+                // WazeWrap.Events.register('afterundoaction', this, checkSelection);
+                // WazeWrap.Events.register('afteraction', this, checkSelection);
+                // WazeWrap.Events.register('selectionchanged', this, checkSelection);
+                // W.model.venues.on('objectschanged', ObjectsChanged);
+                sdk.Events.on({eventName: "wme-after-undo", eventHandler: checkSelection});
+                sdk.Events.on({eventName: "wme-selection-changed", eventHandler: checkSelection});
+                sdk.Events.on({eventName: "me-data-model-objects-changed", eventHandler: ObjectsChanged})
             }
             else{
-                WazeWrap.Events.unregister('afterundoaction', this, checkSelection);
-                WazeWrap.Events.unregister('afteraction', this, checkSelection);
-                WazeWrap.Events.unregister('selectionchanged', this, checkSelection);
-                W.model.venues.off('objectschanged', ObjectsChanged);
+                // WazeWrap.Events.unregister('afterundoaction', this, checkSelection);
+                // WazeWrap.Events.unregister('afteraction', this, checkSelection);
+                // WazeWrap.Events.unregister('selectionchanged', this, checkSelection);
+                // W.model.venues.off('objectschanged', ObjectsChanged);
+                sdk.Events.off({eventName: "wme-after-undo", eventHandler: checkSelection});
+                sdk.Events.off({eventName: "wme-selection-changed", eventHandler: checkSelection});
+                sdk.Events.off({eventName: "me-data-model-objects-changed", eventHandler: ObjectsChanged})
             }
         });
 
         $('#_cbOpenPUR').change(function(){
             if(this.checked)
-                sdk.Events.on({eventName: "wme-selection-changed", eventName: openPUR})
+                sdk.Events.on({eventName: "wme-selection-changed", eventHandler: openPUR})
                 // WazeWrap.Events.register('selectionchanged', this, openPUR);
             else
-                sdk.Events.off({eventName: "wme-selection-changed", eventName: openPUR})
+                sdk.Events.off({eventName: "wme-selection-changed", eventHandler: openPUR})
                 // WazeWrap.Events.unregister('selectionchanged', this, openPUR);
         });
 
@@ -601,7 +645,7 @@ function pie(tries = 1) {
             $('#_cbhidePlaceNamesWhenPlacesHidden')[0].disabled = false;
         }
         if (settings.PlaceZoom < 12)
-            settings.PlaceZoom = parseInt(settings.PlaceZoom) + 12;
+            settings.PlaceZoom = Number.parseInt(settings.PlaceZoom) + 12;
         $('#piePlaceZoom')[0].value = settings.PlaceZoom;
         $('#pieDefaultLockLevel')[0].value = settings.DefaultLockLevel;
         $('#piePlaceNameFontSize')[0].value = settings.PlaceNameFontSize;
@@ -636,8 +680,8 @@ function pie(tries = 1) {
         if(settings.ShowExternalProviderTooltip){
             //registerEvents(ShowExternalProviderTooltip);
             //ShowExternalProviderTooltip();
-            var observer = new MutationObserver(function(mutations) {
-               mutations.forEach(function(mutation) {
+            const observer = new MutationObserver((mutations) => {
+               mutations.forEach((mutation) => {
                    if ($(mutation.target).hasClass('select2-chosen')) ShowExternalProviderTooltip();
                });
            });
@@ -674,14 +718,18 @@ function pie(tries = 1) {
             ToggleExternalProvidersCSS(true);
 
         if(settings.ShowClosestSegmentSelected){
-            WazeWrap.Events.register('afterundoaction', null, checkSelection);
-            WazeWrap.Events.register('afteraction', null, checkSelection);
-            WazeWrap.Events.register('selectionchanged', null, checkSelection);
-            W.model.venues.on('objectschanged', ObjectsChanged);
+            // WazeWrap.Events.register('afterundoaction', null, checkSelection);
+            sdk.Events.on({eventName: "wme-after-undo", eventHandler: checkSelection});
+            // WazeWrap.Events.register('afteraction', null, checkSelection);
+            // WazeWrap.Events.register('selectionchanged', null, checkSelection);
+            sdk.Events.on({eventName: "wme-selection-changed", eventHandler: checkSelection});
+            // W.model.venues.on('objectschanged', ObjectsChanged);
+            sdk.Events.on({eventName: "wme-data-model-objects-changed", eventHandler: ObjectsChanged});
         }
 
         if(settings.OpenPUR)
-            WazeWrap.Events.register('selectionchanged', null, openPUR);
+            // WazeWrap.Events.register('selectionchanged', null, openPUR);
+            sdk.Events.on({eventName: "wme-selection-changed", eventHandler: openPUR});
 
         GLE.showTempClosedPOIs = settings.showTempClosedPOIs;
 
@@ -707,13 +755,13 @@ function pie(tries = 1) {
         }
 
         $('.pieSettingsCheckbox').change(function() {
-             var settingName = $(this)[0].id.substr(3);
+            const settingName = $(this)[0].id.substr(3);
             settings[settingName] = this.checked;
             saveSettings();
         });
 
         $('#piePlaceZoom').change(function(){
-            var settingName = $(this)[0].id.substr(3);
+            const settingName = $(this)[0].id.substr(3);
             settings[settingName] = $(this)[0].value;
             saveSettings();
         });
@@ -729,7 +777,7 @@ function pie(tries = 1) {
         });
 
         $('#piePlaceNameFontSize').focusout(function(){
-            var fontSize = $(this)[0].value;
+            const fontSize = $(this)[0].value;
             if(fontSize == "" || fontSize == "0")
                 $(this)[0].value = 12;
             settings[$(this)[0].id.substr(3)] = fontSize;
@@ -748,12 +796,12 @@ function pie(tries = 1) {
             DisplayPlaceNames();
         });
 
-        $('#piePlaceNameFontSize').keypress(function(event) {
+        $('#piePlaceNameFontSize').keypress((event) => {
             if ((event.which < 48 || event.which > 57))
                 event.preventDefault();
         });
 
-        $('#piePlaceNameFontOutlineWidth').keypress(function(event) {
+        $('#piePlaceNameFontOutlineWidth').keypress((event) => {
             if ((event.which < 48 || event.which > 57))
                 event.preventDefault();
         });
@@ -769,19 +817,19 @@ function pie(tries = 1) {
             settings[$(this)[0].id.substr(3)] = factor;
         });
 
-        var i;
+        // var i;
         //Whenever a Place item is changed, read the settings and save to localStorage
-        $('[id^="pieItem"]').change(function(){
-            for(i=0;i<12;i++)
-                settings.NewPlacesList[i] = $('#pieItem'+(i+1))[0].value;
+        $('[id^="pieItem"]').change(()=> {
+            for(let i=0;i<12;i++)
+                settings.NewPlacesList[i] = $(`#pieItem${i+1}`)[0].value;
 
             saveSettings();
             //buildNewPlaceList();
         });
 
         //Load settings into Place Customization list options
-        for(i=0; i<12;i++)
-            $('#pieItem'+(i+1))[0].value = settings.NewPlacesList[i];
+        for(let i=0; i<12;i++)
+            $(`#pieItem${i+1}`)[0].value = settings.NewPlacesList[i];
 
         //Build our new menu
         //buildNewPlaceList();
@@ -817,21 +865,21 @@ function pie(tries = 1) {
         $('input[type=radio][name=PlaceFilterToggle]').change(UpdatePlaceFilter);
 
 
-        window.addEventListener("beforeunload", function() {
+        window.addEventListener("beforeunload", () => {
 		checkShortcutsChanged();
             //saveSettings();
         }, false);
 
-        let extprovobserver = new MutationObserver(function(mutations) {
-               mutations.forEach(function(mutation) {
+        const extprovobserver = new MutationObserver((mutations) => {
+               mutations.forEach((mutation) => {
 
                    /*if ($(mutation.target).hasClass('external-providers-view'))
                        if(W.loginManager.user.normalizedLevel === 1)
                            $('.external-providers-view').parent().parent().remove();
                            */
 
-                       for (var i = 0; i < mutation.addedNodes.length; i++) {
-                           var addedNode = mutation.addedNodes[i];
+                       for (let i = 0; i < mutation.addedNodes.length; i++) {
+                           const addedNode = mutation.addedNodes[i];
                            // Only fire up if it's a node
                            if (addedNode.nodeType === Node.ELEMENT_NODE && ($(addedNode).hasClass('address-edit-view') || $(addedNode).hasClass('conversation-view'))) {
                                updatePlaceSizeDisplay();
@@ -872,36 +920,36 @@ function pie(tries = 1) {
 
         extprovobserver.observe(document.getElementById('edit-panel'), { childList: true, subtree: true });
 
-        WazeWrap.Events.register("selectionchanged", null, function(){
+        WazeWrap.Events.register("selectionchanged", null, ()=> {
             if(W.selectionManager.getSelectedFeatures.length > 0)
                 lastSelectedFeature = W.selectionManager.getSelectedFeatures()[0].WW.getType;
             if(WazeWrap.hasPlaceSelected()){
                 setTimeout(() => {
                     //Trim whitespace from start and end of house number field on Places
-                    $('.form-control.house-number').focusout(function(){
+                    $('.form-control.house-number').focusout(()=> {
                         $('.form-control.house-number')[0].value = $('.form-control.house-number')[0].value.trim();
                     });
 
                     //Make Website label a clickable link to the set website
                     let placeURL = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.url || "";
 
-                    $('input[name="url"]').focusout(function(){
+                    $('input[name="url"]').focusout(()=> {
                         placeURL = $('input[name="url"]')[0].value.trim();
                         if(placeURL == ""){
                             $('input[name="url"]').parent().parent().find('label').unwrap();
                             return;
                         }
                         if(!placeURL.startsWith("http"))
-                            placeURL = "https://" + placeURL;
+                            placeURL = `https://${placeURL}`;
                         if($('#websiteLink').length == 0)
-                            $('input[name="url"]').parent().parent().find('label').wrap('<a href="' + placeURL + '" id="websiteLink" target="_blank" style="cursor:pointer;"></a>');
+                            $('input[name="url"]').parent().parent().find('label').wrap(`<a href="${placeURL}" id="websiteLink" target="_blank" style="cursor:pointer;"></a>`);
                         else
                             $('#websiteLink').attr('href', placeURL);
                     });
                     if(placeURL != ""){
                         if(!placeURL.startsWith("http"))
-                            placeURL = "https://" + placeURL;
-                        $('input[name="url"]').parent().parent().find('label').wrap('<a href="' + placeURL + '" id="websiteLink" target="_blank" style="cursor:pointer;"></a>');
+                            placeURL = `https://${placeURL}`;
+                        $('input[name="url"]').parent().parent().find('label').wrap(`<a href="${placeURL}" id="websiteLink" target="_blank" style="cursor:pointer;"></a>`);
                         $('input[name="url"]').parent().parent().find('label').css('text-decoration', 'underline');
                         $('input[name="url"]').parent().parent().find('label').css('cursor', 'pointer');
                     }
@@ -940,11 +988,13 @@ function pie(tries = 1) {
         W.model.actionManager.events.register("afterclearactions",null, highlightObsoleteHospitalCategory);
         W.model.actionManager.events.register("afteraction",null, highlightObsoleteHospitalCategory);*/
 
-        WazeWrap.Events.register("zoomend", null, DisplayPlaceNames);
-        WazeWrap.Events.register("changelayer", null, DisplayPlaceNames);
+        // WazeWrap.Events.register("zoomend", null, DisplayPlaceNames);
+        sdk.Events.on({eventName: "wme-map-zoom-changed", eventHandler: DisplayPlaceNames});
+        // WazeWrap.Events.register("changelayer", null, DisplayPlaceNames);
+        sdk.Events.on({eventName: "wme-map-layer-changed", eventHandler: DisplayPlaceNames});
 
         //Shamelessly copied from URO+
-        var MO_MPLayer = new MutationObserver(MPLayerChanged);
+        const MO_MPLayer = new MutationObserver(MPLayerChanged);
         MO_MPLayer.observe(W.map.getLayerByName("mapProblems").div,{childList : true});
 
         wazePL = document.querySelector('.WazeControlPermalink>a.fa-link');
@@ -961,7 +1011,7 @@ function pie(tries = 1) {
         registerEvents(AddMakePrimaryButtons);
         AddMakePrimaryButtons();
 
-        WazeWrap.Events.register("change:mode", null, function(x, modeID){
+        WazeWrap.Events.register("change:mode", null, (x, modeID)=> {
             if(modeID === 1) //in event mode
                 GLE.disable();
             else{
@@ -1934,19 +1984,27 @@ function pie(tries = 1) {
     }
 
     function registerEvents(handler){
-        WazeWrap.Events.register("selectionchanged", null, handler);
-        //W.selectionManager.events.register("selectionchanged", null, handler);
-        WazeWrap.Events.register("afterundoaction",null, handler);
-        WazeWrap.Events.register("afterclearactions",null, handler);
-        WazeWrap.Events.register("afteraction",null, handler);
+        // WazeWrap.Events.register("selectionchanged", null, handler);
+        // //W.selectionManager.events.register("selectionchanged", null, handler);
+        // WazeWrap.Events.register("afterundoaction",null, handler);
+        // WazeWrap.Events.register("afterclearactions",null, handler);
+        // WazeWrap.Events.register("afteraction",null, handler);
+        sdk.Events.on({eventName: "wme-selection-changed", eventHandler: handler});
+        sdk.Events.on({eventName: "wme-after-undo", eventHandler: handler});
+        sdk.Events.on({eventName: "wme-after-redo-clear", eventHandler: handler});
+        sdk.Events.on({eventName: "wme-after-edit", eventHandler: handler});
     }
 
     function unregisterEvents(handler){
-        WazeWrap.Events.unregister("selectionchanged", null, handler);
-        //W.selectionManager.events.unregister("selectionchanged", null, handler);
-        WazeWrap.Events.unregister("afterundoaction",null, handler);
-        WazeWrap.Events.unregister("afterclearactions",null, handler);
-        WazeWrap.Events.unregister("afteraction",null, handler);
+        // WazeWrap.Events.unregister("selectionchanged", null, handler);
+        // //W.selectionManager.events.unregister("selectionchanged", null, handler);
+        // WazeWrap.Events.unregister("afterundoaction",null, handler);
+        // WazeWrap.Events.unregister("afterclearactions",null, handler);
+        // WazeWrap.Events.unregister("afteraction",null, handler);
+        sdk.Events.off({eventName: "wme-selection-changed", eventHandler: handler});
+        sdk.Events.off({eventName: "wme-after-undo", eventHandler: handler});
+        sdk.Events.off({eventName: "wme-after-redo-clear", eventHandler: handler});
+        sdk.Events.off({eventName: "wme-after-edit", eventHandler: handler});
     }
 
     function ToggleExternalProvidersCSS(truthiness){

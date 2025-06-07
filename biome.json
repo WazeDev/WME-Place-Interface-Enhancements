@@ -21,7 +21,8 @@
 		"rules": {
 			"recommended": true,
 			"style": {
-				"useSingleVarDeclarator": "off"
+				"useSingleVarDeclarator": "off",
+				"useForOf": "off"
 			}
 		}
 	},
