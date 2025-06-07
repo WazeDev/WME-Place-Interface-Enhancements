@@ -96,30 +96,67 @@ function pie(tries = 1) {
         // };
 
         //Closest segment
-        const lineStyleToNavPoint = {
-            strokeWidth: 3,
+    const lineStyleToNavPoint = {
+        strokeWidth: 3,
+        strokeColor: '#00ece3',
+        strokeLinecap: 'round',
+        strokeDashstyle: 'dash'
+    },
+        lineStyleToClosestSeg = {
+            strokeWidth: 4,
             strokeColor: '#00ece3',
-            strokeLinecap: 'round',
-            strokeDashstyle: 'dash'
+            strokeLinecap: 'round'
         },
-            lineStyleToClosestSeg = {
-                strokeWidth: 4,
-                strokeColor: '#00ece3',
-                strokeLinecap: 'round'
+        pointStyleNavPoint = {
+            externalGraphic: 'data:image/gif;base64,R0lGODlhFgAWAPZ/AD09PT8/Pj8/P0M9PUA/P1s9PUBAPz09Qz09Zz09c0M9SWc9bT9AQD1DT0FBQEJBQURDQkRDQ0JGRkZFRUlIRklIR0lISElJSVFPTFJPTlJQTVNQTlNRT1ZTT1lWUlhWU11ZVmFbSXNDW2FhT2diXUlDYUNJbVtDc1thYWBgYGFhYWxsbG1tbZE9PbZzPaRVVZFnSbZzQ7BtYbB/Z8J/Q7yFW4uRbZGLc8iLYdqkZ8iqeeCwZ+y8cz09iz09kT1Dlz1nlz1JpENbkUNztmGFvD2R1EOR1H+wyG2w4HO25nO27Hm88p2dnZ6enraXl7a2ts7Cl/jIi/LOkfjUkf/Ukf/Ul//gqv/mtoW22pe22pfCzovI8pfU+KTa/7zs/8LCwsLOzs7Ozs/Pz9rOzubUzuzazvLgyP/syP//1P/42v//2s7U5s744NTm+Nrs/87y/8j4/9T//+bm5v//4P//5v//7ODy/+b///Pz8/jy8v//8vL4////+Pj//////wAAACH5BAUAAH8ALAAAAAAWABYAAAf+gH+CgyQeFQ8AAAQTHiSDj48ZDAIAlJWVAhyQjw8CAitMYXh4YUwrlQ+bf54VX36vsK9fEwKpnAIgcrBpTll9sHIgDLZ/GQITurBUAD1xsXIWAhmCnq6wZjMACFhusV+VfxyfsHw5JjfaNiVcsSsCHRUATLA8Qm9WBUFxUydesEwAKhgQEOaVmhddYr3KYcTPrzC1KOFRIwOEAhRbYNXBEaIBCSR+8CRKhAdNi5FKNLoIEABAkZCJWobhQwbKAi3dYJXRAQRMGz8QIVQQMM+PHhpJ/NQZs6YPnRhL/gmo8AfAClhXRGCRwoxNjSF3YJ2iJsCanzMwMB0gEvbVE09GgsQhixVFQA84z6JdGERLRTI/VQb8cPZKjgoBECAROGY2zx5YT6IJUNXpU6hRpdzVUhXXk6VEngx44PwIxAQJiSRUAKEqEAA7',
+            graphicWidth: 22,
+            graphicHeight: 22
+        },
+        pointStyle = {
+            pointRadius: 6,
+            fillColor: 'white',
+            fillOpacity: 1,
+            strokeColor: '#00ece3',
+            strokeWidth: '3',
+            strokeLinecap: 'round'
+        };
+
+        const styleConfig = {
+            styleContext: {
+                labelYOffset: (context) => {
+                    return context?.feature?.properties?.style?.labelYOffset;
+                },
+                pointRadius: (context) => {
+                    return context?.feature?.properties?.style?.pointRadius;
+                },
+                fontStyle: (context) => {
+                    return context?.feature?.properties?.style?.fontStyle;
+                },
+                labelText: (context) => {
+                    return context?.feature?.properties?.style?.labelText;
+                }
             },
-            pointStyleNavPoint = {
-                externalGraphic: 'data:image/gif;base64,R0lGODlhFgAWAPZ/AD09PT8/Pj8/P0M9PUA/P1s9PUBAPz09Qz09Zz09c0M9SWc9bT9AQD1DT0FBQEJBQURDQkRDQ0JGRkZFRUlIRklIR0lISElJSVFPTFJPTlJQTVNQTlNRT1ZTT1lWUlhWU11ZVmFbSXNDW2FhT2diXUlDYUNJbVtDc1thYWBgYGFhYWxsbG1tbZE9PbZzPaRVVZFnSbZzQ7BtYbB/Z8J/Q7yFW4uRbZGLc8iLYdqkZ8iqeeCwZ+y8cz09iz09kT1Dlz1nlz1JpENbkUNztmGFvD2R1EOR1H+wyG2w4HO25nO27Hm88p2dnZ6enraXl7a2ts7Cl/jIi/LOkfjUkf/Ukf/Ul//gqv/mtoW22pe22pfCzovI8pfU+KTa/7zs/8LCwsLOzs7Ozs/Pz9rOzubUzuzazvLgyP/syP//1P/42v//2s7U5s744NTm+Nrs/87y/8j4/9T//+bm5v//4P//5v//7ODy/+b///Pz8/jy8v//8vL4////+Pj//////wAAACH5BAUAAH8ALAAAAAAWABYAAAf+gH+CgyQeFQ8AAAQTHiSDj48ZDAIAlJWVAhyQjw8CAitMYXh4YUwrlQ+bf54VX36vsK9fEwKpnAIgcrBpTll9sHIgDLZ/GQITurBUAD1xsXIWAhmCnq6wZjMACFhusV+VfxyfsHw5JjfaNiVcsSsCHRUATLA8Qm9WBUFxUydesEwAKhgQEOaVmhddYr3KYcTPrzC1KOFRIwOEAhRbYNXBEaIBCSR+8CRKhAdNi5FKNLoIEABAkZCJWobhQwbKAi3dYJXRAQRMGz8QIVQQMM+PHhpJ/NQZs6YPnRhL/gmo8AfAClhXRGCRwoxNjSF3YJ2iJsCanzMwMB0gEvbVE09GgsQhixVFQA84z6JdGERLRTI/VQb8cPZKjgoBECAROGY2zx5YT6IJUNXpU6hRpdzVUhXXk6VEngx44PwIxAQJiSRUAKEqEAA7',
-                graphicWidth: 22,
-                graphicHeight: 22
-            },
-            pointStyle = {
-                pointRadius: 6,
-                fillColor: 'white',
-                fillOpacity: 1,
-                strokeColor: '#00ece3',
-                strokeWidth: '3',
-                strokeLinecap: 'round'
-            };
+            styleRules: [
+                {
+                    predicate: (properties) => { return properties.style === "default"},
+                    style: {
+                        pointRadius: "${pointRadius}",
+                        label : "${labelText}",
+                        fontFamily: "Tahoma, Arial, Verdana",
+                        labelOutlineColor: settings.PlaceNameFontOutline,
+                        labelOutlineWidth: Number(settings.PlaceNameFontOutlineWidth),
+                        labelAlign: 'cm',
+                        fontColor: settings.PlaceNameFontColor,
+                        fontOpacity: 1.0,
+                        fontSize: `${settings.PlaceNameFontSize}px`,
+                        labelYOffset: "${labelYOffset}",
+                        fontStyle: "${fontStyle}",
+                        fontWeight: (settings.PlaceNameFontBold ? 'bold' : ''),
+                    },
+                }
+            ],
+        };
+
 
     const layerConfig = {
         "PIEPlaceNameLayer": {
@@ -272,34 +309,6 @@ function pie(tries = 1) {
 
         //Load settings
         await loadSettings();
-
-        function applyDefaultStyle(properties) { return properties.style === "default" };
-        const styleConfig = {
-            styleContext: {
-                // shieldLabelYOffset: (context) => {
-                //     return context?.feature?.properties?.style?.labelYOffset;
-                // },
-            },
-            styleRules: [
-                {
-                    predicate: applyDefaultStyle,
-                    style: {
-                        pointRadius: "${pointRadius}",
-                        label : "${labelText}",
-                        fontFamily: "Tahoma, Arial, Verdana",
-                        labelOutlineColor: settings.PlaceNameFontOutline,
-                        labelOutlineWidth: Number(settings.PlaceNameFontOutlineWidth),
-                        labelAlign: 'cm',
-                        fontColor: settings.PlaceNameFontColor,
-                        fontOpacity: 1.0,
-                        fontSize: `${settings.PlaceNameFontSize}px`,
-                        labelYOffset: "${yOffset}",
-                        fontStyle: "${style}",
-                        fontWeight: (settings.PlaceNameFontBold ? 'bold' : ''),
-                    },
-                }
-            ],
-        };
 
         // const style = new OpenLayers.Style({
         //     pointRadius: "${pointRadius}",
@@ -841,26 +850,26 @@ function pie(tries = 1) {
         //W.editingMediator.on('change:editingEnabled', buildNewPlaceList);
 
         /********* SHORTCUTS *********/
-        new WazeWrap.Interface.Shortcut('CreateResidentialPlaceShortcut', 'Creates a resdiential Place point', 'wmepie', 'Place Interface Enhancements', settings.CreateResidentialPlaceShortcut, function(){startPlacementMode(resCategory, true);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateResidentialPlaceShortcut', 'Creates a resdiential Place point', 'wmepie', 'Place Interface Enhancements', settings.CreateResidentialPlaceShortcut, ()=> {startPlacementMode(resCategory, true);}, null).add();
 
-        new WazeWrap.Interface.Shortcut('CreateParkingLotShortcut', 'Creates a parking lot Place', 'wmepie', 'Place Interface Enhancements', settings.CreateParkingLotShortcut, function(){startPlacementMode("PARKING_LOT", false);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateParkingLotShortcut', 'Creates a parking lot Place', 'wmepie', 'Place Interface Enhancements', settings.CreateParkingLotShortcut, ()=> {startPlacementMode("PARKING_LOT", false);}, null).add();
         new WazeWrap.Interface.Shortcut('HideAreaPlacesShortcut', 'Toggle hiding area Places', 'wmepie', 'Place Interface Enhancements', settings.ToggleAreaPlacesShortcut, ToggleHideAreaPlaces, null).add();
         new WazeWrap.Interface.Shortcut('OrthogonalizeShortcut', 'Orthogonalize Area Place', 'wmepie', 'Place Interface Enhancements', settings.OrthogonalizeShortcut, OrthogonalizePlace, null).add();
         new WazeWrap.Interface.Shortcut('SimplifyPlaceShortcut', 'Simplify Area Place', 'wmepie', 'Place Interface Enhancements', settings.SimplifyPlaceShortcut, SimplifyPlace, null).add();
 
 
-        new WazeWrap.Interface.Shortcut('CreateItem1Shortcut', 'Create Item 1', 'wmepie', 'Place Interface Enhancements', settings.CreateItem1Shortcut, function(){PlaceMenuShortcut(1);}, null).add();
-        new WazeWrap.Interface.Shortcut('CreateItem2Shortcut', 'Create Item 2', 'wmepie', 'Place Interface Enhancements', settings.CreateItem2Shortcut, function(){PlaceMenuShortcut(2);}, null).add();
-        new WazeWrap.Interface.Shortcut('CreateItem3Shortcut', 'Create Item 3', 'wmepie', 'Place Interface Enhancements', settings.CreateItem3Shortcut, function(){PlaceMenuShortcut(3);}, null).add();
-        new WazeWrap.Interface.Shortcut('CreateItem4Shortcut', 'Create Item 4', 'wmepie', 'Place Interface Enhancements', settings.CreateItem4Shortcut, function(){PlaceMenuShortcut(4);}, null).add();
-        new WazeWrap.Interface.Shortcut('CreateItem5Shortcut', 'Create Item 5', 'wmepie', 'Place Interface Enhancements', settings.CreateItem5Shortcut, function(){PlaceMenuShortcut(5);}, null).add();
-        new WazeWrap.Interface.Shortcut('CreateItem6Shortcut', 'Create Item 6', 'wmepie', 'Place Interface Enhancements', settings.CreateItem6Shortcut, function(){PlaceMenuShortcut(6);}, null).add();
-        new WazeWrap.Interface.Shortcut('CreateItem7Shortcut', 'Create Item 7', 'wmepie', 'Place Interface Enhancements', settings.CreateItem7Shortcut, function(){PlaceMenuShortcut(7);}, null).add();
-        new WazeWrap.Interface.Shortcut('CreateItem8Shortcut', 'Create Item 8', 'wmepie', 'Place Interface Enhancements', settings.CreateItem8Shortcut, function(){PlaceMenuShortcut(8);}, null).add();
-        new WazeWrap.Interface.Shortcut('CreateItem9Shortcut', 'Create Item 9', 'wmepie', 'Place Interface Enhancements', settings.CreateItem9Shortcut, function(){PlaceMenuShortcut(9);}, null).add();
-        new WazeWrap.Interface.Shortcut('CreateItem10Shortcut', 'Create Item 10', 'wmepie', 'Place Interface Enhancements', settings.CreateItem10Shortcut, function(){PlaceMenuShortcut(10);}, null).add();
-        new WazeWrap.Interface.Shortcut('CreateItem11Shortcut', 'Create Item 11', 'wmepie', 'Place Interface Enhancements', settings.CreateItem11Shortcut, function(){PlaceMenuShortcut(11);}, null).add();
-        new WazeWrap.Interface.Shortcut('CreateItem12Shortcut', 'Create Item 12', 'wmepie', 'Place Interface Enhancements', settings.CreateItem12Shortcut, function(){PlaceMenuShortcut(12);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem1Shortcut', 'Create Item 1', 'wmepie', 'Place Interface Enhancements', settings.CreateItem1Shortcut, ()=> {PlaceMenuShortcut(1);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem2Shortcut', 'Create Item 2', 'wmepie', 'Place Interface Enhancements', settings.CreateItem2Shortcut, ()=> {PlaceMenuShortcut(2);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem3Shortcut', 'Create Item 3', 'wmepie', 'Place Interface Enhancements', settings.CreateItem3Shortcut, ()=> {PlaceMenuShortcut(3);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem4Shortcut', 'Create Item 4', 'wmepie', 'Place Interface Enhancements', settings.CreateItem4Shortcut, ()=> {PlaceMenuShortcut(4);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem5Shortcut', 'Create Item 5', 'wmepie', 'Place Interface Enhancements', settings.CreateItem5Shortcut, ()=> {PlaceMenuShortcut(5);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem6Shortcut', 'Create Item 6', 'wmepie', 'Place Interface Enhancements', settings.CreateItem6Shortcut, ()=> {PlaceMenuShortcut(6);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem7Shortcut', 'Create Item 7', 'wmepie', 'Place Interface Enhancements', settings.CreateItem7Shortcut, ()=> {PlaceMenuShortcut(7);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem8Shortcut', 'Create Item 8', 'wmepie', 'Place Interface Enhancements', settings.CreateItem8Shortcut, ()=> {PlaceMenuShortcut(8);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem9Shortcut', 'Create Item 9', 'wmepie', 'Place Interface Enhancements', settings.CreateItem9Shortcut, ()=> {PlaceMenuShortcut(9);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem10Shortcut', 'Create Item 10', 'wmepie', 'Place Interface Enhancements', settings.CreateItem10Shortcut, ()=> {PlaceMenuShortcut(10);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem11Shortcut', 'Create Item 11', 'wmepie', 'Place Interface Enhancements', settings.CreateItem11Shortcut, ()=> {PlaceMenuShortcut(11);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateItem12Shortcut', 'Create Item 12', 'wmepie', 'Place Interface Enhancements', settings.CreateItem12Shortcut, ()=> {PlaceMenuShortcut(12);}, null).add();
 
         $("#piePlaceFilter").on("propertychange keyup paste input", UpdatePlaceFilter);
         $('input[type=radio][name=PlaceFilterToggle]').trigger("change",UpdatePlaceFilter);
@@ -872,7 +881,8 @@ function pie(tries = 1) {
         }, false);
 
         const extprovobserver = new MutationObserver((mutations) => {
-               mutations.forEach((mutation) => {
+            //    mutations.forEach((mutation) => {
+                for(const mutation of mutations) {
 
                    /*if ($(mutation.target).hasClass('external-providers-view'))
                        if(W.loginManager.user.normalizedLevel === 1)
@@ -904,7 +914,7 @@ function pie(tries = 1) {
                                    _hidePaymentType();
                            }
                        }
-               });
+               };
            });
 
         W.model.venues.on('objectschanged', venues => {
@@ -1030,13 +1040,13 @@ function pie(tries = 1) {
 
     function SetupPhotoViewer(){
         //Black background
-        let mainDiv=document.createElement('div');
+        const mainDiv=document.createElement('div');
         mainDiv.id='photoViewerMainDiv';
         $(mainDiv).css({'float':'right','position':'absolute','left':'0px','top':'0px','width':'100%','height':'100%','background-color':'rgb(0, 0, 0, 0.85)','z-index':'1005','overflow-y':'auto','display':'none', 'font-size':'13px'});
         $('#map').append(mainDiv);
 
         //Div options
-        let optDiv=document.createElement('div');
+        const optDiv=document.createElement('div');
         optDiv.id='options';
         $(optDiv).css({'position':'absolute','top':'0','width':'100%','height':'100%','z-index':'1011','background-color':'rgb(0, 0, 0, 0.85)', 'display':'none'});
         /*optDiv.onclick = function(){
@@ -1052,7 +1062,7 @@ function pie(tries = 1) {
             '<div class="photoViewerOptionsFooter" style="margin-top:15px;"><button class="btn btn-primary" type="button" id="photoViewerSave">Save</button><button type="button" class="btn btn-default" id="photoViewerCancel">Cancel</button></div>';
         optDiv.appendChild(optDiv2);
 
-        $('#photoViewerCancel').click(function(){
+        $('#photoViewerCancel').trigger("click", ()=> {
             $(optDiv).css('display', 'none');
         });
 
@@ -1071,7 +1081,7 @@ function pie(tries = 1) {
         let param=document.createElement('button');
         param.innerHTML='<i style="color:#ccc;" class="fa fa-gear"></i>';
         $(param).css({'float':'right','height':'22px','line-height':'22px','margin':'3px','background-color':'#354148','color':'white','border':'0','border-radius':'11px'});
-        param.onclick=(function(){
+        param.onclick=(()=> {
             $(optDiv).css('display', 'block');
         });
         topbar.appendChild(param);
@@ -1122,7 +1132,7 @@ function pie(tries = 1) {
         setChecked('photoViewerPreserveLayout', settings.PhotoViewerPreserveLayout);
         setChecked('photoViewerShowHiddenPlaces', settings.PhotoViewerShowHiddenPlaces);
 
-        $('#photoViewerSave').click(function(){
+        $('#photoViewerSave').trigger("click", ()=> {
             settings.sortBy = $('#sortBy')[0].value;
             settings.sortOrder = $('#sortOrder')[0].value;
             settings.PhotoViewerPreserveLayout = isChecked('photoViewerPreserveLayout');
@@ -1164,36 +1174,32 @@ function pie(tries = 1) {
     }
 
     function dynamicSort(property) {
-        var sortOrder = 1;
+        let sortOrder = 1;
         if(property[0] === "-") {
             sortOrder = -1;
             property = property.substr(1);
         }
 
-        return function (a,b) {
-            if(sortOrder == -1){
+        return (a,b) => {
+            if(sortOrder === -1){
                 if(property === "name")
                     return b.attributes[property].localeCompare(a.attributes[property]);
-                else if(property === "ImageCount")
-                    return (parseInt(b.attributes.images.length) - parseInt(a.attributes.images.length));
-                else
-                    return (parseInt(b.attributes[property]) - parseInt(a.attributes[property]));
+                if(property === "ImageCount")
+                    return (Number.parseInt(b.attributes.images.length) - Number.parseInt(a.attributes.images.length));
+                return (Number.parseInt(b.attributes[property]) - Number.parseInt(a.attributes[property]));
             }
-            else{
-                if(property === "name")
-                    return a.attributes[property].localeCompare(b.attributes[property]);
-                else if(property === "ImageCount")
-                    return (parseInt(a.attributes.images.length) - parseInt(b.attributes.images.length));
-                else
-                    return (parseInt(a.attributes[property]) - parseInt(b.attributes[property]));
-            }
+            if(property === "name")
+                return a.attributes[property].localeCompare(b.attributes[property]);
+            if(property === "ImageCount")
+                return (Number.parseInt(a.attributes.images.length) - Number.parseInt(b.attributes.images.length));
+            return (Number.parseInt(a.attributes[property]) - Number.parseInt(b.attributes[property]));
         }
     }
 
     function Photos_scan(){
         catalog=[];
         let venues = [];
-        for (let poi in W.model.venues.objects)
+        for (const poi in W.model.venues.objects)
             venues.push(W.model.venues.getObjectById(poi));
 
         venues.sort(dynamicSort((settings.sortOrder === "sortDesc" ? "-" : "") + settings.sortBy.substr(6)));

@@ -23,7 +23,10 @@
 			"style": {
 				"useSingleVarDeclarator": "off",
 				"useForOf": "off"
-			}
+			},
+			"suspicious": {
+			},
+			"complexity": {}
 		}
 	},
 	"javascript": {
