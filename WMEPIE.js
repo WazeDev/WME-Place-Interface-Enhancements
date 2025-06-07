@@ -121,6 +121,44 @@ function pie(tries = 1) {
                 strokeLinecap: 'round'
             };
 
+    const layerConfig = {
+        "PIEPlaceNameLayer": {
+            layerName: "PIEPlaceNameLayer",
+            uniqueName: "__PIEPlaceNameLayer",
+            displayInLayerSwitcher: false,
+            styleRules: styleConfig.styleRules,
+            styleContext: styleConfig.styleContext
+        },
+        "WME PIE": {
+            layerName: mainLayerName,
+            displayInLayerSwitcher: false,
+            styleRules: styleConfig.styleRules,
+            styleContext: styleConfig.styleContext
+                    },
+        "PIEPLSpotEstimatorLayer": {
+            layerName: "PIEPLSpotEstimatorLayer",
+            displayInLayerSwitcher: false, 
+            uniqueName: "__PIEPLSpotEstimatorLayer", 
+            styleRules: styleConfig.styleRules,
+            styleContext: styleConfig.styleContext
+                    },
+        "PIEPLSpotEstimatorCalibrationLayer": {
+            styleRules: styleConfig.styleRules,
+            styleContext: styleConfig.styleContext,
+                            layerName: "PIEPLSpotEstimatorCalibrationLayer", 
+            displayInLayerSwitcher: false, 
+            uniqueName: "__PIEPLSpotEstimatorCalibrationLayer"
+        },
+        "PIEShowStopPointsLayer": {layerName: "PIEShowStopPointsLayer", displayInLayerSwitcher: false, uniqueName: "__PIEShowStopPointsLayer", 
+                            styleRules: styleConfig.styleRules,
+            styleContext: styleConfig.styleContext
+        },
+        "PIEClosestSegment":  {layerName: "PIEClosestSegment", displayInLayerSwitcher: false, uniqueName:"__PIEClosesetSegmentLayer", 
+                            styleRules: styleConfig.styleRules,
+            styleContext: styleConfig.styleContext
+        }
+    }
+
         
     loadScriptUpdateMonitor();
     init();
@@ -278,44 +316,6 @@ function pie(tries = 1) {
         //     fontWeight: (settings.PlaceNameFontBold ? 'bold' : ''),
         // });
 
-        const layerConfig = {
-            "PIEPlaceNameLayer": {
-                layerName: "PIEPlaceNameLayer",
-                uniqueName: "__PIEPlaceNameLayer",
-                displayInLayerSwitcher: false,
-                styleRules: styleConfig.styleRules,
-                styleContext: styleConfig.styleContext
-            },
-            "WME PIE": {
-                layerName: mainLayerName,
-                displayInLayerSwitcher: false,
-                styleRules: styleConfig.styleRules,
-                styleContext: styleConfig.styleContext
-                        },
-            "PIEPLSpotEstimatorLayer": {
-                layerName: "PIEPLSpotEstimatorLayer",
-                displayInLayerSwitcher: false, 
-                uniqueName: "__PIEPLSpotEstimatorLayer", 
-                styleRules: styleConfig.styleRules,
-                styleContext: styleConfig.styleContext
-                        },
-            "PIEPLSpotEstimatorCalibrationLayer": {
-                styleRules: styleConfig.styleRules,
-                styleContext: styleConfig.styleContext,
-                                layerName: "PIEPLSpotEstimatorCalibrationLayer", 
-                displayInLayerSwitcher: false, 
-                uniqueName: "__PIEPLSpotEstimatorCalibrationLayer"
-            },
-            "PIEShowStopPointsLayer": {layerName: "PIEShowStopPointsLayer", displayInLayerSwitcher: false, uniqueName: "__PIEShowStopPointsLayer", 
-                                styleRules: styleConfig.styleRules,
-                styleContext: styleConfig.styleContext
-            },
-            "PIEClosestSegment":  {layerName: "PIEClosestSegment", displayInLayerSwitcher: false, uniqueName:"__PIEClosesetSegmentLayer", 
-                                styleRules: styleConfig.styleRules,
-                styleContext: styleConfig.styleContext
-            }
-        }
-
         function _setLayerVisibility(layerName, visibility) {
             if(visibility) {
                 sdk.Map.setLayerVisibility({
@@ -418,7 +418,7 @@ function pie(tries = 1) {
 
         //$('#divPlaceNamesFontCustomization .select2-input').remove()
         //Set up event handlers
-        $('#_cbShowAreaPlaceSize').change(function() {
+        $('#_cbShowAreaPlaceSize').trigger("change",function() {
             if(this.checked) {
                 attachPlaceSizeHandlers();
                 updatePlaceSizeDisplay();
@@ -434,7 +434,7 @@ function pie(tries = 1) {
             }
         });
 
-        $('#_cbShowPlaceNames').change(function() {
+        $('#_cbShowPlaceNames').trigger("change",function() {
             // PIEPlaceNameLayer.setVisibility(this.checked);
             _setLayerVisibility("PIEPlaceNameLayer", this.checked);
             $('#_cbShowPlaceNamesPoint')[0].disabled = !this.checked;
@@ -446,75 +446,75 @@ function pie(tries = 1) {
             DisplayPlaceNames();
         });
 
-        $('[id^="_cbShowPlaceNames"]').change(()=> {
+        $('[id^="_cbShowPlaceNames"]').trigger("change",()=> {
             DisplayPlaceNames();
         });
 
-        $('#_cbhidePlaceNamesWhenPlacesHidden').change(()=> {
+        $('#_cbhidePlaceNamesWhenPlacesHidden').trigger("change",()=> {
             DisplayPlaceNames();
         });
 
-        $('#_cbShowExternalProviderTooltip').change(function(){
+        $('#_cbShowExternalProviderTooltip').trigger("change",function(){
             ToggleExternalProvidersCSS(this.checked);
         });
 
-        $('#_cbShowPlaceLocatorCrosshair').change(function(){
+        $('#_cbShowPlaceLocatorCrosshair').trigger("change",function(){
             if(this.checked)
                 registerEvents(ShowPlaceLocatorCrosshair);
             else
                 unregisterEvents(ShowPlaceLocatorCrosshair);
         });
 
-        $('#_cbShowParkingLotButton').change(function(){
+        $('#_cbShowParkingLotButton').trigger("change",function(){
             if(this.checked)
                 registerEvents(ShowParkingLotButton);
             else
                 unregisterEvents(ShowParkingLotButton);
         });
 
-        $('#_cbShowCopyPlaceButton').change(function(){
+        $('#_cbShowCopyPlaceButton').trigger("change",function(){
             if(this.checked)
                 registerEvents(ShowCopyPlaceButton);
             else
                 unregisterEvents(ShowCopyPlaceButton);
         });
 
-        $('#_cbShowSearchButton').change(function(){
+        $('#_cbShowSearchButton').trigger("change",function(){
             if(this.checked)
                 registerEvents(ShowSearchButton);
             else
                 unregisterEvents(ShowSearchButton);
         });
 
-        $('#_cbAddPlaceCategoriesButtons').change(function(){
+        $('#_cbAddPlaceCategoriesButtons').trigger("change",function(){
             if(this.checked)
                 registerEvents(AddPlaceCategoriesButtons);
             else
                 unregisterEvents(AddPlaceCategoriesButtons);
         });
 
-//         $('#_cbMoveHNEntry').change(function(){
+//         $('#_cbMoveHNEntry').trigger("change",function(){
 //             if(this.checked)
 //                 registerEvents(MoveHNEntry);
 //             else
 //                 unregisterEvents(MoveHNEntry);
 //         });
 
-        $('#_cbClearDescription').change(function(){
+        $('#_cbClearDescription').trigger("change",function(){
             if(this.checked)
                 registerEvents(ShowClearDescription);
             else
                 unregisterEvents(ShowClearDescription);
         });
 
-        $('#_cbShowPLSpotEstimatorButton').change(function(){
+        $('#_cbShowPLSpotEstimatorButton').trigger("change",function(){
             if(this.checked)
                 registerEvents(ShowPLSpotEstimatorButton);
             else
                 unregisterEvents(ShowPLSpotEstimatorButton);
         });
 
-        $('#_cbShowNavPointClosestSegmentOnHover').change(function(){
+        $('#_cbShowNavPointClosestSegmentOnHover').trigger("change",function(){
             if(this.checked)
                 sdk.Events.on({eventName: "wme-map-mouse-move", eventHandler: drawNavPointClosestSegmentLines});
                 // WazeWrap.Events.register("mousemove", null, drawNavPointClosestSegmentLines);
@@ -523,7 +523,7 @@ function pie(tries = 1) {
                 // WazeWrap.Events.unregister("mousemove", null, drawNavPointClosestSegmentLines);
         });
 
-        $('#_cbShowClosestSegmentSelected').change(function(){
+        $('#_cbShowClosestSegmentSelected').trigger("change",function(){
             if(this.checked){
                 // WazeWrap.Events.register('afterundoaction', this, checkSelection);
                 // WazeWrap.Events.register('afteraction', this, checkSelection);
@@ -544,7 +544,7 @@ function pie(tries = 1) {
             }
         });
 
-        $('#_cbOpenPUR').change(function(){
+        $('#_cbOpenPUR').trigger("change",function(){
             if(this.checked)
                 sdk.Events.on({eventName: "wme-selection-changed", eventHandler: openPUR})
                 // WazeWrap.Events.register('selectionchanged', this, openPUR);
@@ -553,7 +553,7 @@ function pie(tries = 1) {
                 // WazeWrap.Events.unregister('selectionchanged', this, openPUR);
         });
 
-        $('#_cbEnableGLE').change(function(){
+        $('#_cbEnableGLE').trigger("change",function(){
             if(this.checked)
                 GLE.enable();
             else
@@ -561,11 +561,11 @@ function pie(tries = 1) {
             $('#_cbGLEShowTempClosed')[0].disabled = !this.checked;
         });
 
-        $('#_cbGLEShowTempClosed').change(function(){
+        $('#_cbGLEShowTempClosed').trigger("change",function(){
             GLE.showTempClosedPOIs = this.checked;
         });
 
-        $('#_cbEnablePhotoViewer').change(function(){
+        $('#_cbEnablePhotoViewer').trigger("change",function(){
             if(this.checked)
                 $('#launchDiv').css('display', 'block');
             else{
@@ -574,7 +574,7 @@ function pie(tries = 1) {
             }
         });
 
-        $('#_cbEnlargeGeoHandles').change(function(){
+        $('#_cbEnlargeGeoHandles').trigger("change",function(){
             if(this.checked)
                 changeGeoHandleStyle(8);
             else
@@ -584,14 +584,14 @@ function pie(tries = 1) {
         });
 
 
-        $('#_cbHidePaymentType').change(function(){
+        $('#_cbHidePaymentType').trigger("change",function(){
             if(this.checked)
                 registerEvents(HidePaymentTypePlaceSelected);
             else
                 unregisterEvents(HidePaymentTypePlaceSelected);
         });
 
-        $('#_cbGeometryMods').change(function(){
+        $('#_cbGeometryMods').trigger("change",function(){
             if(this.checked)
                 registerEvents(InsertGeometryMods);
             else
@@ -653,7 +653,8 @@ function pie(tries = 1) {
         $('#pieSimplifyFactor')[0].value = settings.SimplifyFactor;
 
         if(settings.ShowNavPointClosestSegmentOnHover)
-            WazeWrap.Events.register("mousemove", null, drawNavPointClosestSegmentLines);
+            // WazeWrap.Events.register("mousemove", null, drawNavPointClosestSegmentLines);
+            sdk.Events.on({eventName: "wme-map-mouse-move", eventHandler: drawNavPointClosestSegmentLines});
 
         if(settings.ShowAreaPlaceSize){
             $('#_cbShowAreaPlaceSizeImperial')[0].disabled = false;
@@ -754,29 +755,29 @@ function pie(tries = 1) {
             InsertGeometryMods();
         }
 
-        $('.pieSettingsCheckbox').change(function() {
+        $('.pieSettingsCheckbox').trigger("change",function() {
             const settingName = $(this)[0].id.substr(3);
             settings[settingName] = this.checked;
             saveSettings();
         });
 
-        $('#piePlaceZoom').change(function(){
+        $('#piePlaceZoom').trigger("change",function(){
             const settingName = $(this)[0].id.substr(3);
             settings[settingName] = $(this)[0].value;
             saveSettings();
         });
 
-        $('#pieDefaultLockLevel').change(function(){
+        $('#pieDefaultLockLevel').trigger("change",function(){
             settings[$(this)[0].id.substr(3)] = $(this)[0].value;
             saveSettings();
         });
 
-        $('#_cbPlaceNameFontBold').change(function(){
+        $('#_cbPlaceNameFontBold').trigger("change",function(){
             PIEPlaceNameLayer.styleMap.styles.default.defaultStyle.fontWeight = (this.checked ? 'bold' :'');
             DisplayPlaceNames();
         });
 
-        $('#piePlaceNameFontSize').focusout(function(){
+        $('#piePlaceNameFontSize').trigger("focusout",function(){
             const fontSize = $(this)[0].value;
             if(fontSize == "" || fontSize == "0")
                 $(this)[0].value = 12;
@@ -786,7 +787,7 @@ function pie(tries = 1) {
             DisplayPlaceNames();
         });
 
-        $('#piePlaceNameFontOutlineWidth').focusout(function(){
+        $('#piePlaceNameFontOutlineWidth').trigger("focusout", function(){
             var outlineWidth = $(this)[0].value;
             if(outlineWidth == "" || outlineWidth == "0")
                 $(this)[0].value = 3;
@@ -796,17 +797,17 @@ function pie(tries = 1) {
             DisplayPlaceNames();
         });
 
-        $('#piePlaceNameFontSize').keypress((event) => {
+        $('#piePlaceNameFontSize').trigger("keypress",(event) => {
             if ((event.which < 48 || event.which > 57))
                 event.preventDefault();
         });
 
-        $('#piePlaceNameFontOutlineWidth').keypress((event) => {
+        $('#piePlaceNameFontOutlineWidth').trigger("keypress",(event) => {
             if ((event.which < 48 || event.which > 57))
                 event.preventDefault();
         });
 
-        $('#pieSimplifyFactor').focusout(function(){
+        $('#pieSimplifyFactor').trigger("focusout",function(){
             let factor = $(this)[0].value;
             if(factor == "")
                 $(this)[0].value = 5;
@@ -819,7 +820,7 @@ function pie(tries = 1) {
 
         // var i;
         //Whenever a Place item is changed, read the settings and save to localStorage
-        $('[id^="pieItem"]').change(()=> {
+        $('[id^="pieItem"]').trigger("change",()=> {
             for(let i=0;i<12;i++)
                 settings.NewPlacesList[i] = $(`#pieItem${i+1}`)[0].value;
 
@@ -862,10 +863,10 @@ function pie(tries = 1) {
         new WazeWrap.Interface.Shortcut('CreateItem12Shortcut', 'Create Item 12', 'wmepie', 'Place Interface Enhancements', settings.CreateItem12Shortcut, function(){PlaceMenuShortcut(12);}, null).add();
 
         $("#piePlaceFilter").on("propertychange keyup paste input", UpdatePlaceFilter);
-        $('input[type=radio][name=PlaceFilterToggle]').change(UpdatePlaceFilter);
+        $('input[type=radio][name=PlaceFilterToggle]').trigger("change",UpdatePlaceFilter);
 
 
-        window.addEventListener("beforeunload", () => {
+        unsafeWindow.addEventListener("beforeunload", () => {
 		checkShortcutsChanged();
             //saveSettings();
         }, false);
@@ -926,14 +927,14 @@ function pie(tries = 1) {
             if(WazeWrap.hasPlaceSelected()){
                 setTimeout(() => {
                     //Trim whitespace from start and end of house number field on Places
-                    $('.form-control.house-number').focusout(()=> {
+                    $('.form-control.house-number').trigger("focusout",()=> {
                         $('.form-control.house-number')[0].value = $('.form-control.house-number')[0].value.trim();
                     });
 
                     //Make Website label a clickable link to the set website
                     let placeURL = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.url || "";
 
-                    $('input[name="url"]').focusout(()=> {
+                    $('input[name="url"]').trigger("focusout",()=> {
                         placeURL = $('input[name="url"]')[0].value.trim();
                         if(placeURL == ""){
                             $('input[name="url"]').parent().parent().find('label').unwrap();
@@ -2017,7 +2018,8 @@ function pie(tries = 1) {
     }
 
     function DisplayPlaceNames(){
-        PIEPlaceNameLayer.removeAllFeatures();
+        // PIEPlaceNameLayer.removeAllFeatures();
+        sdk.Map.removeAllFeatures({layerName: layerConfig.PIEPlaceNameLayer.layerName});
         var showPoint, showArea, showLock, showNames, showPLA, hideNames;
         showNames = isChecked('_cbShowPlaceNames');
         showPoint = isChecked('_cbShowPlaceNamesPoint');
@@ -2027,11 +2029,14 @@ function pie(tries = 1) {
         hideNames = isChecked('_cbhidePlaceNamesWhenPlacesHidden');
 
         if(showNames){
-            var isPoint;
-            for (var placeID in W.model.venues.objects) {
-                var venue = W.model.venues.getObjectById(placeID);
-                isPoint = venue.isPoint();
-                if((isPoint && W.map.getZoom() >= 17) || (!isPoint && W.map.getZoom() >= 15)){
+            // var isPoint;
+            // for (var placeID in W.model.venues.objects) {
+            for(const venue in sdk.DataModel.Venues.getAll()) {
+                // var venue = W.model.venues.getObjectById(placeID);
+                // isPoint = venue.isPoint();
+                let isPoint = GoogleLinkEnhancer.GLE.isPointVenue(venue);
+
+                if((isPoint && sdk.Map.getZoomLevel() >= 17) || (!isPoint && sdk.Map.getZoomLevel() >= 15)){
                     if(WazeWrap.Geometry.isGeometryInMapExtent(venue.getOLGeometry())){
                         if( (isPoint && showPoint) || (!isPoint && showArea && !venue.isParkingLot()) || (!isPoint && showPLA && venue.isParkingLot())){
                             let placeFilter = $('#piePlaceFilter').val();
@@ -2904,8 +2909,9 @@ function pie(tries = 1) {
             PLSpotEstimatordrawControl.deactivate();
             PLSpotEstimatordrawControl.destroy();
         }
-        PLSpotEstimatorLayer.removeAllFeatures();
-        W.map.removeLayer(PLSpotEstimatorLayer);
+        sdk.Map.removeAllFeatures({layerName: layerConfig.PLSpotEstimatorLayer.layerName});
+        sdk.Map.removeLayer({layerName: layerConfig.PLSpotEstimatorLayer.layerName});
+        // W.map.removeLayer(PLSpotEstimatorLayer);
         $('div#WazeMap.view-area.olMap').off('keydown');
     }
 
@@ -2936,7 +2942,7 @@ function pie(tries = 1) {
 
     function PLSpotEstimatorCalibrationdoneHandler(geom){
         var style = {strokeWidth: 3, strokeColor: '#00ee00'};
-        PLSpotEstimatorCalibrationLayer.addFeatures(new OpenLayers.Feature.Vector(geom,{}, style));
+        sdk.Map.addFeaturesToLayer({layername: PLSpotEstimatorCalibrationLayer.layerName, features: geom})//.addFeatures(new OpenLayers.Feature.Vector(geom,{}, style));
         let totalLength = 0;
 
         PLSpotEstimatorCalibrationLayer.features.forEach(function(f) {
@@ -2986,7 +2992,7 @@ function pie(tries = 1) {
 
                     $("#WazeMap").append($PLSpotEstimator.html());
 
-                    $("#PIECloseParkingSpotEstimator").click(function(){
+                    $("#PIECloseParkingSpotEstimator").trigger("click", function(){
                         $('#PIEParkingSpotEstimator').remove();
                         disablePLSpotEstimatorDrawMode();
                         disablePLSpotEstimatorCalibrationDrawMode();
@@ -2996,7 +3002,7 @@ function pie(tries = 1) {
                             PLSpotEstimatorCalibrationdrawControl.destroy();
                     });
 
-                    $('#PIEParkingSpotEstimator').keydown(function(e){
+                    $('#PIEParkingSpotEstimator').trigger("keydown", function(e){
                         disablePLSpotEstimatorDrawMode();
                         disablePLSpotEstimatorCalibrationDrawMode();
                         if(PLSpotEstimatordrawControl != null)
@@ -3047,7 +3053,7 @@ function pie(tries = 1) {
                         }
                     });
 
-                    $('#PIE90DegreeSpotWidth').focusout(function(){
+                    $('#PIE90DegreeSpotWidth').trigger("focusout",function(){
                         let width = $(this)[0].value;
                         if(width == "" || width == "0")
                             $(this)[0].value = 3.44;
@@ -3055,7 +3061,7 @@ function pie(tries = 1) {
                         saveSettings();
                     });
 
-                    $('#PIEAngledSpotWidth').focusout(function(){
+                    $('#PIEAngledSpotWidth').trigger("focusout",function(){
                         let width = $(this)[0].value;
                         if(width == "" || width == "0")
                             $(this)[0].value = 3;
@@ -3063,7 +3069,7 @@ function pie(tries = 1) {
                         saveSettings();
                     });
 
-                    $('#PIE90DegreeSpotWidthDraw').click(function() {
+                    $('#PIE90DegreeSpotWidthDraw').trigger("click", function() {
                         if (PLSpotEstimatordrawControl && PLSpotEstimatordrawControl.active) {
                             PLSpotEstimatordrawControl.deactivate();
                             PLSpotEstimatordrawControl.destroy();
@@ -3079,7 +3085,7 @@ function pie(tries = 1) {
                         }
                     });
 
-                    $('#PIEAngledSpotWidthDraw').click(function() {
+                    $('#PIEAngledSpotWidthDraw').trigger("click", function() {
                         if (PLSpotEstimatordrawControl && PLSpotEstimatordrawControl.active) {
                             PLSpotEstimatordrawControl.deactivate();
                             PLSpotEstimatordrawControl.destroy();
@@ -3095,7 +3101,7 @@ function pie(tries = 1) {
                         }
                     });
 
-                    $('#PIE90DegreeSpotWidthCalibration').click(function(){
+                    $('#PIE90DegreeSpotWidthCalibration').trigger("click", function(){
                         if(PLSpotEstimatordrawControl){
                             PLSpotEstimatordrawControl.deactivate();
                             PLSpotEstimatordrawControl.destroy();
@@ -3113,7 +3119,7 @@ function pie(tries = 1) {
                         startPLSpotEstimatorCalibrationMode();
                     });
 
-                    $('#PIEAngledSpotWidthCalibration').click(function(){
+                    $('#PIEAngledSpotWidthCalibration').trigger("click", function(){
                         if(PLSpotEstimatordrawControl){
                             PLSpotEstimatordrawControl.deactivate();
                             PLSpotEstimatordrawControl.destroy();
