@@ -808,11 +808,11 @@ function pie(tries = 1) {
 
         $('#piePlaceNameFontSize').trigger("focusout",function(){
             const fontSize = $(this)[0].value;
-            if(fontSize == "" || fontSize == "0")
+            if(fontSize === "" || fontSize === "0")
                 $(this)[0].value = 12;
             settings[$(this)[0].id.substr(3)] = fontSize;
             saveSettings();
-            PIEPlaceNameLayer.styleMap.styles.default.defaultStyle.fontSize = fontSize + "px";
+            PIEPlaceNameLayer.styleMap.styles.default.defaultStyle.fontSize = `${fontSize}px`;
             DisplayPlaceNames();
         });
 
@@ -838,7 +838,7 @@ function pie(tries = 1) {
 
         $('#pieSimplifyFactor').trigger("focusout",function(){
             let factor = $(this)[0].value;
-            if(factor == "")
+            if(factor === "")
                 $(this)[0].value = 5;
             if(factor > 10)
                 factor = 10;
@@ -972,7 +972,7 @@ function pie(tries = 1) {
                         }
                         if(!placeURL.startsWith("http"))
                             placeURL = `https://${placeURL}`;
-                        if($('#websiteLink').length == 0)
+                        if($('#websiteLink').length === 0)
                             $('input[name="url"]').parent().parent().find('label').wrap(`<a href="${placeURL}" id="websiteLink" target="_blank" style="cursor:pointer;"></a>`);
                         else
                             $('#websiteLink').attr('href', placeURL);
@@ -1228,7 +1228,7 @@ function pie(tries = 1) {
             const vattr = venue.attributes;
             if (typeof (venue) ==='undefined' || vattr.id === null || venue.isSelected()) continue;
 
-            if (vattr.images.length != 0 && onScreen(venue))
+            if (vattr.images.length !== 0 && onScreen(venue))
                 catalog.push(vattr.id);
         }
         Photos_show();
@@ -1316,13 +1316,13 @@ function pie(tries = 1) {
                 purActions.style.float='right';
                 purActions.style.marginRight='5px';
                 purActions.style.cursor='pointer';
-                let purApprove = document.createElement('i');
+                const purApprove = document.createElement('i');
                 purApprove.className = "fa fa-check";
                 purApprove.title = "Approve this PUR";
                 purApprove.style.color = "#0f0";
                 purApprove.venue = venue;
                 purApprove.addEventListener("click", function(evt){
-                    let ven = evt.target.venue;
+                    const ven = evt.target.venue;
                     W.model.actionManager.add(new(require("Waze/Action/UpdatePlaceUpdate"))(ven, ven.attributes.venueUpdateRequests[0], true));
                     $($(this).parent().parent()).css("border", "1px solid #0f0");
                     $($(this).parent().parent().find("img")).css("border", "1px solid #0f0")
@@ -1330,13 +1330,13 @@ function pie(tries = 1) {
                 }, false);
                 purActions.appendChild(purApprove);
 
-                let purReject = document.createElement('i');
+                const purReject = document.createElement('i');
                 purReject.className = "fa fa-times";
                 purReject.title = "Reject this PUR";
                 purReject.style.color = "#f00";
                 purReject.venue = venue;
                 purReject.addEventListener("click", function(evt){
-                    let ven = evt.target.venue;
+                    const ven = evt.target.venue;
                     W.model.actionManager.add(new(require("Waze/Action/UpdatePlaceUpdate"))(ven, ven.attributes.venueUpdateRequests[0], false));
                     $(this).parent().parent().remove();
                 }, false);
@@ -1366,13 +1366,13 @@ function pie(tries = 1) {
                     W.selectionManager.setSelectedModels(venueList);
                 })(vattr.geometry.bounds, catalog[i]), false);
             venueDiv.appendChild(venuePos);
-            let tmp=document.createElement('div'); tmp.style.clear='both';venueDiv.appendChild(tmp);
+            const tmp=document.createElement('div'); tmp.style.clear='both';venueDiv.appendChild(tmp);
 
-            let venueLock = document.createElement('div');
+            const venueLock = document.createElement('div');
             venueLock.innerHTML = `<span style="font-size:10px; color:#aaa;">${I18n.translations[I18n.currentLocale()].edit.segment.fields.lock}: ${vattr.lockRank+1}</span>`;
             venueDiv.appendChild(venueLock);
             //Show differents categories
-            let venueCat=document.createElement('div');
+            const venueCat=document.createElement('div');
             for (let j=0; I18n.translations[I18n.currentLocale()].venues.categories[vattr.categories[j]]; j++)
                 venueCat.innerHTML += `<span style="font-size:10px;color:#aaa;">${I18n.translations[I18n.currentLocale()].venues.categories[vattr.categories[j]]}${j < vattr.categories.length-1 ? ',' : ''} </span>`;
 
@@ -1381,17 +1381,17 @@ function pie(tries = 1) {
 
             //Show differents images
             for (let k=0; vattr.images[k]; k++) {
-                let imgDIV = document.createElement('div');
+                const imgDIV = document.createElement('div');
                 imgDIV.id = vattr.images[k].attributes.id;
                 $(imgDIV).addClass('pvImage');
                 $(imgDIV).css({'float': 'left', 'padding-right':'3px'});
                 if(k > 0)
                     $(imgDIV).css('margin-left', '5px');
-                let venueImg=document.createElement('img');
+                const venueImg=document.createElement('img');
                 $(venueImg).css({'float':'left','max-width':'180px','height':'140px','margin':'5px','cursor':'pointer'});
                 venueImg.src=`https://venue-image.waze.com/thumbs/thumb347_${vattr.images[k].attributes.id}`;
                 if (vattr.images[k].attributes.approved===true) {
-                    let picIsWhitelisted = typeof myplace !== 'undefined' && myplace.placePicturesIDs.indexOf(vattr.images[k].id) > -1;
+                    const picIsWhitelisted = typeof myplace !== 'undefined' && myplace.placePicturesIDs.indexOf(vattr.images[k].id) > -1;
                     imgDIV.style.border = `1px solid ${picIsWhitelisted ? "#fff" : "#0f0"}`;
                     $(imgDIV).addClass('approvedImage');
                     if(picIsWhitelisted)
@@ -1412,12 +1412,12 @@ function pie(tries = 1) {
                     })(vattr.images[k].attributes.id, venue, vattr.images[k].attributes.approved), false);
 
                 if(vattr.images[k].attributes.approved){ //Add a trash can icon to delete a picture if the picture is approved on the Place (not a PUR)
-                    let deleteImg = document.createElement('i');
+                    const deleteImg = document.createElement('i');
                     $(deleteImg).addClass('fa fa-trash-o');
                     $(deleteImg).css({'float':'right', 'cursor':'pointer', 'title':'Delete photo'});
                     $(deleteImg).prop({ 'data-id': vattr.id, 'data-imageID': vattr.images[k].attributes.id});
                     $(deleteImg).click(function(){
-                        let imageID = $(this).prop('data-imageID');
+                        const imageID = $(this).prop('data-imageID');
                         DeleteImage(venue, imageID);
                     });
                     imgDIV.appendChild(deleteImg);
@@ -1425,11 +1425,11 @@ function pie(tries = 1) {
                 else
                 {
                     if(vattr.approved){
-                        let purActions=document.createElement('span');
+                        const purActions=document.createElement('span');
                         purActions.style.float='right';
                         purActions.style.marginRight='5px';
                         purActions.style.cursor='pointer';
-                        let purApprove = document.createElement('i');
+                        const purApprove = document.createElement('i');
                         purApprove.className = "fa fa-check";
                         purApprove.title = "Approve this picture";
                         purApprove.style.color = "#0f0";
@@ -1470,10 +1470,10 @@ function pie(tries = 1) {
     }
 
     function processPlacePUR(evt, approve){
-        let ven = evt.target.venue;
-        let currImage = evt.target.currImage;
+        const ven = evt.target.venue;
+        const currImage = evt.target.currImage;
         let pur;
-        let venURs = ven.attributes.venueUpdateRequests;
+        const venURs = ven.attributes.venueUpdateRequests;
         for(let i=0; i<venURs.length; i++){
             if(venURs[i].attributes.updateType === "ADD_IMAGE"){
                 if(venURs[i].id === currImage){
@@ -1487,8 +1487,8 @@ function pie(tries = 1) {
     }
 
     function DeleteImage(venue, imageID){
-        let UpdateObject= require("Waze/Action/UpdateObject");
-        let newimages = [].concat(venue.attributes.images);
+        const UpdateObject= require("Waze/Action/UpdateObject");
+        const newimages = [].concat(venue.attributes.images);
         for(let i=newimages.length-1; i >= 0; i--){
             if(newimages[i].id === imageID)
                 newimages.splice(i,1);
@@ -1518,9 +1518,9 @@ function pie(tries = 1) {
     }
 
     function Photos_zoom(venue, id, approved){
-        let zoom = document.createElement('div');
+        const zoom = document.createElement('div');
         let zoomPicIndex = null;
-        let images = venue.attributes.images;
+        const images = venue.attributes.images;
         for(let i=0;i<images.length;i++){
             if(images[i].id === id){
                 zoomPicIndex = i;
@@ -1529,20 +1529,20 @@ function pie(tries = 1) {
         }
         zoom.id = "photoViewerZoom";
         $(zoom).css({'position':'absolute','top':'0','width':'100%','height':'100%','z-index':'1011','background-color':'rgb(0, 0, 0, 0.85)'});
-        let imageDIV = document.createElement('div');
+        const imageDIV = document.createElement('div');
         $(imageDIV).css({'text-align':'center', 'position':'relative', 'top':'30px'});
         imageDIV.innerHTML=`<img id="zoomImage" style="border-radius:12px; border:2px solid ${approved ? '#0f0' : '#f00'};" src="https://venue-image.waze.com/thumbs/thumb700_${id}" />${approved ? '<i id="zoomDelete" class="fa fa-trash-o fa-lg" style="cursor:pointer; color:white; position:absolute; top:0; margin-left:7px;"></i>' : ''}`;
         zoom.appendChild(imageDIV);
 
-        let zoomDateDiv = document.createElement('div');
+        const zoomDateDiv = document.createElement('div');
         zoomDateDiv.setAttribute('id', 'zoomDate');
         $(zoomDateDiv).css({'text-align':'center', 'position':'relative', 'top':'30px', 'color':'white'});
-        let d = new Date(images[zoomPicIndex].attributes.date);
+        const d = new Date(images[zoomPicIndex].attributes.date);
         zoomDateDiv.innerHTML = `${d.toLocaleString()}`;
         zoom.appendChild(zoomDateDiv);
 
         if(venue.attributes.images.length > 1){
-            let zoomNavDiv = document.createElement('div');
+            const zoomNavDiv = document.createElement('div');
             $(zoomNavDiv).css({'text-align':'center', 'position':'relative', 'top':'30px'});
             zoomNavDiv.innerHTML = '<a href="#" id="zoomPrev" style="text-decoration: none; display: inline-block; background-color: #ddd; padding: 8px 16px; font-size:18px;">&#8249;</a><a href="#" id="zoomNext" style="text-decoration: none; display: inline-block; background-color: #ddd; padding: 8px 16px; font-size:18px;">&#8250;</a>';
             zoom.appendChild(zoomNavDiv);
@@ -1726,15 +1726,15 @@ function pie(tries = 1) {
 
     //*******/
     function UpdatePlaceFilter(){
-        let index = W.map.venueLayer.styleMap.styles.default.rules.findIndex((e)=> e.name === "PIEPlaceFilter");
+        const index = W.map.venueLayer.styleMap.styles.default.rules.findIndex((e)=> e.name === "PIEPlaceFilter");
         if(index > -1)
         {
             W.map.venueLayer.styleMap.styles.default.rules.splice(index, 1);
             W.map.venueLayer.redraw();
         }
-        if($('#piePlaceFilter').val().trim() != "")
+        if($('#piePlaceFilter').val().trim() !== "")
         {
-            let myRule = new W.Rule({
+            const myRule = new W.Rule({
                 filter: new OpenLayers.Filter.Comparison({
                     type: '==',
                     evaluate: (venue) => {
@@ -1755,7 +1755,7 @@ function pie(tries = 1) {
     }
 
     function ToggleHideAreaPlaces(){
-        let index = W.map.venueLayer.styleMap.styles.default.rules.findIndex((e)=> e.name === "PIEHide");
+        const index = W.map.venueLayer.styleMap.styles.default.rules.findIndex((e)=> e.name === "PIEHide");
         if(index === -1)
         {
             const myRule = new W.Rule({
@@ -1832,7 +1832,8 @@ function pie(tries = 1) {
                     // showStopPointsLayer.addFeatures([lineFeature, pointFeature]);
 
             }
-            if(highlightedVenue === null || W.map.getZoom() < 16)
+            // if(highlightedVenue === null || W.map.getZoom() < 16)
+            if(highlightedVenue === null || sdk.Map.getZoomLevel() < 16)
                 // showStopPointsLayer.removeAllFeatures();
                 sdk.Map.removeAllFeaturesFromLayer({layerName: layerConfig.PIEShowStopPointsLayer.layerName});
         }
@@ -1880,8 +1881,8 @@ function pie(tries = 1) {
 	function drawLine(start, end, lStyle, pStyle) {
 		// let lineFeature, pointFeature;
 
-		let lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([start, end]), {}, lStyle);
-		let pointFeature = new OpenLayers.Feature.Vector(end, {}, pStyle);
+		const lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([start, end]), {}, lStyle);
+		const pointFeature = new OpenLayers.Feature.Vector(end, {}, pStyle);
 		closestSegmentLayer.addFeatures([lineFeature, pointFeature]);
 	}
 
@@ -2068,7 +2069,7 @@ function pie(tries = 1) {
             for(const venue in sdk.DataModel.Venues.getAll()) {
                 // var venue = W.model.venues.getObjectById(placeID);
                 // isPoint = venue.isPoint();
-                let isPoint = GoogleLinkEnhancer.GLE.isPointVenue(venue);
+                const isPoint = GoogleLinkEnhancer.GLE.isPointVenue(venue);
 
                 if((isPoint && sdk.Map.getZoomLevel() >= 17) || (!isPoint && sdk.Map.getZoomLevel() >= 15)){
                     if(WazeWrap.Geometry.isGeometryInMapExtent(venue.getOLGeometry())){
@@ -2198,7 +2199,8 @@ function pie(tries = 1) {
         const polyDrawFeatureOptions = {callbacks : {"done": doneHandler}};
         if(isPoint){
             $(".olMapViewport").on('mousemove', MouseMoveHandler);
-            $(".olMapViewport").click(()=> {endPlacementMode(category, isPoint);});
+            $(".olMapViewport").on("click", ()=> {endPlacementMode(category, isPoint);});
+            $(".olMapViewport").trigger("click");
             /*drawPoly = new OpenLayers.Control.DrawFeature(newPlaceLayer, OpenLayers.Handler.Polygon, polyDrawFeatureOptions);
             W.map.addControl(drawPoly);
             drawPoly.activate();*/
@@ -2347,36 +2349,36 @@ function pie(tries = 1) {
         const AddPlace = require("Waze/Action/AddLandmark");
         const multiaction = new MultiAction();
 
-        var newOLgeometry;
+        let newOLgeometry;
         if(isPoint)
             newOLgeometry = new OpenLayers.Geometry.Point(pos.lon, pos.lat);
         else{
-            var points = [];
-            var i;
+            const points = [];
+            let i;
             for(i=0;i<pos.components[0].components.length;i++)
                 points.push(new OpenLayers.Geometry.Point(pos.components[0].components[i].x, pos.components[0].components[i].y));
 
-            var ring = new OpenLayers.Geometry.LinearRing(points);
+            const ring = new OpenLayers.Geometry.LinearRing(points);
             newOLgeometry = new OpenLayers.Geometry.Polygon([ring]);
         }
 
-        var NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(newOLgeometry) });
+        const NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(newOLgeometry) });
 
         NewPlace.attributes.categories.push(category);
         if(category === resCategory){
             NewPlace._originalResidential = true;
             NewPlace.attributes.residential = true;
-            let eep = new NavigationPoint(W.userscripts.toGeoJSONGeometry(new OpenLayers.Geometry.Point(pos.lon, pos.lat)));
+            const eep = new NavigationPoint(W.userscripts.toGeoJSONGeometry(new OpenLayers.Geometry.Point(pos.lon, pos.lat)));
             NewPlace.attributes.entryExitPoints.push(eep);
         }
         NewPlace.attributes.lockRank = Number(settings.DefaultLockLevel);
 
-        var closestSeg = WazeWrap.Geometry.findClosestSegment(new OpenLayers.Geometry.Point(pos.lon, pos.lat), settings.SkipPLR, settings.SkipPLR);
+        const closestSeg = WazeWrap.Geometry.findClosestSegment(new OpenLayers.Geometry.Point(pos.lon, pos.lat), settings.SkipPLR, settings.SkipPLR);
 
         W.model.actionManager.add(new AddPlace(NewPlace));
 
         if(closestSeg){ //if we were able to find a segment, try to pull the city and/or street name if the options are enabled
-            var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = closestSeg.getAddress();
+            let newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = closestSeg.getAddress();
 
             newAttributes = {
                 countryID: address.attributes.country.attributes.id,
@@ -2391,12 +2393,12 @@ function pie(tries = 1) {
                 newAttributes.emptyStreet = true;
 
             if(settings.UseCityFromClosestSeg){
-                var cityName = address.attributes.city.attributes.name;
+                let cityName = address.attributes.city.attributes.name;
 
                 if(settings.UseAltCity && cityName === ""){
                     if(address.attributes.altStreets.length > 0){ //segment has alt names
-                        for(var j=0;j<closestSeg.attributes.streetIDs.length;j++){
-                            var altCity = W.model.cities.getObjectById(W.model.streets.getObjectById(closestSeg.attributes.streetIDs[j]).attributes.cityID).attributes;
+                        for(let j=0;j<closestSeg.attributes.streetIDs.length;j++){
+                            const altCity = W.model.cities.getObjectById(W.model.streets.getObjectById(closestSeg.attributes.streetIDs[j]).attributes.cityID).attributes;
 
                             if(altCity.name !== null && altCity.englishName !== ""){
                                 cityName = altCity.name;
@@ -2437,14 +2439,14 @@ function pie(tries = 1) {
 
         } else if (rppTries < 1000) {
             console.log("not found");
-            setTimeout(function () {editRPPAddress(++rppTries);}, 200);
+            setTimeout(() => {editRPPAddress(rppTries+1);}, 200);
         }
     }
 
     function buildItemOption(itemNumber){
-        var $section = $("<div>", {style:"padding:8px 16px", id:"piePlaceCat" + itemNumber});
+        const $section = $("<div>", {style:"padding:8px 16px", id:`piePlaceCat${itemNumber}`});
         $section.html([
-            I18n.t('pie.prefs.Item') + " ",
+            `${I18n.t('pie.prefs.Item')} `,
             itemNumber,
             buildItemList(itemNumber),
             '</br>'
@@ -2454,9 +2456,9 @@ function pie(tries = 1) {
     }
 
     function buildLockLevelsList(){
-        var $lockLevels = $("<div>");
-        for(var i=0;i<WazeWrap.User.Rank();i++)
-            $lockLevels.append("<option value=" + i + ">" + (i+1) + "</option>");
+        const $lockLevels = $("<div>");
+        for(let i=0;i<WazeWrap.User.Rank();i++)
+            $lockLevels.append(`<option value=${i}>${i+1}</option>`);
 
         return $lockLevels.html();
     }
@@ -2506,23 +2508,23 @@ function pie(tries = 1) {
 
     function OrthogonalizePlace(){
         if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().toString().match(/^POLYGON/)){
-            let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-            var newGeom = WazeWrap.Util.OrthogonalizeGeometry(selected.getOLGeometry().clone().components[0].components);
-            var UFG = require("Waze/Action/UpdateFeatureGeometry");
-            var originalGeometry = selected.getOLGeometry().clone();
+            const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+            const newGeom = WazeWrap.Util.OrthogonalizeGeometry(selected.getOLGeometry().clone().components[0].components);
+            const UFG = require("Waze/Action/UpdateFeatureGeometry");
+            const originalGeometry = selected.getOLGeometry().clone();
 
             if(!GeomArraysEqual(originalGeometry.components[0].components, newGeom)){
                 selected.getOLGeometry().components[0].components = [].concat(newGeom);
                 selected.getOLGeometry().components[0].clearBounds();
 
-                var action = new UFG(selected, W.model.venues, W.userscripts.toGeoJSONGeometry(originalGeometry), W.userscripts.toGeoJSONGeometry(selected.getOLGeometry()));
+                const action = new UFG(selected, W.model.venues, W.userscripts.toGeoJSONGeometry(originalGeometry), W.userscripts.toGeoJSONGeometry(selected.getOLGeometry()));
                 W.model.actionManager.add(action);
             }
         }
     }
 
     function GeomArraysEqual(geom1, geom2){
-        if(geom1.length != geom2.length)
+        if(geom1.length !== geom2.length)
             return false;
 
         for(let i=0; i<geom1.length; i++){
@@ -2547,14 +2549,14 @@ function pie(tries = 1) {
 
     function SimplifyPlace(){
         if(WazeWrap.hasPlaceSelected() && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().toString().match(/^POLYGON/)){
-            let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-            let originalGeometry = selected.getOLGeometry().clone();
+            const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+            const originalGeometry = selected.getOLGeometry().clone();
             let ls = new OpenLayers.Geometry.LineString(originalGeometry.components[0].components);
             ls = ls.simplify(settings.SimplifyFactor);
-            let newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
+            const newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
 
             if (newGeometry.components[0].components.length < originalGeometry.components[0].components.length) {
-                let UFG = require("Waze/Action/UpdateFeatureGeometry");
+                const UFG = require("Waze/Action/UpdateFeatureGeometry");
                 W.model.actionManager.add(new UFG(selected, W.model.venues, W.userscripts.toGeoJSONGeometry(originalGeometry), W.userscripts.toGeoJSONGeometry(newGeometry)));
             }
         }
@@ -2562,7 +2564,7 @@ function pie(tries = 1) {
 
     function ViewEditPlaceGeom(){
         $('#pieViewEditGeom').remove();
-        var $section = $("<div>", {style:"padding:8px 16px"});
+        const $section = $("<div>", {style:"padding:8px 16px"});
         $section.html([
             '<div id="pieViewEditGeom" style="padding:8px 16px; position:fixed; z-index:1000; border-radius:10px; box-shadow:5px 5px 10px silver; top:25%; left:30%; background-color:white; min-width:100px; min-height:100px;">', //Main div
             '<div class="content">',
@@ -2587,16 +2589,16 @@ function pie(tries = 1) {
 
         updateGeometryInputs();
 
-        $('#pieBtnApplyStandardGeom').click(function(){
-            let lines = $('#piePlaceGeomStandard').val().split('\n');
+        $('#pieBtnApplyStandardGeom').click(()=> {
+            const lines = $('#piePlaceGeomStandard').val().split('\n');
 
-            for(var i = 0;i < lines.length;i++){
+            for(let i = 0;i < lines.length;i++){
                 if(! /^(-?\d*(?:\.\d*)?),\s?(-?\d*(?:\.\d*))$/.test(lines[i])){
                     WazeWrap.Alerts.error(GM_info.script.name, "Incorrectly formatted coordinates");
                     return;
                 }
-                let coords = lines[i].match(/^(-?\d*(?:\.\d*)?),\s?(-?\d*(?:\.\d*))$/);
-                let pt = WazeWrap.Geometry.ConvertTo900913(coords[2], coords[1]);
+                const coords = lines[i].match(/^(-?\d*(?:\.\d*)?),\s?(-?\d*(?:\.\d*))$/);
+                const pt = WazeWrap.Geometry.ConvertTo900913(coords[2], coords[1]);
                 lines[i] = new OpenLayers.Geometry.Point(pt.lon, pt.lat);
             }
 
@@ -2604,18 +2606,18 @@ function pie(tries = 1) {
             updateGeometryInputs();
         });
 
-        $('#pieBtnApplyWazeGeom').click(function(){
-            let lines = $('#piePlaceGeomWaze').val().split('\n');
+        $('#pieBtnApplyWazeGeom').click(()=> {
+            const lines = $('#piePlaceGeomWaze').val().split('\n');
 
-            for(var i = 0;i < lines.length;i++){
+            for(let i = 0;i < lines.length;i++){
                 if(lines[i].length > 0){
                     lines[i] = lines[i].replace(/\t/, " ");
                     if(! /^(-?\d*(?:\.\d*)?)\s+(-?\d*(?:\.\d*))$/.test(lines[i])){
                         WazeWrap.Alerts.error(GM_info.script.name, "Incorrectly formatted coordinates");
                         return;
                     }
-                    let coords = lines[i].match(/^(-?\d*(?:\.\d*)?)\s+(-?\d*(?:\.\d*))$/);
-                    let pt = WazeWrap.Geometry.ConvertTo900913(coords[1], coords[2]);
+                    const coords = lines[i].match(/^(-?\d*(?:\.\d*)?)\s+(-?\d*(?:\.\d*))$/);
+                    const pt = WazeWrap.Geometry.ConvertTo900913(coords[1], coords[2]);
                     lines[i] = new OpenLayers.Geometry.Point(pt.lon, pt.lat);
                 }
             }
@@ -2624,16 +2626,16 @@ function pie(tries = 1) {
             updateGeometryInputs();
         });
 
-        $('#pieBtnApplyWKTGeom').click(function(){
-            let lines = $('#piePlaceGeomWKT').val().match(/POLYGON\((.*)\)/)[1].split(',');
+        $('#pieBtnApplyWKTGeom').click(()=> {
+            const lines = $('#piePlaceGeomWKT').val().match(/POLYGON\((.*)\)/)[1].split(',');
 
-            for(var i = 0;i < lines.length;i++){
+            for(let i = 0;i < lines.length;i++){
                 if(! /^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/.test(lines[i].trim())){
                     WazeWrap.Alerts.error(GM_info.script.name, "Incorrectly formatted coordinates");
                     return;
                 }
-                let coords = lines[i].trim().match(/^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/);
-                let pt = WazeWrap.Geometry.ConvertTo900913(coords[1], coords[2]);
+                const coords = lines[i].trim().match(/^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/);
+                const pt = WazeWrap.Geometry.ConvertTo900913(coords[1], coords[2]);
                 lines[i] = new OpenLayers.Geometry.Point(pt.lon, pt.lat);
             }
 
@@ -2641,25 +2643,25 @@ function pie(tries = 1) {
             updateGeometryInputs();
         });
 
-        $('#pieGeomClose').click(function(){
+        $('#pieGeomClose').click(()=> {
             $('#pieViewEditGeom').remove();
         });
     }
 
     function saveNewPlaceGeometry(newGeom){
-        let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-        let originalGeometry = selected.getOLGeometry().clone();
-        let ls = new OpenLayers.Geometry.LineString(newGeom);
-        let newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
+        const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+        const originalGeometry = selected.getOLGeometry().clone();
+        const ls = new OpenLayers.Geometry.LineString(newGeom);
+        const newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
 
-        let UFG = require("Waze/Action/UpdateFeatureGeometry");
-        debugger;
+        const UFG = require("Waze/Action/UpdateFeatureGeometry");
+        // debugger;
         W.model.actionManager.add(new UFG(selected, W.model.venues, W.userscripts.toGeoJSONGeometry(originalGeometry), W.userscripts.toGeoJSONGeometry(newGeometry)));
     }
 
     function updateGeometryInputs(){
-        let currPlaceModel = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-        let currPlaceGeom = currPlaceModel.getOLGeometry().components[0].clone().components;
+        const currPlaceModel = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+        const currPlaceGeom = currPlaceModel.getOLGeometry().components[0].clone().components;
         let standardGeom = "", WMEGeom = "", WKTGeom = "";
         WKTGeom = "POLYGON(";
 
@@ -2692,45 +2694,45 @@ function pie(tries = 1) {
 
         if((WazeWrap.hasPlaceSelected() || WazeWrap.hasMapCommentSelected()) && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().toString().match(/^POLYGON/)){
             await new Promise(r => setTimeout(r, 150));
-            let $GeomMods = $(`<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls">${!WazeWrap.hasMapCommentSelected() ? '<i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="piesimplifyplace" title="Simplify" class="fa fa-magic fa-2x" aria-hidden="true" style="cursor:pointer;"></i>' : ''} <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Rotate ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieresize" title="Allow resizing the Place. While enabled the geometry cannot be modified" class="fa fa-expand fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Resize ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieEditGeom" class="fa fa-pencil-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pieClearGeom" title="Clear geometry" class="fa fa-times fa-2x" aria-hidden="true" style="cursor:pointer; color:red;"></i></div></div>`);
+            const $GeomMods = $(`<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls">${!WazeWrap.hasMapCommentSelected() ? '<i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="piesimplifyplace" title="Simplify" class="fa fa-magic fa-2x" aria-hidden="true" style="cursor:pointer;"></i>' : ''} <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Rotate ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieresize" title="Allow resizing the Place. While enabled the geometry cannot be modified" class="fa fa-expand fa-2x" aria-hidden="true" style="cursor:pointer; color:${settings.Resize ? 'rgb(0,180,0)': 'black'}"></i> <i id="pieEditGeom" class="fa fa-pencil-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pieClearGeom" title="Clear geometry" class="fa fa-times fa-2x" aria-hidden="true" style="cursor:pointer; color:red;"></i></div></div>`);
             if(W.selectionManager.getSelectedFeatures()[0].WW.getType() === "mapComment")
                 $('#edit-panel > div > div > div.tab-content > div > form > div:nth-child(4)').after($GeomMods);
             else
                 $('#venue-edit-general > div:nth-child(9)').after($GeomMods);
 
-            $('#pieorthogonalize').click(function(){
+            $('#pieorthogonalize').click(()=> {
                 OrthogonalizePlace();
             });
 
-            $('#piesimplifyplace').click(function(){
+            $('#piesimplifyplace').click(()=> {
                 SimplifyPlace();
             });
 
-            $('#pieEditGeom').click(function(){
+            $('#pieEditGeom').click(()=> {
                 ViewEditPlaceGeom();
             });
 
-            $('#pieClearGeom').click(function(){
-                let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-                let centerLonLat = selected.getOLGeometry().bounds.getCenterLonLat();
-                let newGeom = OpenLayers.Geometry.Polygon.createRegularPolygon(new OpenLayers.Geometry.Point(centerLonLat.lon, centerLonLat.lat), 20, 4, null).components[0].components;
-                let UFG = require("Waze/Action/UpdateFeatureGeometry");
-                let originalGeometry = selected.getOLGeometry().clone();
+            $('#pieClearGeom').click(()=> {
+                const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+                const centerLonLat = selected.getOLGeometry().bounds.getCenterLonLat();
+                const newGeom = OpenLayers.Geometry.Polygon.createRegularPolygon(new OpenLayers.Geometry.Point(centerLonLat.lon, centerLonLat.lat), 20, 4, null).components[0].components;
+                const UFG = require("Waze/Action/UpdateFeatureGeometry");
+                const originalGeometry = selected.getOLGeometry().clone();
 
                 selected.getOLGeometry().components[0].components = [].concat(newGeom);
                 selected.getOLGeometry().components[0].clearBounds();
 
-                let action = new UFG(selected, W.model.venues, W.userscripts.toGeoJSONGeometry(originalGeometry), W.userscripts.toGeoJSONGeometry(selected.getOLGeometry()));
+                const action = new UFG(selected, W.model.venues, W.userscripts.toGeoJSONGeometry(originalGeometry), W.userscripts.toGeoJSONGeometry(selected.getOLGeometry()));
                 W.model.actionManager.add(action);
 
             });
 
-            $('#pierotate').click(function(){
+            $('#pierotate').click(()=> {
                 settings.Rotate = !settings.Rotate;
                 $('#pierotate').css('color', settings.Rotate ? 'rgb(0,180,0)': 'black');
                 saveSettings();
                 getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.ROTATE) == 0)
+                    if((val.mode & OpenLayers.Control.ModifyFeature.ROTATE) === 0)
                         val.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
                     else
                         val.mode &= ~OpenLayers.Control.ModifyFeature.ROTATE;
@@ -2738,12 +2740,12 @@ function pie(tries = 1) {
                 });
             });
 
-            $('#pieresize').click(function(){
+            $('#pieresize').click(()=> {
                 settings.Resize = !settings.Resize;
                 $('#pieresize').css('color', settings.Resize ? 'rgb(0,180,0)': 'black');
                 saveSettings();
                 getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.RESIZE) == 0)
+                    if((val.mode & OpenLayers.Control.ModifyFeature.RESIZE) === 0)
                         val.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
                     else
                         val.mode &= ~OpenLayers.Control.ModifyFeature.RESIZE;
@@ -2754,7 +2756,7 @@ function pie(tries = 1) {
             //activate the changes when a Place is selected
             if(settings.Rotate){
                 getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.ROTATE) == 0)
+                    if((val.mode & OpenLayers.Control.ModifyFeature.ROTATE) === 0)
                         val.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
                     val.resetVertices();
                 });
@@ -2762,13 +2764,13 @@ function pie(tries = 1) {
 
             if(settings.Resize){
                 getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.RESIZE) == 0)
+                    if((val.mode & OpenLayers.Control.ModifyFeature.RESIZE) === 0)
                         val.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
                     val.resetVertices();
                 });
             }
         }
-        else if(!WazeWrap.hasSelectedFeatures() && W.geometryEditing.activeEditor && lastSelectedFeature == "venue"){
+        else if(!WazeWrap.hasSelectedFeatures() && W.geometryEditing.activeEditor && lastSelectedFeature === "venue"){
             if(W.geometryEditing.activeEditor.radiusHandle)
                 W.geometryEditing.activeEditor.radiusHandle.destroy();
         }
@@ -2778,7 +2780,7 @@ function pie(tries = 1) {
         $('#pieCrosshairs').remove();
         if(WazeWrap.getSelectedFeatures().length > 0){
             if(WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue"){
-                var $crosshairs;
+                let $crosshairs;
                 if(_.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,"RESIDENCE_HOME")){
                     $('.venue > .tab-content').css('position', 'relative');
                     $crosshairs = $('<div style="position:absolute; z-index:100; cursor:pointer; top:0; right:0;" id="pieCrosshairs" title="Zoom and center on Place"><i class="fa fa-crosshairs fa-lg" id="placeCrosshair" aria-hidden="true"></i></div>');
@@ -2789,38 +2791,38 @@ function pie(tries = 1) {
                      $crosshairs = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="pieCrosshairs" title="Zoom and center on Place"><i class="fa fa-crosshairs fa-lg" id="placeCrosshair" aria-hidden="true"></i></div>');
                     $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($crosshairs);
                 }
-                $('#pieCrosshairs').click(function(){
+                $('#pieCrosshairs').click(()=> {
                     CenterOnPlace(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), settings.PlaceZoom);
                 });
 
-                $('#pieCrosshairs').mouseenter(function(e) {
+                $('#pieCrosshairs').mouseenter((e) => {
                     //var changedThisPl = getKMLPermalink(wazePL.getAttribute('href'));
                     window.addEventListener('keydown', copyPLHotkeyEvent, false);
                 });
 
-                $('#pieCrosshairs').mouseleave('mouseleave', function() {
+                $('#pieCrosshairs').mouseleave('mouseleave', () => {
                     window.removeEventListener('keydown', copyPLHotkeyEvent);
                 });
             }
         }
     }
 
-    var copyPLHotkeyEvent = function(e) {
+    const copyPLHotkeyEvent = (e) => {
             if ((e.metaKey || e.ctrlKey) && (e.which === 67))
                 copyToClipboard(getPermalink(wazePL.getAttribute('href')));
         };
 
-    var BusinessPLAMode = false;
+    let BusinessPLAMode = false;
     function ShowParkingLotButton(){
         $('#piePLAButton').remove();
         if(WazeWrap.getSelectedFeatures().length > 0){
             if(WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue"){
-                var $PLAButton;
+                let $PLAButton;
                 if(!(_.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,"RESIDENCE_HOME") || _.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,"PARKING_LOT"))){
                     $PLAButton = $('<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="piePLAButton" title="Create a Parking Lot Area for this Place"><i class="fa fa-product-hunt fa-lg" aria-hidden="true"></i></div>');
                     $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($PLAButton);
 
-                    $('#piePLAButton').click(function(){
+                    $('#piePLAButton').click(()=> {
                         if(!BusinessPLAMode){
                             BusinessPLAMode = true;
                             businessPLAPlaceName = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.name;
@@ -2840,26 +2842,26 @@ function pie(tries = 1) {
         }
     }
 
-    var extProviderTries = 0;
+    let extProviderTries = 0;
     function ShowExternalProviderTooltip(){
         if(isChecked('_cbShowExternalProviderTooltip'))
             if(WazeWrap.getSelectedFeatures().length > 0 && WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue"){
                 if($('.select2-container.uuid').length > 0)
-                    for(var i=0; i < $('.select2-container.uuid').find('span.select2-chosen').length; i++){
+                    for(let i=0; i < $('.select2-container.uuid').find('span.select2-chosen').length; i++){
                         extProviderTries = 0;
                         ReadExtProviderText(i, extProviderTries);
                     }
             }
     }
 
-    var calibratingAngledWidth = false;
+    let calibratingAngledWidth = false;
     function ShowPLSpotEstimatorButton(){
         $('.PIEParkingSpotEstimatorButton').remove();
 
         if(WazeWrap.getSelectedFeatures().length > 0){
             if(WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue" && WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories.includes("PARKING_LOT")){
-                var $ParkingSpotEstimatorButton;
-                $ParkingSpotEstimatorButton = $('<div style="font-size:18px; float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" class="PIEParkingSpotEstimatorButton" title="' + I18n.t('pie.prefs.PSEDisplayButtonTitle') + '">#</div>');
+                // let $ParkingSpotEstimatorButton;
+                const $ParkingSpotEstimatorButton = $(`<div style="font-size:18px; float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" class="PIEParkingSpotEstimatorButton" title="${I18n.t('pie.prefs.PSEDisplayButtonTitle')}">#</div>`);
                 $('#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label').after($ParkingSpotEstimatorButton);
 
                 $('select[name="estimatedNumberOfSpots"]').before($ParkingSpotEstimatorButton.clone());
@@ -2873,7 +2875,7 @@ function pie(tries = 1) {
     }
 
     function startPLSpotEstimatorDrawMode(){
-        let polyDrawFeatureOptions = {callbacks : {"done": PLSpotEstimatordoneHandler, "point": pointHandler}};
+        const polyDrawFeatureOptions = {callbacks : {"done": PLSpotEstimatordoneHandler, "point": pointHandler}};
         PLSpotEstimatorLayer.setZIndex(1000);
         PLSpotEstimatordrawControl = new OpenLayers.Control.DrawFeature(PLSpotEstimatorLayer, OpenLayers.Handler.Path, polyDrawFeatureOptions);
         W.map.addControl(PLSpotEstimatordrawControl);
@@ -2883,7 +2885,7 @@ function pie(tries = 1) {
     }
 
     function startPLSpotEstimatorCalibrationMode(){
-        let polyDrawFeatureOptions = {callbacks : {"done": PLSpotEstimatorCalibrationdoneHandler, "point": pointHandler}};
+        const polyDrawFeatureOptions = {callbacks : {"done": PLSpotEstimatorCalibrationdoneHandler, "point": pointHandler}};
         W.map.addLayer(PLSpotEstimatorCalibrationLayer);
         PLSpotEstimatorCalibrationLayer.setZIndex(1005);
         PLSpotEstimatorCalibrationdrawControl = new OpenLayers.Control.DrawFeature(PLSpotEstimatorCalibrationLayer, OpenLayers.Handler.Path, polyDrawFeatureOptions);
@@ -2898,7 +2900,7 @@ function pie(tries = 1) {
     }
 
     function PLSpotEstimatorkeyUpHandler(e){
-        if (e.keyCode == 27){
+        if (e.keyCode === 27){
             if (isDrawing) {
                 PLSpotEstimatordrawControl.cancel();
                 isDrawing = false;
@@ -2911,16 +2913,16 @@ function pie(tries = 1) {
             }
             e.stopPropagation();
         }
-        else if(e.keyCode == 90 && e.ctrlKey) //ctrl+z
+        else if(e.keyCode === 90 && e.ctrlKey) //ctrl+z
             PLSpotEstimatordrawControl.undo();
-        else if(e.keyCode == 89 && e.ctrlKey) //ctrl+y
+        else if(e.keyCode === 89 && e.ctrlKey) //ctrl+y
             PLSpotEstimatordrawControl.redo();
-        else if(e.keyCode == 13) //enter
+        else if(e.keyCode === 13) //enter
             PLSpotEstimatordrawControl.finishSketch();
     }
 
     function PLSpotEstimatorCalibrationkeyUpHandler(e){
-        if (e.keyCode == 27){ //esc
+        if (e.keyCode === 27){ //esc
             if (isDrawing) {
                 PLSpotEstimatorCalibrationdrawControl.cancel();
                 isDrawing = false;
@@ -2934,11 +2936,11 @@ function pie(tries = 1) {
             e.stopPropagation();
 
         }
-        else if(e.keyCode == 90 && e.ctrlKey)
+        else if(e.keyCode === 90 && e.ctrlKey)
             PLSpotEstimatorCalibrationdrawControl.undo();
-        else if(e.keyCode == 89 && e.ctrlKey)
+        else if(e.keyCode === 89 && e.ctrlKey)
             PLSpotEstimatorCalibrationdrawControl.redo();
-        else if(e.keyCode == 13)
+        else if(e.keyCode === 13)
             PLSpotEstimatorCalibrationdrawControl.finishSketch();
     }
 
@@ -2964,7 +2966,7 @@ function pie(tries = 1) {
         $('div#WazeMap.view-area.olMap').off('keydown');
     }
 
-    var totalSpots = 0;
+    let totalSpots = 0;
     function PLSpotEstimatordoneHandler(geom){
         let style = {strokeWidth: 3, strokeColor: '#ee9900'};
         PLSpotEstimatorLayer.addFeatures(new OpenLayers.Feature.Vector(geom,{}, style));
