@@ -97,22 +97,6 @@ function pie(tries = 1) {
         // };
 
         //Closest segment
-    const lineStyleToNavPoint = {
-        strokeWidth: 3,
-        strokeColor: '#00ece3',
-        strokeLinecap: 'round',
-        strokeDashstyle: 'dash'
-    },
-        lineStyleToClosestSeg = {
-            strokeWidth: 4,
-            strokeColor: '#00ece3',
-            strokeLinecap: 'round'
-        },
-        pointStyleNavPoint = {
-            externalGraphic: 'data:image/gif;base64,R0lGODlhFgAWAPZ/AD09PT8/Pj8/P0M9PUA/P1s9PUBAPz09Qz09Zz09c0M9SWc9bT9AQD1DT0FBQEJBQURDQkRDQ0JGRkZFRUlIRklIR0lISElJSVFPTFJPTlJQTVNQTlNRT1ZTT1lWUlhWU11ZVmFbSXNDW2FhT2diXUlDYUNJbVtDc1thYWBgYGFhYWxsbG1tbZE9PbZzPaRVVZFnSbZzQ7BtYbB/Z8J/Q7yFW4uRbZGLc8iLYdqkZ8iqeeCwZ+y8cz09iz09kT1Dlz1nlz1JpENbkUNztmGFvD2R1EOR1H+wyG2w4HO25nO27Hm88p2dnZ6enraXl7a2ts7Cl/jIi/LOkfjUkf/Ukf/Ul//gqv/mtoW22pe22pfCzovI8pfU+KTa/7zs/8LCwsLOzs7Ozs/Pz9rOzubUzuzazvLgyP/syP//1P/42v//2s7U5s744NTm+Nrs/87y/8j4/9T//+bm5v//4P//5v//7ODy/+b///Pz8/jy8v//8vL4////+Pj//////wAAACH5BAUAAH8ALAAAAAAWABYAAAf+gH+CgyQeFQ8AAAQTHiSDj48ZDAIAlJWVAhyQjw8CAitMYXh4YUwrlQ+bf54VX36vsK9fEwKpnAIgcrBpTll9sHIgDLZ/GQITurBUAD1xsXIWAhmCnq6wZjMACFhusV+VfxyfsHw5JjfaNiVcsSsCHRUATLA8Qm9WBUFxUydesEwAKhgQEOaVmhddYr3KYcTPrzC1KOFRIwOEAhRbYNXBEaIBCSR+8CRKhAdNi5FKNLoIEABAkZCJWobhQwbKAi3dYJXRAQRMGz8QIVQQMM+PHhpJ/NQZs6YPnRhL/gmo8AfAClhXRGCRwoxNjSF3YJ2iJsCanzMwMB0gEvbVE09GgsQhixVFQA84z6JdGERLRTI/VQb8cPZKjgoBECAROGY2zx5YT6IJUNXpU6hRpdzVUhXXk6VEngx44PwIxAQJiSRUAKEqEAA7',
-            graphicWidth: 22,
-            graphicHeight: 22
-        };
 
 
         const styleConfig = {
@@ -149,7 +133,7 @@ function pie(tries = 1) {
                     },
                 },
                 {
-                    predicate: (properties) => { return properties.style === "pointStyle" },
+                    predicate: (properties) => { return properties.styleName === "pointStyle" },
                     style: {
                         pointRadius: 6,
                         fillColor: 'white',
@@ -158,7 +142,33 @@ function pie(tries = 1) {
                         strokeWidth: '3',
                         strokeLinecap: 'round'
                     }
+                },
+                { 
+                    predicate: (properties) => { return properties.styleName === "lineStyleToNavPoint" },
+                    style: {
+                        strokeWidth: 3,
+                        strokeColor: '#00ece3',
+                        strokeLinecap: 'round',
+                        strokeDashstyle: 'dash'
+                    }
+                },
+                { 
+                    predicate: (properties) => { return properties.styleName === "lineStyleToClosestSeg" },
+                    style: {
+                        strokeWidth: 4,
+                        strokeColor: '#00ece3',
+                        strokeLinecap: 'round'
+                    }
+                },
+                {
+                    predicate: (properties) => { return properties.styleName === "pointStyleNavPoint" },
+                    style: {
+                        externalGraphic: 'data:image/gif;base64,R0lGODlhFgAWAPZ/AD09PT8/Pj8/P0M9PUA/P1s9PUBAPz09Qz09Zz09c0M9SWc9bT9AQD1DT0FBQEJBQURDQkRDQ0JGRkZFRUlIRklIR0lISElJSVFPTFJPTlJQTVNQTlNRT1ZTT1lWUlhWU11ZVmFbSXNDW2FhT2diXUlDYUNJbVtDc1thYWBgYGFhYWxsbG1tbZE9PbZzPaRVVZFnSbZzQ7BtYbB/Z8J/Q7yFW4uRbZGLc8iLYdqkZ8iqeeCwZ+y8cz09iz09kT1Dlz1nlz1JpENbkUNztmGFvD2R1EOR1H+wyG2w4HO25nO27Hm88p2dnZ6enraXl7a2ts7Cl/jIi/LOkfjUkf/Ukf/Ul//gqv/mtoW22pe22pfCzovI8pfU+KTa/7zs/8LCwsLOzs7Ozs/Pz9rOzubUzuzazvLgyP/syP//1P/42v//2s7U5s744NTm+Nrs/87y/8j4/9T//+bm5v//4P//5v//7ODy/+b///Pz8/jy8v//8vL4////+Pj//////wAAACH5BAUAAH8ALAAAAAAWABYAAAf+gH+CgyQeFQ8AAAQTHiSDj48ZDAIAlJWVAhyQjw8CAitMYXh4YUwrlQ+bf54VX36vsK9fEwKpnAIgcrBpTll9sHIgDLZ/GQITurBUAD1xsXIWAhmCnq6wZjMACFhusV+VfxyfsHw5JjfaNiVcsSsCHRUATLA8Qm9WBUFxUydesEwAKhgQEOaVmhddYr3KYcTPrzC1KOFRIwOEAhRbYNXBEaIBCSR+8CRKhAdNi5FKNLoIEABAkZCJWobhQwbKAi3dYJXRAQRMGz8QIVQQMM+PHhpJ/NQZs6YPnRhL/gmo8AfAClhXRGCRwoxNjSF3YJ2iJsCanzMwMB0gEvbVE09GgsQhixVFQA84z6JdGERLRTI/VQb8cPZKjgoBECAROGY2zx5YT6IJUNXpU6hRpdzVUhXXk6VEngx44PwIxAQJiSRUAKEqEAA7',
+                        graphicWidth: 22,
+                        graphicHeight: 22
+                    }
                 }
+
             ],
         };
 
@@ -807,8 +817,8 @@ function pie(tries = 1) {
         });
 
         $('#piePlaceNameFontOutlineWidth').trigger("focusout", function(){
-            var outlineWidth = $(this)[0].value;
-            if(outlineWidth == "" || outlineWidth == "0")
+            const outlineWidth = $(this)[0].value;
+            if(outlineWidth === "" || outlineWidth === "0")
                 $(this)[0].value = 3;
             settings[$(this)[0].id.substr(3)] = outlineWidth;
             saveSettings();
@@ -956,7 +966,7 @@ function pie(tries = 1) {
 
                     $('input[name="url"]').trigger("focusout",()=> {
                         placeURL = $('input[name="url"]')[0].value.trim();
-                        if(placeURL == ""){
+                        if(placeURL === ""){
                             $('input[name="url"]').parent().parent().find('label').unwrap();
                             return;
                         }
@@ -967,7 +977,7 @@ function pie(tries = 1) {
                         else
                             $('#websiteLink').attr('href', placeURL);
                     });
-                    if(placeURL != ""){
+                    if(placeURL !== ""){
                         if(!placeURL.startsWith("http"))
                             placeURL = `https://${placeURL}`;
                         $('input[name="url"]').parent().parent().find('label').wrap(`<a href="${placeURL}" id="websiteLink" target="_blank" style="cursor:pointer;"></a>`);
@@ -1064,7 +1074,7 @@ function pie(tries = 1) {
         };*/
         $('#map').append(optDiv);
 
-        let optDiv2=document.createElement('div');
+        const optDiv2=document.createElement('div');
         optDiv2.className = 'photoViewerOptionsContainer';
         $(optDiv2).css({'text-align':'center','width':'500px', 'position':'relative', 'top':'30px', 'background-color':'black', 'color':'white', 'margin':'0 auto', 'border':'1px solid white', 'border-radius':'12px', 'padding':'10px'});
         optDiv2.innerHTML = '<div class="photoViewerOptionsOptionText"><div><span>Sort by</span></div><div><span>Sort order</span></div><div><span>Keep position after picture deletion</span></div><div><span>Show whitelisted Places</span></div></div>' +
@@ -1076,19 +1086,19 @@ function pie(tries = 1) {
             $(optDiv).css('display', 'none');
         });
 
-        let topbar = document.createElement('div');
+        const topbar = document.createElement('div');
         $(topbar).css({'position':'sticky', 'top':'0px', 'width':'100%', 'height':'23px'});
         mainDiv.appendChild(topbar);
 
         //Button to quit
-        let quit=document.createElement('button');
+        const quit=document.createElement('button');
         quit.innerHTML=I18n.translations[I18n.currentLocale()].merge_places.actions.cancel
         $(quit).css({'float':'right','height':'23px','line-height':'23px','margin':'3px','padding':'0 10px','background-color':'#26bae8','color':'white','border':'0','border-radius':'13px'});
         quit.onclick = hide_visio;
         topbar.appendChild(quit);
 
         //Button for script options
-        let param=document.createElement('button');
+        const param=document.createElement('button');
         param.innerHTML='<i style="color:#ccc;" class="fa fa-gear"></i>';
         $(param).css({'float':'right','height':'22px','line-height':'22px','margin':'3px','background-color':'#354148','color':'white','border':'0','border-radius':'11px'});
         param.onclick=(()=> {
@@ -1097,40 +1107,40 @@ function pie(tries = 1) {
         topbar.appendChild(param);
 
         //Quantity
-        let quantities=document.createElement('div');
+        const quantities=document.createElement('div');
         $(quantities).css({'float':'right','height':'22px','line-height':'22px','margin':'3px','padding':'0 8px','background-color':'#354148','color':'white','border':'0','border-radius':'11px'});
-        let placeqty = document.createElement('div');
+        const placeqty = document.createElement('div');
         $(placeqty).css({'color':'white','display':'inline-block', 'margin-right':'5px'});
         placeqty.innerHTML='<i class="fa fa-map-marker" style="color:red;" title="Total Places found with images"></i> <span id="placessqty"></span>';
         quantities.appendChild(placeqty);
-        let imageqty = document.createElement('div');
+        const imageqty = document.createElement('div');
         $(imageqty).css({'display':'inline-block'});
         imageqty.innerHTML='<i class="fa fa-file-image-o" title="Total images found"></i> <span id="imagesqty"></span>';
         quantities.appendChild(imageqty);
         topbar.appendChild(quantities);
 
         //Refresh
-        let refresh=document.createElement('div');
+        const refresh=document.createElement('div');
         refresh.innerHTML='<i class="fa fa-refresh"></i>';
         $(refresh).css({'float':'right','height':'22px','line-height':'22px','margin':'3px','padding':'0 8px','background-color':'#354148','color':'white','border':'0','border-radius':'11px', 'cursor':'pointer'});
         refresh.id="refreshScan";
-        $(refresh).click(Photos_scan);
+        $(refresh).trigger("click", Photos_scan);
         topbar.appendChild(refresh);
 
-        let showDiv=document.createElement('div');
+        const showDiv=document.createElement('div');
         showDiv.id='showDiv';
         showDiv.style.padding='5px';
         mainDiv.appendChild(showDiv);
 
         //Icon near chat
-        let launchDiv=document.createElement('div');
+        const launchDiv=document.createElement('div');
         launchDiv.id='launchDiv';
         $(launchDiv).css({'z-index':'10000 !important', 'title':'test','bottom':'20px','left':'70px','position':'absolute','font-weight':'400', 'display': (settings.EnablePhotoViewer ? 'block' : 'none')});
-        let tmpdiv=document.createElement('div');
+        const tmpdiv=document.createElement('div');
         $(tmpdiv).css({'height':'40px','position':'absolute','bottom':'0px','transition':'all 0.3s'});
         tmpdiv.onmouseenter=togglePhotoViewerMouseEvent;
         launchDiv.appendChild(tmpdiv);
-        let launchButton=document.createElement('button');
+        const launchButton=document.createElement('button');
         $(launchButton).css({'filter':'filter:grayscale(100%)','border':'none','background-color':'white','border-radius':'8px 8px 8px 8px','width':'43px','height':'40px'});
         launchButton.innerHTML='<i style="color:#666;font-size:20px;" class="fa fa-image"></i>';
         launchButton.id = "photoViewerButton";
@@ -1208,14 +1218,14 @@ function pie(tries = 1) {
 
     function Photos_scan(){
         catalog=[];
-        let venues = [];
+        const venues = [];
         for (const poi in W.model.venues.objects)
             venues.push(W.model.venues.getObjectById(poi));
 
         venues.sort(dynamicSort((settings.sortOrder === "sortDesc" ? "-" : "") + settings.sortBy.substr(6)));
         for (let i=0; i<venues.length; i++) {
-            let venue = venues[i]
-            let vattr = venue.attributes;
+            const venue = venues[i]
+            const vattr = venue.attributes;
             if (typeof (venue) ==='undefined' || vattr.id === null || venue.isSelected()) continue;
 
             if (vattr.images.length != 0 && onScreen(venue))
@@ -1229,9 +1239,9 @@ function pie(tries = 1) {
         let c=0;
         let picCount=0;
         for (let i=0; catalog[i]; i++) {
-            let venue = W.model.venues.getObjectById(catalog[i]);
-            let vattr= venue.attributes;
-            let myplace = await idbPVKeyval.get('Places', vattr.id);
+            const venue = W.model.venues.getObjectById(catalog[i]);
+            const vattr= venue.attributes;
+            const myplace = await idbPVKeyval.get('Places', vattr.id);
             let matchCount = 0;
 
             if(!settings.PhotoViewerShowHiddenPlaces){
@@ -1245,7 +1255,7 @@ function pie(tries = 1) {
                 }
             }
 
-            let venueDiv=document.createElement('div');
+            const venueDiv=document.createElement('div');
             $(venueDiv).css({'float':'left','min-width':'200px','height':'220px','margin':'0 10px 10px 0','padding':'5px','border-radius':'10px','background-color':'black','color':'white', 'overflow-y':'auto'});
             if (vattr.approved) {
                 venueDiv.style.border='1px solid #26bae8';
@@ -1262,18 +1272,18 @@ function pie(tries = 1) {
             $('#showDiv').append(venueDiv);
 
             // POI's Name
-            let venueName =document.createElement('span');
+            const venueName =document.createElement('span');
             venueName.style.float='left';
             venueName.innerHTML=vattr.name;// + ` (${parseInt(vattr.lockRank) + 1})`;
             if(vattr.categories[0] === "RESIDENCE_HOME"){
-                let address = venue.getAddress();
+                const address = venue.getAddress();
                 venueName.innerHTML=`${address.attributes.houseNumber} ${address.attributes.street.name}`;
             }
             venueDiv.appendChild(venueName);
 
             if(vattr.approved){
                 // Whitelist button
-                let venueCheck=document.createElement('span');
+                const venueCheck=document.createElement('span');
                 venueCheck.style.float='right';
                 venueCheck.style.marginRight='5px';
                 venueCheck.style.cursor='pointer';
@@ -1302,7 +1312,7 @@ function pie(tries = 1) {
                 venueDiv.appendChild(venueCheck);
             }
             else{
-                let purActions=document.createElement('span');
+                const purActions=document.createElement('span');
                 purActions.style.float='right';
                 purActions.style.marginRight='5px';
                 purActions.style.cursor='pointer';
@@ -1336,16 +1346,16 @@ function pie(tries = 1) {
             }
 
             // Check to localize POI
-            let venuePos=document.createElement('span');
+            const venuePos=document.createElement('span');
             venuePos.style.float='right';
             venuePos.style.margin='0 5px';
             venuePos.style.cursor='pointer';
             venuePos.innerHTML='<i style="color:#aaa;" class="fa fa-crosshairs" title="Geolocate and Select"></i>'; // title="'+ I18n.translations[I18n.currentLocale()].geolocation.focus-btn +'"
             venuePos.id=catalog[i];
-            venuePos.addEventListener("click", ((geo, id) => function () {
+            venuePos.addEventListener("click", ((geo, id) => () => {
                     hide_visio();
-                    debugger;
-                    let venueList = [];
+                    // debugger;
+                    const venueList = [];
                     venueList.push(W.model.venues.objects[id]);
 
                     const lon=(((geo.left+geo.right)/2)+geo.right)/2;
@@ -1379,7 +1389,7 @@ function pie(tries = 1) {
                     $(imgDIV).css('margin-left', '5px');
                 let venueImg=document.createElement('img');
                 $(venueImg).css({'float':'left','max-width':'180px','height':'140px','margin':'5px','cursor':'pointer'});
-                venueImg.src='https://venue-image.waze.com/thumbs/thumb347_'+vattr.images[k].attributes.id;
+                venueImg.src=`https://venue-image.waze.com/thumbs/thumb347_${vattr.images[k].attributes.id}`;
                 if (vattr.images[k].attributes.approved===true) {
                     let picIsWhitelisted = typeof myplace !== 'undefined' && myplace.placePicturesIDs.indexOf(vattr.images[k].id) > -1;
                     imgDIV.style.border = `1px solid ${picIsWhitelisted ? "#fff" : "#0f0"}`;
@@ -1390,8 +1400,7 @@ function pie(tries = 1) {
                     imgDIV.style.border='1px solid #f00';
                     imgDIV.title='This image is not approved';
                 }
-                venueImg.addEventListener("click", function (imageid, venue, approved) {
-                    return function () {
+                venueImg.addEventListener("click", ((imageid, venue, approved) => () => {
                         Photos_zoom(venue, imageid, approved);
                         W.selectionManager.unselectAll();
                         //Disabling selecting the Place when viewing the expanded picture
@@ -1400,8 +1409,7 @@ function pie(tries = 1) {
                         //W.selectionManager.setSelectedModels(venueList);
                         $("#venue-edit-photos").css('display', 'block');
                         $("#venue-edit-general").css('display', 'none');
-                    }
-                }(vattr.images[k].attributes.id, venue, vattr.images[k].attributes.approved), false);
+                    })(vattr.images[k].attributes.id, venue, vattr.images[k].attributes.approved), false);
 
                 if(vattr.images[k].attributes.approved){ //Add a trash can icon to delete a picture if the picture is approved on the Place (not a PUR)
                     let deleteImg = document.createElement('i');
@@ -1434,10 +1442,10 @@ function pie(tries = 1) {
                         }, false);
                         purActions.appendChild(purApprove);
 
-                        var br = document.createElement('br');
+                        const br = document.createElement('br');
                         purActions.appendChild(br);
 
-                        let purReject = document.createElement('i');
+                        const purReject = document.createElement('i');
                         purReject.className = "fa fa-times";
                         purReject.title = "Reject this picture";
                         purReject.style.color = "#f00";
@@ -1540,31 +1548,31 @@ function pie(tries = 1) {
             zoom.appendChild(zoomNavDiv);
         }
 
-        zoom.onclick=(function(){
+        zoom.onclick=(()=> {
             zoom.remove();
         });
         $('#map').append(zoom);
-        $('#zoomDelete').click(function(){
+        $('#zoomDelete').trigger("click", ()=> {
             DeleteImage(venue, id);
         });
 
-        $("#zoomPrev").click(function(){
+        $("#zoomPrev").trigger("click", ()=> {
             if(zoomPicIndex > 0){
                 zoomPicIndex--;
                 $('#zoomImage').attr('src', `https://venue-image.waze.com/thumbs/thumb700_${images[zoomPicIndex].id}`);
                 id = images[zoomPicIndex].id;
-                let d = new Date(images[zoomPicIndex].attributes.date);
+                const d = new Date(images[zoomPicIndex].attributes.date);
                 $('#zoomDate').text(d.toLocaleString());
             }
             event.stopPropagation();
         });
 
-        $("#zoomNext").click(function(){
+        $("#zoomNext").trigger("click", ()=> {
             if(zoomPicIndex < (images.length - 1)){
                 zoomPicIndex++;
                 $('#zoomImage').attr('src', `https://venue-image.waze.com/thumbs/thumb700_${images[zoomPicIndex].id}`);
                 id = images[zoomPicIndex].id;
-                let d = new Date(images[zoomPicIndex].attributes.date);
+                const d = new Date(images[zoomPicIndex].attributes.date);
                 $('#zoomDate').text(d.toLocaleString());
             }
             event.stopPropagation();
@@ -1573,8 +1581,8 @@ function pie(tries = 1) {
 
     function PlaceMenuShortcut(itemNum){
         if(WazeWrap.hasPlaceSelected()){ //add the category to the Place
-            let selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-            let newCategories = [].concat(selected.attributes.categories);
+            const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+            const newCategories = [].concat(selected.attributes.categories);
             let catToAdd;
             if($(`#piePlaceMainItem${itemNum}`).length > 0)
                 catToAdd = $(`#piePlaceMainItem${itemNum}`)[0].getAttribute("data-category")
@@ -1595,20 +1603,20 @@ function pie(tries = 1) {
 
     function AddHoursParserInterface(){
         if(WazeWrap.hasPlaceSelected()){
-            var $PIEHoursParser = $("<div>", {style:"min-height:20px"});
+            const $PIEHoursParser = $("<div>", {style:"min-height:20px"});
             if(!$('#PIEHoursParserDiv').length){
                 $PIEHoursParser.html([
                     '<div id="PIEHoursParserDiv" style="margin-top:5px">',
-                    '<textarea id="PIE-hourspaste" placeholder="' + I18n.t('pie.hoursParser.defaultText') + '" wrap="off" autocomplete="off" style="overflow: auto; width: 85%; max-width: 85%; min-width: 85%; font-size: 0.85em; height: 24px; min-height: 24px; max-height: 300px; padding-left: 3px; color: rgb(153, 153, 153);"></textarea>',
-                    '<input class="btn btn-default btn-xs" id="PIEAppendHours" title="' + I18n.t('pie.hoursParser.AddHoursTitle') + '" type="button" value="' + I18n.t('pie.hoursParser.AddHours') + '" style="margin-bottom:4px">',
-                    '<input class="btn btn-default btn-xs" id="PIEReplaceHours" title="' + I18n.t('pie.hoursParser.ReplaceHoursTitle') + '" type="button" value="' + I18n.t('pie.hoursParser.ReplaceHours') + '" style="margin-bottom:4px">',
+                    `<textarea id="PIE-hourspaste" placeholder="${I18n.t('pie.hoursParser.defaultText')}" wrap="off" autocomplete="off" style="overflow: auto; width: 85%; max-width: 85%; min-width: 85%; font-size: 0.85em; height: 24px; min-height: 24px; max-height: 300px; padding-left: 3px; color: rgb(153, 153, 153);"></textarea>`,
+                    `<input class="btn btn-default btn-xs" id="PIEAppendHours" title="${I18n.t('pie.hoursParser.AddHoursTitle')}" type="button" value="${I18n.t('pie.hoursParser.AddHours')}" style="margin-bottom:4px">`,
+                    `<input class="btn btn-default btn-xs" id="PIEReplaceHours" title="${I18n.t('pie.hoursParser.ReplaceHoursTitle')}" type="button" value="${I18n.t('pie.hoursParser.ReplaceHours')}" style="margin-bottom:4px">`,
                     '<span id="PIEHoursParserError" style="display:block; color:red"></span>',
                     '</div>'
                 ].join(' '));
-                var appendDiv = (function() {
+                const appendDiv = (() => {
                     $('.opening-hours-add').parent().append($PIEHoursParser.html());
-                	$('#PIEAppendHours').click(function(){ addHours(false);});
-                	$('#PIEReplaceHours').click(function(){ addHours(true);});
+                	$('#PIEAppendHours').click(()=> { addHours(false);});
+                	$('#PIEReplaceHours').click(()=> { addHours(true);});
                 });
                 delayFire(150, appendDiv);
 
@@ -1617,13 +1625,14 @@ function pie(tries = 1) {
                     if (event.keyCode === 13) {
                         if (event.ctrlKey) {
                             // Simulate a newline event (shift + enter)
-                            var text = this.value;
-                            var selStart = this.selectionStart;
-                            this.value = text.substr(0, selStart) + '\n' + text.substr(this.selectionEnd, text.length-1);
+                            const text = this.value;
+                            const selStart = this.selectionStart;
+                            this.value = `${text.substr(0, selStart)}\n${text.substr(this.selectionEnd, text.length-1)}`;
                             this.selectionStart = selStart+1;
                             this.selectionEnd = selStart+1;
                             return true;
-                        } else if(!(event.shiftKey||event.ctrlKey) && $('#PIE-hourspaste').val() !== '' ){
+                        }
+                        if(!(event.shiftKey||event.ctrlKey) && $('#PIE-hourspaste').val() !== '' ){
                             event.stopPropagation();
                             event.preventDefault();
                             event.returnValue = false;
@@ -1638,7 +1647,7 @@ function pie(tries = 1) {
     }
 
     function addHours(replaceAll = false) {
-        var pasteHours = $('#PIE-hourspaste').val();
+        let pasteHours = $('#PIE-hourspaste').val();
         if (pasteHours.trim() === "")
             return;
 
@@ -1647,17 +1656,17 @@ function pie(tries = 1) {
             _.forOwn(I18n.translations[I18n.locale].date, (v,k) => { if(k.indexOf("day_names_") > -1) { I18n.translations[I18n.locale].date.day_names.push(v)}});
         }
 
-        var englishNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        var lngDate = I18n.translations[I18n.locale].date.day_names.map(function(value) { return value.toLowerCase(); })
-        var lngFullDate = I18n.translations[I18n.locale].date.abbr_day_names.map(function(value) { return value.toLowerCase(); })
-        for (var i = 0; i < englishNames.length; i++) {
+        const englishNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const lngDate = I18n.translations[I18n.locale].date.day_names.map((value) => value.toLowerCase())
+        const lngFullDate = I18n.translations[I18n.locale].date.abbr_day_names.map((value) => value.toLowerCase())
+        for (let i = 0; i < englishNames.length; i++) {
             pasteHours = pasteHours.replace(lngDate[i], englishNames[i]);
             pasteHours = pasteHours.replace(lngFullDate[i], englishNames[i]);
         }
 
         if(!replaceAll)
-            pasteHours = pasteHours + ',' + getOpeningHours(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel()).join(',');
-        var parserResult = hoursparser.parseHours(pasteHours);
+            pasteHours = `${pasteHours},${getOpeningHours(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel()).join(',')}`;
+        const parserResult = hoursparser.parseHours(pasteHours);
         if (parserResult.hours && parserResult.overlappingHours === false && parserResult.sameOpenAndCloseTimes === false && parserResult.parseError === false) {
             W.model.actionManager.add(new UpdateObject(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), { openingHours: parserResult.hours }));
             $('#PIEHoursParserError').empty();
@@ -1675,19 +1684,19 @@ function pie(tries = 1) {
     //******* Taken from WMEPH for hours parsing
     // Formats "hour object" into a string.
     function formatOpeningHour(hourEntry) {
-        var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-        var hours = hourEntry.fromHour + '-' + hourEntry.toHour;
-        return hourEntry.days.map(day => dayNames[day] + ' ' + hours).join(', ');
+        const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const hours = `${hourEntry.fromHour}-${hourEntry.toHour}`;
+        return hourEntry.days.map(day => `${dayNames[day]} ${hours}`).join(', ');
     }
 
     // Pull natural text from opening hours
     function getOpeningHours(venue) {
-        return venue && venue.attributes.openingHours && venue.attributes.openingHours.map(formatOpeningHour);
+        return venue?.attributes.openingHours?.map(formatOpeningHour);
     }
 
     function changeGeoHandleStyle(radius){
         let handleStyle;
-        let rules = W.map.getLayerByUniqueName("venues").styleMap.styles.default.rules;
+        const rules = W.map.getLayerByUniqueName("venues").styleMap.styles.default.rules;
         for(let i=0; i< rules.length; i++){
             if(rules[i].id === "Waze_Rule_14"){
                 handleStyle = rules[i];
@@ -1702,14 +1711,14 @@ function pie(tries = 1) {
 
     function enlargeVirtualVerticies(){
         if(WazeWrap.hasPlaceSelected()){
-            setTimeout(function(){
+            setTimeout(()=> {
             if(settings.EnlargeGeoHandles){
-                    W.map.controls.find(function(c){ return c.displayClass === "olControlModifyFeature";}).virtualStyle.pointRadius = 6;
+                    W.map.controls.find((c)=> c.displayClass === "olControlModifyFeature").virtualStyle.pointRadius = 6;
             }
             else{
-                W.map.controls.find(function(c){ return c.displayClass === "olControlModifyFeature";}).virtualStyle.pointRadius = 4;
+                W.map.controls.find((c)=> c.displayClass === "olControlModifyFeature").virtualStyle.pointRadius = 4;
             }
-            W.map.controls.find(function(c){ return c.displayClass === "olControlModifyFeature";}).resetVertices();
+            W.map.controls.find((c)=> c.displayClass === "olControlModifyFeature").resetVertices();
             unregisterEvents(enlargeVirtualVerticies);
             }, 50);
         }
@@ -1717,7 +1726,7 @@ function pie(tries = 1) {
 
     //*******/
     function UpdatePlaceFilter(){
-        let index = W.map.venueLayer.styleMap.styles.default.rules.findIndex(function(e){ return e.name == "PIEPlaceFilter";});
+        let index = W.map.venueLayer.styleMap.styles.default.rules.findIndex((e)=> e.name === "PIEPlaceFilter");
         if(index > -1)
         {
             W.map.venueLayer.styleMap.styles.default.rules.splice(index, 1);
@@ -1728,11 +1737,10 @@ function pie(tries = 1) {
             let myRule = new W.Rule({
                 filter: new OpenLayers.Filter.Comparison({
                     type: '==',
-                    evaluate: function(venue) {
+                    evaluate: (venue) => {
                         if($("#_rbHidePlaces").prop("checked"))
                             return (new RegExp($('#piePlaceFilter').val(), "ig").exec(WazeWrap.Model.getObjectModel(venue).attributes.name));
-                        else
-                            return !(new RegExp($('#piePlaceFilter').val(), "ig").exec(WazeWrap.Model.getObjectModel(venue).attributes.name));
+                        return !(new RegExp($('#piePlaceFilter').val(), "ig").exec(WazeWrap.Model.getObjectModel(venue).attributes.name));
                     }
                 }),
                 symbolizer: {
@@ -1747,15 +1755,13 @@ function pie(tries = 1) {
     }
 
     function ToggleHideAreaPlaces(){
-        let index = W.map.venueLayer.styleMap.styles.default.rules.findIndex(function(e){ return e.name == "PIEHide";});
+        let index = W.map.venueLayer.styleMap.styles.default.rules.findIndex((e)=> e.name === "PIEHide");
         if(index === -1)
         {
-            let myRule = new W.Rule({
+            const myRule = new W.Rule({
                 filter: new OpenLayers.Filter.Comparison({
                     type: '==',
-                    evaluate: function(venue) {
-                        return (venue.getOLGeometry() != null ? /POLYGON/i.test(venue.getOLGeometry().id) : false);
-                    }
+                    evaluate: (venue) => (venue.getOLGeometry() != null ? /POLYGON/i.test(venue.getOLGeometry().id) : false)
                 }),
                 symbolizer: {
                     display: 'none'
@@ -1802,8 +1808,14 @@ function pie(tries = 1) {
 
                 //nav point to closest segment
                 const closestSeg = WazeWrap.Geometry.findClosestSegment(navPoint,false, false);
-                let lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([navPoint, closestSeg.closestPoint]), {}, lineStyleToClosestSeg);
-                let pointFeature = new OpenLayers.Feature.Vector(closestSeg.closestPoint, {}, pointStyle);
+                // let lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([navPoint, closestSeg.closestPoint]), {}, lineStyleToClosestSeg);
+                // let pointFeature = new OpenLayers.Feature.Vector(closestSeg.closestPoint, {}, pointStyle);
+                let lineFeature = turf.lineString([navPoint, closestSeg.closestPoint], {
+                    styleName: "lineStyleToClosestSeg"
+                });
+                let pointFeature = turf.point(closestSeg.closestPoint, {
+                    styleName: "pointStyle"
+                });
                 // showStopPointsLayer.addFeatures([lineFeature, pointFeature]);
                 sdk.Map.addFeaturesToLayer({features: [lineFeature, pointFeature], layerName: layerConfig.PIEShowStopPointsLayer.layerName});
 
@@ -1811,8 +1823,10 @@ function pie(tries = 1) {
                 let startPt = highlightedVenue.geometry;
                 if(isArea)
                     startPt = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().getCentroid();
-                lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([startPt, navPoint]), {}, lineStyleToNavPoint);
-                pointFeature = new OpenLayers.Feature.Vector(navPoint, {}, pointStyleNavPoint);
+                // lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([startPt, navPoint]), {}, lineStyleToNavPoint);
+                lineFeature = turf.lineString([startPt, navPoint], { styleName: "lineStyleToNavPoint" });
+                // pointFeature = new OpenLayers.Feature.Vector(navPoint, {}, pointStyleNavPoint);
+                pointFeature = turf.point(navPoint, { styleName: "pointStyleNavPoint" });
                 if(WazeWrap.Model.getObjectModel(highlightedVenue).attributes.entryExitPoints.length > 0 || isArea)
                     sdk.Map.addFeaturesToLayer({features: [lineFeature, pointFeature], layerName: layerConfig.PIEShowStopPointsLayer.layerName});
                     // showStopPointsLayer.addFeatures([lineFeature, pointFeature]);
@@ -1864,10 +1878,10 @@ function pie(tries = 1) {
 	}
 
 	function drawLine(start, end, lStyle, pStyle) {
-		var lineFeature, pointFeature;
+		// let lineFeature, pointFeature;
 
-		lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([start, end]), {}, lStyle);
-		pointFeature = new OpenLayers.Feature.Vector(end, {}, pStyle);
+		let lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([start, end]), {}, lStyle);
+		let pointFeature = new OpenLayers.Feature.Vector(end, {}, pStyle);
 		closestSegmentLayer.addFeatures([lineFeature, pointFeature]);
 	}
 
@@ -1932,7 +1946,7 @@ function pie(tries = 1) {
 
     function removeDragCallbacks() {
         if(!W.geometryEditing.activeEditor == null){
-            W.geometryEditing.activeEditor.dragControl.onDrag = function (e, t) {
+            W.geometryEditing.activeEditor.dragControl.onDrag = (e, t) => {
                 W.geometryEditing.activeEditor.dragVertex.apply(W.geometryEditing.activeEditor, [e, t]);
             };
             if (null !== typeof ClosestSegmentNavPoint) {
@@ -1969,17 +1983,17 @@ function pie(tries = 1) {
 
         $('[id^="piePlaceMainItem"]').click(function(e){
             $('.toolbar-group-venues').removeClass('open');
-            startPlacementMode($('#' + this.id).data("category"), true);
+            startPlacementMode($(`#${this.id}`).data("category"), true);
         });
 
         $('[id^="piePlaceAreaItem"]').click(function(e){
             e.stopPropagation();
             $('.toolbar-group-venues').removeClass('open');
-            startPlacementMode($('#' + this.id).data("category"), false);
+            startPlacementMode($(`#${this.id}`).data("category"), false);
         });
     }
 
-    function initColorPicker(tries){
+    function initColorPicker(tries = 1){
         tries = tries || 1;
 
         if ($('#colorPickerFont')[0].jscolor ) {
@@ -1992,12 +2006,12 @@ function pie(tries = 1) {
 
 
         } else if (tries < 1000)
-            setTimeout(function () {initColorPicker(tries++);}, 200);
+            setTimeout(() => {initColorPicker(tries + 1);}, 200);
     }
 
     function jscolorChanged(){
-        settings.PlaceNameFontColor = "#" + $('#colorPickerFont')[0].jscolor.toString();
-        settings.PlaceNameFontOutline = "#" + $('#colorPickerFontOutline')[0].jscolor.toString();
+        settings.PlaceNameFontColor = `#${$('#colorPickerFont')[0].jscolor.toString()}`;
+        settings.PlaceNameFontOutline = `#${$('#colorPickerFontOutline')[0].jscolor.toString()}`;
         saveSettings();
         PIEPlaceNameLayer.styleMap.styles.default.defaultStyle.fontColor = settings.PlaceNameFontColor;
         PIEPlaceNameLayer.styleMap.styles.default.defaultStyle.labelOutlineColor = settings.PlaceNameFontOutline;
@@ -2032,7 +2046,7 @@ function pie(tries = 1) {
         if(truthiness)
             injectCSSWithID('pieExternalProvidersTweaks', '#edit-panel .external-providers-view .select2-container {width:90%; margin-bottom:2px;}');
         else{
-            var styles = document.getElementById('pieExternalProvidersTweaks');
+            const styles = document.getElementById('pieExternalProvidersTweaks');
             if(styles) styles.parentNode.removeChild(styles);
         }
     }
@@ -2061,10 +2075,10 @@ function pie(tries = 1) {
                         if( (isPoint && showPoint) || (!isPoint && showArea && !venue.isParkingLot()) || (!isPoint && showPLA && venue.isParkingLot())){
                             let placeFilter = $('#piePlaceFilter').val();
                             if(placeFilter.length > 0){
-                                let nameMatch = RegExp($('#piePlaceFilter').val(), "ig").exec(venue.attributes.name);
+                                const nameMatch = RegExp($('#piePlaceFilter').val(), "ig").exec(venue.attributes.name);
                                 if(nameMatch && $("#_rbHidePlaces").prop("checked"))
                                     continue;
-                                else if(!nameMatch && !$("#_rbHidePlaces").prop("checked")) //no name match and show only
+                                if(!nameMatch && !$("#_rbHidePlaces").prop("checked")) //no name match and show only
                                     continue;
                             }
 
@@ -2074,10 +2088,10 @@ function pie(tries = 1) {
                                 textLoc = new OpenLayers.Geometry.Point(venue.getOLGeometry().x, venue.getOLGeometry().y);
                             else
                                 textLoc = venue.getOLGeometry().getCentroid();
-                            let placeName =WordWrap(venue.attributes.name.trim() + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : ''));
+                            let placeName =WordWrap(venue.attributes.name.trim() + (showLock ? ` (L${venue.attributes.lockRank + 1})` : ''));
                             if(venue.attributes.categories[0] === "RESIDENCE_HOME")
-                                placeName = venue.attributes.houseNumber + (venue.attributes.name.trim() !== '' ? ' - ' + venue.attributes.name : '') + (showLock ? ' (L' + (venue.attributes.lockRank + 1) + ')' : '');
-                            let placeNameLabel = new OpenLayers.Feature.Vector(textLoc,{display: 'block',labelText: placeName.trim(), yOffset:(isPoint ? -13 - placeName.split("\n").length * 5 : 0)});
+                                placeName = venue.attributes.houseNumber + (venue.attributes.name.trim() !== '' ? ` - ${venue.attributes.name}` : '') + (showLock ? ` (L${venue.attributes.lockRank + 1})` : '');
+                            const placeNameLabel = new OpenLayers.Feature.Vector(textLoc,{display: 'block',labelText: placeName.trim(), yOffset:(isPoint ? -13 - placeName.split("\n").length * 5 : 0)});
                             PIEPlaceNameLayer.addFeatures([placeNameLabel]);
                         }
                     }
@@ -2087,42 +2101,42 @@ function pie(tries = 1) {
     }
 
     function WordWrap(text){
-        var newName = "";
+        let newName = "";
 
         if(text !== ""){
-            var splitName = text.match(/(.{1,35})(?:\s|$)/g);
-            for(var i=0;i<splitName.length;i++)
-                newName += splitName[i] + (i != splitName.length-1 ? '\n' : '');
+            const splitName = text.match(/(.{1,35})(?:\s|$)/g);
+            for(let i=0;i<splitName.length;i++)
+                newName += splitName[i] + (i !== splitName.length-1 ? '\n' : '');
         }
         return newName;
     }
 
     //Shamelessly copied from URO+
     function MPLayerChanged(){
-        for(var mObj in W.map.getLayerByName("mapProblems").markers){
-            var mIcon = W.map.getLayerByName("mapProblems").markers[mObj].icon.div;
+        for(const mObj in W.map.getLayerByName("mapProblems").markers){
+            const mIcon = W.map.getLayerByName("mapProblems").markers[mObj].icon.div;
             mIcon.addEventListener("click", MarkerClick, false);
         }
     }
 
     function MarkerClick(){
-        var markerType = GetMarkerType(this.className);
+        const markerType = GetMarkerType(this.className);
         if(markerType !== null){
-            var markerID = this.attributes["data-id"].value;
+            const markerID = this.attributes["data-id"].value;
             if(W.map.getLayerByUniqueName("problems").markers[markerID].model.attributes.subType === 71){
-                var $PIECreatePLA = $('<div id="PIECreatePLA">', {style:"min-height:20px"});
+                const $PIECreatePLA = $('<div id="PIECreatePLA">', {style:"min-height:20px"});
                 $PIECreatePLA.html([
                     '<div class="btn btn-block" id="PIECreatePLAButton" style="color: #fff; background-color: #92c2d1; border-color: #78b0bf; margin-top:5px; width:67%; margin: 0 auto;">Create Suggested PLA</div>',
                 ].join(' '));
 
-                setTimeout(function(){$('#panel-container > div > div > div.actions > div > div > form').append($PIECreatePLA); $('#PIECreatePLAButton').click(function(){createPLAFromMP(markerID);});}, 150);
+                setTimeout(()=> {$('#panel-container > div > div > div.actions > div > div > form').append($PIECreatePLA); $('#PIECreatePLAButton').click(()=> {createPLAFromMP(markerID);});}, 150);
             }
         }
     }
 
     //Shamelessly copied from URO+
     function GetMarkerType(className){
-        var markerType = null;
+        let markerType = null;
         if(className.indexOf('user-generated') !== -1) markerType = 'ur';
         else if(className.indexOf('map-problem') !== -1) markerType = 'mp';
         else if(className.indexOf('place-update') !== -1) markerType = 'pur';
@@ -2130,18 +2144,18 @@ function pie(tries = 1) {
     }
 
     function createPLAFromMP(MPID){
-        var pos = W.model.problemDetails.objects[MPID].venueGeom;
+        const pos = W.model.problemDetails.objects[MPID].venueGeom;
 
-        var PlaceObject = require("Waze/Feature/Vector/Landmark");
-        var AddPlace = require("Waze/Action/AddLandmark");
+        const PlaceObject = require("Waze/Feature/Vector/Landmark");
+        const AddPlace = require("Waze/Action/AddLandmark");
 
-        var points = [];
-        var i;
+        const points = [];
+        let i;
         for(i=0;i<pos.components[0].components.length;i++)
             points.push(new OpenLayers.Geometry.Point(pos.components[0].components[i].x, pos.components[0].components[i].y));
 
-        var ring = new OpenLayers.Geometry.LinearRing(points);
-        var NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(new OpenLayers.Geometry.Polygon([ring])) });
+        const ring = new OpenLayers.Geometry.LinearRing(points);
+        const NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(new OpenLayers.Geometry.Polygon([ring])) });
 
         NewPlace.attributes.categories.push("PARKING_LOT");
 
@@ -2159,7 +2173,7 @@ function pie(tries = 1) {
             }
     }
 
-    var newPlaceCategory = "";
+    let newPlaceCategory = "";
     function startPlacementMode(category, isPoint){
         if(W.editingMediator.attributes.editingHouseNumbers) //don't allow creating Places in HN edit mode
             return;
@@ -2181,10 +2195,10 @@ function pie(tries = 1) {
         }
         $('#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive').removeClass("open");
         newPlaceCategory = category;
-        var polyDrawFeatureOptions = {callbacks : {"done": doneHandler}};
+        const polyDrawFeatureOptions = {callbacks : {"done": doneHandler}};
         if(isPoint){
             $(".olMapViewport").on('mousemove', MouseMoveHandler);
-            $(".olMapViewport").click(function(){endPlacementMode(category, isPoint);});
+            $(".olMapViewport").click(()=> {endPlacementMode(category, isPoint);});
             /*drawPoly = new OpenLayers.Control.DrawFeature(newPlaceLayer, OpenLayers.Handler.Polygon, polyDrawFeatureOptions);
             W.map.addControl(drawPoly);
             drawPoly.activate();*/
@@ -2200,9 +2214,9 @@ function pie(tries = 1) {
         document.addEventListener('keyup', keyUpHandler, false);
     }
 
-    var businessPLAPlaceName, businessPLAPlaceAddress;//, businessPLAPlacePhone, businessPLAPlaceURL;
+    let businessPLAPlaceName, businessPLAPlaceAddress;//, businessPLAPlacePhone, businessPLAPlaceURL;
     function startBusinessPLAPlacementMode(){
-        var polyDrawFeatureOptions = {callbacks : {"done": doneHandlerBusinessPLAPlace}};
+        const polyDrawFeatureOptions = {callbacks : {"done": doneHandlerBusinessPLAPlace}};
         drawPoly = new OpenLayers.Control.DrawFeature(newPlaceLayer, OpenLayers.Handler.Polygon, polyDrawFeatureOptions);
         W.map.addControl(drawPoly);
         drawPoly.activate();
@@ -2218,21 +2232,21 @@ function pie(tries = 1) {
     function CreateBusinesPLAPlace(geom, name, address){//, phone, url){
         drawPoly.destroy();
 
-        var PlaceObject = require("Waze/Feature/Vector/Landmark");
-        var AddPlace = require("Waze/Action/AddLandmark");
-        var multiaction = new MultiAction();
+        const PlaceObject = require("Waze/Feature/Vector/Landmark");
+        const AddPlace = require("Waze/Action/AddLandmark");
+        const multiaction = new MultiAction();
 
-        var points = [];
-        var i;
+        const points = [];
+        let i;
         for(i=0;i<geom.components[0].components.length;i++)
             points.push(new OpenLayers.Geometry.Point(geom.components[0].components[i].x, geom.components[0].components[i].y));
 
-        var ring = new OpenLayers.Geometry.LinearRing(points);
-        var NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(new OpenLayers.Geometry.Polygon([ring])) });
+        const ring = new OpenLayers.Geometry.LinearRing(points);
+        const NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(new OpenLayers.Geometry.Polygon([ring])) });
         NewPlace.attributes.categories.push("PARKING_LOT");
 
         NewPlace.attributes.lockRank = Number(settings.DefaultLockLevel);
-        NewPlace.attributes.name = "Parking - " + name;
+        NewPlace.attributes.name = `Parking - ${name}`;
         //NewPlace.attributes.phone = phone;
         //NewPlace.attributes.url = url;
         NewPlace.attributes.categoryAttributes.PARKING_LOT = {};
@@ -2241,7 +2255,7 @@ function pie(tries = 1) {
         NewPlace.attributes.categoryAttributes.PARKING_LOT.costType = "FREE";
 
         if(address){
-            var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress');
+            let newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress');
             newAttributes = {
                 countryID: address.country.id,
                 stateID: address.state.id,
@@ -2252,7 +2266,7 @@ function pie(tries = 1) {
 
                 newAttributes.streetName = address.street.name;
 
-                var cityName = address.city.attributes.name;
+                const cityName = address.city.attributes.name;
 
                 if(cityName !== "")
                     newAttributes.emptyCity = null;
@@ -2262,7 +2276,7 @@ function pie(tries = 1) {
 
         W.model.actionManager.add(new AddPlace(NewPlace));
 
-        var UFA = new UpdateFeatureAddress(NewPlace, newAttributes);
+        const UFA = new UpdateFeatureAddress(NewPlace, newAttributes);
         UFA.options.updateHouseNumber = true;
         multiaction.doSubAction(W.model, UFA);
         W.model.actionManager.add(multiaction);
@@ -2276,17 +2290,17 @@ function pie(tries = 1) {
     }
 
     function keyUpHandler(e){
-         if (e.keyCode == 27){
+         if (e.keyCode === 27){
              BusinessPLAMode = false;
              disablePlacementMode();
              if(drawPoly !== "undefined")
                  drawPoly.destroy();
          }
-        else if(e.keyCode == 90 && e.ctrlKey)
+        else if(e.keyCode === 90 && e.ctrlKey)
             drawPoly.undo();
-        else if(e.keyCode == 89 && e.ctrlKey)
+        else if(e.keyCode === 89 && e.ctrlKey)
             drawPoly.redo();
-        else if(e.keyCode == 13)
+        else if(e.keyCode === 13)
             drawPoly.finishSketch();
     }
 
@@ -2303,7 +2317,7 @@ function pie(tries = 1) {
     }
 
     function getMousePos900913(){
-        var mousePosition = $('.wz-map-ol-control-span-mouse-position').text().split(" ");
+        const mousePosition = $('.wz-map-ol-control-span-mouse-position').text().split(" ");
         [mousePosition[0], mousePosition[1]] = [mousePosition[1], mousePosition[0]];
         return WazeWrap.Geometry.ConvertTo900913(mousePosition[0], mousePosition[1]);
     }
@@ -2329,9 +2343,9 @@ function pie(tries = 1) {
     }
 
     function createPlace(pos, category, isPoint){
-        var PlaceObject = require("Waze/Feature/Vector/Landmark");
-        var AddPlace = require("Waze/Action/AddLandmark");
-        var multiaction = new MultiAction();
+        const PlaceObject = require("Waze/Feature/Vector/Landmark");
+        const AddPlace = require("Waze/Action/AddLandmark");
+        const multiaction = new MultiAction();
 
         var newOLgeometry;
         if(isPoint)
@@ -3409,12 +3423,12 @@ function pie(tries = 1) {
     }
 
     function updatePlaceSizeDisplay(){
-        var count = WazeWrap.getSelectedFeatures().length;
-        var metersArea = 0;
-        var bold = false;
+        const count = WazeWrap.getSelectedFeatures().length;
+        let metersArea = 0;
+        const bold = false;
         if(count === 1){
-           var venue = WazeWrap.getSelectedFeatures()[0];
-           var isArea = venue.geometry.toString().match(/^POLYGON/);
+           const venue = WazeWrap.getSelectedFeatures()[0];
+           const isArea = venue.geometry.toString().match(/^POLYGON/);
            //var isPoint = venue.geometry.toString().match(/^POINT/);
 
             if(venue.WW.getType() === "venue" && isArea){
@@ -3423,21 +3437,21 @@ function pie(tries = 1) {
                 metersArea = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().getGeodesicArea(W.map.getProjectionObject());
 
                 if(metersArea > 0 && isArea){
-                    var ftArea = Math.round(metersArea * 10.76391 *100)/100;
+                    const ftArea = Math.round(metersArea * 10.76391 *100)/100;
 
-                    var list = $('#venue-edit-general > ul')[0];
-                    var newList = document.createElement("UL");
+                    const list = $('#venue-edit-general > ul')[0];
+                    const newList = document.createElement("UL");
                     newList.id = "AreaSize";
 
-                    var newItem = document.createElement("LI");
+                    let newItem = document.createElement("LI");
                     if(isChecked("_cbShowAreaPlaceSizeMetric")){
-                        newItem.innerHTML = "Area: " + metersArea.toFixed(2) + " m<sup>2</sup>";
+                        newItem.innerHTML = `Area: ${metersArea.toFixed(2)} m<sup>2</sup>`;
                         newList.appendChild(newItem);
                     }
 
                     if(isChecked("_cbShowAreaPlaceSizeImperial")){
                         newItem = document.createElement("LI");
-                        newItem.innerHTML = "Area: " + ftArea.toFixed(2) + " ft<sup>2</sup>";
+                        newItem.innerHTML = `Area: ${ftArea.toFixed(2)} ft<sup>2</sup>`;
                         newList.appendChild(newItem);
                     }
                     if(metersArea < 500){
@@ -3453,7 +3467,7 @@ function pie(tries = 1) {
                     if(list.before != null)
                        list.before(newList);
                     else{
-                        var parent = $('#venue-edit-general > ul')[0].parentNode;
+                        const parent = $('#venue-edit-general > ul')[0].parentNode;
                         parent.insertBefore(newList,$('#venue-edit-general > ul')[0]);
                     }
 
@@ -3464,23 +3478,22 @@ function pie(tries = 1) {
         }
     }
 
-    var getPermalink = function(currPl) {
-        var adjustedPL = currPl.substr(currPl.lastIndexOf('editor')).replace(/&[^&]*Filter=[^&]*|&s=(\d+)/ig,'');
-        var lon = adjustedPL.match(/lon=(-?\d+\.\d+)/)[1];
-        var lat = adjustedPL.match(/lat=(-?\d+\.\d+)/)[1];
-        var zoom = adjustedPL.match(/zoom[Levl]*=\d+/)[0];
-        var centroid = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().getCentroid();
+    const getPermalink = (currPl) => {
+        let adjustedPL = currPl.substr(currPl.lastIndexOf('editor')).replace(/&[^&]*Filter=[^&]*|&s=(\d+)/ig,'');
+        const lon = adjustedPL.match(/lon=(-?\d+\.\d+)/)[1];
+        const lat = adjustedPL.match(/lat=(-?\d+\.\d+)/)[1];
+        const zoom = adjustedPL.match(/zoom[Levl]*=\d+/)[0];
+        const centroid = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().getCentroid();
         adjustedPL = adjustedPL.replace(lon, WazeWrap.Geometry.ConvertTo4326(centroid.x,centroid.y).lon);
         adjustedPL = adjustedPL.replace(lat, WazeWrap.Geometry.ConvertTo4326(centroid.x,centroid.y).lat);
-        adjustedPL = adjustedPL.replace(zoom, "zoomLevel="+settings.PlaceZoom);
+        adjustedPL = adjustedPL.replace(zoom, `zoomLevel=${settings.PlaceZoom}`);
         if(settings.PlaceLocatorCrosshairProdPL)
-            return 'https://www.waze.com/' + adjustedPL;
-        else
-            return location.origin + '/' + adjustedPL;
+            return `https://www.waze.com/${adjustedPL}`;
+        return `${location.origin}/${adjustedPL}`;
     };
 
-    var copyToClipboard = function(str) {
-            var $temp = $('<input>');
+    const copyToClipboard = (str) => {
+            const $temp = $('<input>');
             $('body').append($temp);
             $temp.val(str).select();
             document.execCommand('copy');
@@ -3489,56 +3502,56 @@ function pie(tries = 1) {
 
     function buildItemList(itemNumber){
 
-        var $places = $("<div>");
+        const $places = $("<div>");
         $places.html([
-            '<select id="pieItem' + itemNumber + '">',
-            '<option value="CAR_SERVICES" data-icon="car-services" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.CAR_SERVICES + '</option>',
-            '<option value="GAS_STATION" data-icon="car-services">' + I18n.translations[I18n.currentLocale()].venues.categories.GAS_STATION + '</option>',
-            '<option value="GARAGE_AUTOMOTIVE_SHOP" data-icon="car-services">' + I18n.translations[I18n.currentLocale()].venues.categories.GARAGE_AUTOMOTIVE_SHOP + '</option>',
-            '<option value="CAR_WASH" data-icon="car-services">' + I18n.translations[I18n.currentLocale()].venues.categories.CAR_WASH + '</option>',
-            '<option value="CHARGING_STATION" data-icon="car-services">' + I18n.translations[I18n.currentLocale()].venues.categories.CHARGING_STATION + '</option>',
-            '<option value="TRANSPORTATION" data-icon="transportation" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.TRANSPORTATION + '</option>',
-            '<option value="AIRPORT" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.AIRPORT + '</option>',
-            '<option value="BUS_STATION" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.BUS_STATION + '</option>',
-            '<option value="FERRY_PIER" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.FERRY_PIER + '</option>',
-            '<option value="SEAPORT_MARINA_HARBOR" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.SEAPORT_MARINA_HARBOR + '</option>',
-            '<option value="SUBWAY_STATION" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.SUBWAY_STATION + '</option>',
-            '<option value="TRAIN_STATION" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.TRAIN_STATION + '</option>',
-            '<option value="BRIDGE" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.BRIDGE + '</option>',
-            '<option value="TUNNEL" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.TUNNEL + '</option>',
-            '<option value="TAXI_STATION" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.TAXI_STATION + '</option>',
-            '<option value="JUNCTION_INTERCHANGE" data-icon="transportation">' + I18n.translations[I18n.currentLocale()].venues.categories.JUNCTION_INTERCHANGE + '</option>',
-            '<option value="PROFESSIONAL_AND_PUBLIC" data-icon="professional-and-public" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.PROFESSIONAL_AND_PUBLIC + '</option>',
-            '<option value="COLLEGE_UNIVERSITY" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.COLLEGE_UNIVERSITY + '</option>',
-            '<option value="SCHOOL" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.SCHOOL + '</option>',
-            '<option value="CONVENTIONS_EVENT_CENTER" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.CONVENTIONS_EVENT_CENTER + '</option>',
-            '<option value="GOVERNMENT" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.GOVERNMENT + '</option>',
-            '<option value="LIBRARY" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.LIBRARY + '</option>',
-            '<option value="CITY_HALL" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.CITY_HALL + '</option>',
-            '<option value="ORGANIZATION_OR_ASSOCIATION" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.ORGANIZATION_OR_ASSOCIATION + '</option>',
-            '<option value="PRISON_CORRECTIONAL_FACILITY" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.PRISON_CORRECTIONAL_FACILITY + '</option>',
-            '<option value="COURTHOUSE" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.COURTHOUSE + '</option>',
-            '<option value="CEMETERY" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.CEMETERY + '</option>',
-            '<option value="FIRE_DEPARTMENT" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.FIRE_DEPARTMENT + '</option>',
-            '<option value="POLICE_STATION" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.POLICE_STATION + '</option>',
-            '<option value="MILITARY" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.MILITARY + '</option>',
-            '<option value="HOSPITAL_URGENT_CARE" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.HOSPITAL_URGENT_CARE + '</option>',
-            '<option value="DOCTOR_CLINIC" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.DOCTOR_CLINIC + '</option>',
-            '<option value="OFFICES" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.OFFICES + '</option>',
-            '<option value="POST_OFFICE" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.POST_OFFICE + '</option>',
-            '<option value="RELIGIOUS_CENTER" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.RELIGIOUS_CENTER + '</option>',
-            '<option value="KINDERGARTEN" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.KINDERGARDEN + '</option>',
-            '<option value="FACTORY_INDUSTRIAL" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.FACTORY_INDUSTRIAL + '</option>',
-            '<option value="EMBASSY_CONSULATE" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.EMBASSY_CONSULATE + '</option>',
-            '<option value="INFORMATION_POINT" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.INFORMATION_POINT + '</option>',
-            '<option value="EMERGENCY_SHELTER" data-icon="professional-and-public">' + I18n.translations[I18n.currentLocale()].venues.categories.EMERGENCY_SHELTER + '</option>',
-            '<option value="SHOPPING_AND_SERVICES" data-icon="shopping-and-services" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.SHOPPING_AND_SERVICES + '</option>',
-            '<option value="ARTS_AND_CRAFTS" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.ARTS_AND_CRAFTS + '</option>',
-            '<option value="BANK_FINANCIAL" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.BANK_FINANCIAL + '</option>',
-            '<option value="SPORTING_GOODS" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.SPORTING_GOODS + '</option>',
-            '<option value="BOOKSTORE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.BOOKSTORE + '</option>',
-            '<option value="PHOTOGRAPHY" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.PHOTOGRAPHY + '</option>',
-            '<option value="CAR_DEALERSHIP" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.CAR_DEALERSHIP + '</option>',
+            `<select id="pieItem${itemNumber}">`,
+            `<option value="CAR_SERVICES" data-icon="car-services" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.CAR_SERVICES}</option>`,
+            `<option value="GAS_STATION" data-icon="car-services">${I18n.translations[I18n.currentLocale()].venues.categories.GAS_STATION}</option>`,
+            `<option value="GARAGE_AUTOMOTIVE_SHOP" data-icon="car-services">${I18n.translations[I18n.currentLocale()].venues.categories.GARAGE_AUTOMOTIVE_SHOP}</option>`,
+            `<option value="CAR_WASH" data-icon="car-services">${I18n.translations[I18n.currentLocale()].venues.categories.CAR_WASH}</option>`,
+            `<option value="CHARGING_STATION" data-icon="car-services">${I18n.translations[I18n.currentLocale()].venues.categories.CHARGING_STATION}</option>`,
+            `<option value="TRANSPORTATION" data-icon="transportation" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.TRANSPORTATION}</option>`,
+            `<option value="AIRPORT" data-icon="transportation">${I18n.translations[I18n.currentLocale()].venues.categories.AIRPORT}</option>`,
+            `<option value="BUS_STATION" data-icon="transportation">${I18n.translations[I18n.currentLocale()].venues.categories.BUS_STATION}</option>`,
+            `<option value="FERRY_PIER" data-icon="transportation">${I18n.translations[I18n.currentLocale()].venues.categories.FERRY_PIER}</option>`,
+            `<option value="SEAPORT_MARINA_HARBOR" data-icon="transportation">${I18n.translations[I18n.currentLocale()].venues.categories.SEAPORT_MARINA_HARBOR}</option>`,
+            `<option value="SUBWAY_STATION" data-icon="transportation">${I18n.translations[I18n.currentLocale()].venues.categories.SUBWAY_STATION}</option>`,
+            `<option value="TRAIN_STATION" data-icon="transportation">${I18n.translations[I18n.currentLocale()].venues.categories.TRAIN_STATION}</option>`,
+            `<option value="BRIDGE" data-icon="transportation">${I18n.translations[I18n.currentLocale()].venues.categories.BRIDGE}</option>`,
+            `<option value="TUNNEL" data-icon="transportation">${I18n.translations[I18n.currentLocale()].venues.categories.TUNNEL}</option>`,
+            `<option value="TAXI_STATION" data-icon="transportation">${I18n.translations[I18n.currentLocale()].venues.categories.TAXI_STATION}</option>`,
+            `<option value="JUNCTION_INTERCHANGE" data-icon="transportation">${I18n.translations[I18n.currentLocale()].venues.categories.JUNCTION_INTERCHANGE}</option>`,
+            `<option value="PROFESSIONAL_AND_PUBLIC" data-icon="professional-and-public" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.PROFESSIONAL_AND_PUBLIC}</option>`,
+            `<option value="COLLEGE_UNIVERSITY" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.COLLEGE_UNIVERSITY}</option>`,
+            `<option value="SCHOOL" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.SCHOOL}</option>`,
+            `<option value="CONVENTIONS_EVENT_CENTER" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.CONVENTIONS_EVENT_CENTER}</option>`,
+            `<option value="GOVERNMENT" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.GOVERNMENT}</option>`,
+            `<option value="LIBRARY" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.LIBRARY}</option>`,
+            `<option value="CITY_HALL" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.CITY_HALL}</option>`,
+            `<option value="ORGANIZATION_OR_ASSOCIATION" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.ORGANIZATION_OR_ASSOCIATION}</option>`,
+            `<option value="PRISON_CORRECTIONAL_FACILITY" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.PRISON_CORRECTIONAL_FACILITY}</option>`,
+            `<option value="COURTHOUSE" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.COURTHOUSE}</option>`,
+            `<option value="CEMETERY" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.CEMETERY}</option>`,
+            `<option value="FIRE_DEPARTMENT" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.FIRE_DEPARTMENT}</option>`,
+            `<option value="POLICE_STATION" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.POLICE_STATION}</option>`,
+            `<option value="MILITARY" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.MILITARY}</option>`,
+            `<option value="HOSPITAL_URGENT_CARE" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.HOSPITAL_URGENT_CARE}</option>`,
+            `<option value="DOCTOR_CLINIC" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.DOCTOR_CLINIC}</option>`,
+            `<option value="OFFICES" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.OFFICES}</option>`,
+            `<option value="POST_OFFICE" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.POST_OFFICE}</option>`,
+            `<option value="RELIGIOUS_CENTER" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.RELIGIOUS_CENTER}</option>`,
+            `<option value="KINDERGARTEN" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.KINDERGARDEN}</option>`,
+            `<option value="FACTORY_INDUSTRIAL" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.FACTORY_INDUSTRIAL}</option>`,
+            `<option value="EMBASSY_CONSULATE" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.EMBASSY_CONSULATE}</option>`,
+            `<option value="INFORMATION_POINT" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.INFORMATION_POINT}</option>`,
+            `<option value="EMERGENCY_SHELTER" data-icon="professional-and-public">${I18n.translations[I18n.currentLocale()].venues.categories.EMERGENCY_SHELTER}</option>`,
+            `<option value="SHOPPING_AND_SERVICES" data-icon="shopping-and-services" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.SHOPPING_AND_SERVICES}</option>`,
+            `<option value="ARTS_AND_CRAFTS" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.ARTS_AND_CRAFTS}</option>`,
+            `<option value="BANK_FINANCIAL" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.BANK_FINANCIAL}</option>`,
+            `<option value="SPORTING_GOODS" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.SPORTING_GOODS}</option>`,
+            `<option value="BOOKSTORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.BOOKSTORE}</option>`,
+            `<option value="PHOTOGRAPHY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.PHOTOGRAPHY}</option>`,
+            `<option value="CAR_DEALERSHIP" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.CAR_DEALERSHIP}</option>`,
             '<option value="FASHION_AND_CLOTHING" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.FASHION_AND_CLOTHING + '</option>',
             '<option value="CONVENIENCE_STORE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.CONVENIENCE_STORE + '</option>',
             '<option value="PERSONAL_CARE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.PERSONAL_CARE + '</option>',
@@ -3548,7 +3561,7 @@ function pie(tries = 1) {
             '<option value="FLOWERS" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.FLOWERS + '</option>',
             '<option value="FURNITURE_HOME_STORE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.FURNITURE_HOME_STORE + '</option>',
             '<option value="GIFTS" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.GIFTS + '</option>',
-            '<option value="GYM_FITNESS" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.GYM_FITNESS + '</option>',
+            `<option value="GYM_FITNESS" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.GYM_FITNESS}</option>`,
             '<option value="SWIMMING_POOL" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.SWIMMING_POOL + '</option>',
             '<option value="HARDWARE_STORE" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.HARDWARE_STORE + '</option>',
             '<option value="MARKET" data-icon="shopping-and-services">' + I18n.translations[I18n.currentLocale()].venues.categories.MARKET + '</option>',
@@ -3615,8 +3628,8 @@ function pie(tries = 1) {
             '<option value="CANAL" data-icon="natural-features">' + I18n.translations[I18n.currentLocale()].venues.categories.CANAL + '</option>',
             '<option value="SWAMP_MARSH" data-icon="natural-features">' + I18n.translations[I18n.currentLocale()].venues.categories.SWAMP_MARSH + '</option>',
             '<option value="DAM" data-icon="natural-features">' + I18n.translations[I18n.currentLocale()].venues.categories.DAM + '</option>',
-            '<option value="PARKING_LOT" data-icon="parking-lot" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.PARKING_LOT + '</option>',
-            '<option value="RESIDENCE_HOME" data-icon="residential" style="font-weight:bold;">' + I18n.translations[I18n.currentLocale()].venues.categories.RESIDENCE_HOME + '</option>',
+            `<option value="PARKING_LOT" data-icon="parking-lot" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.PARKING_LOT}</option>`,
+            `<option value="RESIDENCE_HOME" data-icon="residential" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.RESIDENCE_HOME}</option>`,
             '</select>'
             ].join(' '));
 
@@ -3624,7 +3637,7 @@ function pie(tries = 1) {
     }
 
     function injectCss() {
-        var css = [
+        const css = [
             // Lock button formatting
             '.btn-lh {cursor:pointer;padding:1px 6px;height:22px;border:solid 1px #c1c1c1;margin-right:3px;}',
             '.btn.btn-lh.btn-lh-selected {background-color:#6999ae;color:white}',
@@ -3671,16 +3684,16 @@ function pie(tries = 1) {
             '.photoViewerOptionsOptionText div span { vertical-align: middle; line-height:32px;}',
             '.photoViewerOptionsOptionSetting div span { vertical-align: middle; line-height:32px;}'
         ].join(' ');
-        $('<style type="text/css">' + css + '</style>').appendTo('head');
+        $(`<style type="text/css">${css}</style>`).appendTo('head');
     }
 
     function injectCSSWithID(id, css){
-        $('<style type="text/css" id=' + id + '>' + css + '</style>').appendTo('head');
+        $(`<style type="text/css" id=${id}>${css}</style>`).appendTo('head');
     }
 
     async function loadSettings() {
-        var loadedSettings = $.parseJSON(localStorage.getItem("WMEPIE_Settings"));
-        var defaultSettings = {
+        var loadedSettings = JSON.parse(localStorage.getItem("WMEPIE_Settings"));
+        const defaultSettings = {
             ShowAreaPlaceSize: false,
             ShowAreaPlaceSizeImperial: false,
             ShowAreaPlaceSizeMetric: false,
@@ -3762,7 +3775,7 @@ function pie(tries = 1) {
         if(settings.NewPlacesList.length < 12)
             settings.NewPlacesList.push('RESIDENCE_HOME');
 
-        let serverSettings = await WazeWrap.Remote.RetrieveSettings("WME_PIE");
+        const serverSettings = await WazeWrap.Remote.RetrieveSettings("WME_PIE");
         if(serverSettings && serverSettings.lastSaved > settings.lastSaved)
             $.extend(settings, serverSettings);
 
@@ -3849,9 +3862,9 @@ function pie(tries = 1) {
                 GLEShowTempClosed: settings.GLEShowTempClosed
             };
 
-            for (var name in W.accelerators.Actions) {
+            for (const name in W.accelerators.Actions) {
                 let TempKeys = "";
-                if (W.accelerators.Actions[name].group == 'wmepie') {
+                if (W.accelerators.Actions[name].group === 'wmepie') {
                     if (W.accelerators.Actions[name].shortcut) {
                         if (W.accelerators.Actions[name].shortcut.altKey === true)
                             TempKeys += 'A';
@@ -3877,9 +3890,9 @@ function pie(tries = 1) {
 
     function checkShortcutsChanged(){
         let triggerSave = false;
-        for (let name in W.accelerators.Actions) {
+        for (const name in W.accelerators.Actions) {
             let TempKeys = "";
-            if (W.accelerators.Actions[name].group == 'wmepie') {
+            if (W.accelerators.Actions[name].group === 'wmepie') {
                 if (W.accelerators.Actions[name].shortcut) {
                     if (W.accelerators.Actions[name].shortcut.altKey === true)
                         TempKeys += 'A';
@@ -3894,7 +3907,7 @@ function pie(tries = 1) {
                 } else {
                     TempKeys = "-1";
                 }
-                if(settings[name] != Tempkeys){
+                if(settings[name] !== Tempkeys){
                     triggerSave = true;
                     break;
                 }
@@ -4280,8 +4293,8 @@ function pie(tries = 1) {
 
     function setTranslations(translations) {
         I18n.translations[I18n.currentLocale()].pie = translations.en;
-        for (var i = 0; i < Object.keys(translations).length; i++) {
-            var locale = Object.keys(translations)[i];
+        for (let i = 0; i < Object.keys(translations).length; i++) {
+            const locale = Object.keys(translations)[i];
             if (I18n.currentLocale() == locale) {
                 I18n.translations[locale].pie = translations[locale];
                 return;
@@ -4290,12 +4303,12 @@ function pie(tries = 1) {
     }
 
     function listPlaces(){
-        var category = "";
+        let category = "";
         for(let i=0; i<W.Config.venues.categories.length; i++){
             category = W.Config.venues.categories[i];
-            console.log(category + " Main");
-            var subCategories = W.Config.venues.subcategories[category];
-            for(var j=0; j<subCategories.length;j++)
+            console.log(`${category} Main`);
+            const subCategories = W.Config.venues.subcategories[category];
+            for(let j=0; j<subCategories.length;j++)
                 console.log(subCategories[j]);
         }
     }
