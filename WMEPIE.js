@@ -3522,6 +3522,7 @@ function pie(tries = 1) {
 
                 const n = points[corner.i];
                 n[1] = latp2lat(n[1]);
+                const pp = n;
                 // const pp = proj4("EPSG:4326", "EPSG:900913",n);
 
                 const id = nodes[corner.i].id;
@@ -3567,7 +3568,7 @@ function pie(tries = 1) {
                 if (originalPoints[i][0] !== points[i][0] || originalPoints[i][1] !== points[i][1]) {
                     const n = points[i];
                     n[1] = latp2lat(n[1]);
-                    const pp = n.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+                    const pp = n;
 
                     const id = nodes[i].id;
                     for (j = 0; j < nodes.length; j++) {
@@ -3603,7 +3604,7 @@ function pie(tries = 1) {
                     q = subtractPoints(c, b),
                     scale, dotp;
 
-                scale = 2 * Math.min(euclideanDistance(p, { x: 0, y: 0 }), euclideanDistance(q, { x: 0, y: 0 }));
+                scale = 2 * Math.min(euclideanDistance(p, [0, 0]), euclideanDistance(q, [0, 0]));
                 p = normalizePoint(p, 1.0);
                 q = normalizePoint(q, 1.0);
 
@@ -3653,11 +3654,11 @@ function pie(tries = 1) {
         }
 
         function subtractPoints(a, b) {
-            return { x: a[0] - b[0], y: a[1] - b[1] };
+            return [a[0] - b[0], a[1] - b[1]];
         }
 
         function addPoints(a, b) {
-            return { x: a[0] + b[0], y: a[1] + b[1] };
+            return [a[0] + b[0], a[1] + b[1]];
         }
 
         function euclideanDistance(a, b) {
@@ -3666,7 +3667,7 @@ function pie(tries = 1) {
         }
 
         function normalizePoint(point, scale) {
-            const vector = { x: 0, y: 0 };
+            const vector = [0, 0];
             const length = Math.sqrt(point[0] * point[0] + point[1] * point[1]);
             if (length !== 0) {
                 vector[0] = point[0] / length;
@@ -3688,8 +3689,9 @@ function pie(tries = 1) {
 
         this.isDisabled = (nodes) => {
             const points = nodes.slice(0, -1).map((n) => {
-                const p = n.toLonLat().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-                return { x: p.lat, y: p.lon };
+                // const p = n.toLonLat().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+                const p = n;
+                return [p[0], p[1]];
             });
 
             return squareness(points);
