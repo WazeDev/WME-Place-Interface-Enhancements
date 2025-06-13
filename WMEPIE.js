@@ -264,31 +264,17 @@ function pie(tries = 1) {
                 `<h4 style="margin-bottom:0px;"><b>${I18n.t("pie.prefs.title")}</b></h4>`,
                 `<h6 style="margin-top:0px;">${curr_ver}</h6>`,
                 '<fieldset id="fieldPlaceFilter" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t(
-                    "pie.filter.PlaceFilterPanel"
-                )}</h4></legend>`,
-                `<div class="controls-container pie-controls-container" id="divPlaceFilter">${I18n.t(
-                    "pie.filter.filter"
-                )} <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>`,
+                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t("pie.filter.PlaceFilterPanel")}</h4></legend>`,
+                `<div class="controls-container pie-controls-container" id="divPlaceFilter">${I18n.t("pie.filter.filter")} <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>`,
                 "</br>",
-                `<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">${I18n.t(
-                    "pie.filter.Hide"
-                )}</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">${I18n.t(
-                    "pie.filter.Show"
-                )}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">${I18n.t("pie.filter.Hide")}</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">${I18n.t("pie.filter.Show")}</label></div>`,
                 "</fieldset>",
 
                 '<fieldset id="fieldPlacePanel" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t(
-                    "pie.prefs.PropertiesPanel"
-                )}</h4></legend>`,
+                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t("pie.prefs.PropertiesPanel")}</h4></legend>`,
                 '<div class="controls-container pie-controls-container" id="divAreaPlaceSizeControls">',
-                `<div id="divShowAreaPlaceSize" class="controls-container pie-controls-container"><input type="checkbox" id="_cbShowAreaPlaceSize" class="pieSettingsCheckbox" /><label for="_cbShowAreaPlaceSize">${I18n.t(
-                    "pie.prefs.ShowAreaPlaceSize"
-                )}</label></div>`,
-                `<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">${I18n.t(
-                    "pie.prefs.ShowImperial"
-                )}</label></div>`,
+                `<div id="divShowAreaPlaceSize" class="controls-container pie-controls-container"><input type="checkbox" id="_cbShowAreaPlaceSize" class="pieSettingsCheckbox" /><label for="_cbShowAreaPlaceSize">${I18n.t("pie.prefs.ShowAreaPlaceSize")}</label></div>`,
+                `<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">${I18n.t("pie.prefs.ShowImperial")}</label></div>`,
                 `<div id="divShowAreaPlaceSizeMetric" class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeMetric" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeMetric">${I18n.t(
                     "pie.prefs.ShowMetric"
                 )}</label></div>`,
@@ -601,6 +587,41 @@ function pie(tries = 1) {
             init2();
         });
     }
+
+    /**
+     * Finds the closest on-screen drivable segment to the given point, ignoring PLR and PR segments if the options are set
+     * Similar to WazeWrap.Util just using turf.
+     * @function WazeWrap.Geometry.findSDKClosestSegment
+     * @param {GeoJSON.Point} The given point to find the closest segment to
+     * @param {boolean} If true, Parking Lot Road segments will be ignored when finding the closest segment
+     * @param {boolean} If true, Private Road segments will be ignored when finding the closest segment
+     * @returns {Object} Returns an Object containing the Segment and Closest Point on the Segment
+    **/
+    function findSDKClosestSegment(myPoint, ignorePLR, ignoreUnnamedPR) {
+        let minDistance = Number.POSITIVE_INFINITY;
+        let closestSegment;
+
+        for (const s of sdk.DataModel.Segments.getAll()) {
+            const segmentType = s.roadType;
+            if (segmentType === 10 || segmentType === 16 || segmentType === 18 || segmentType === 19 || (ignorePLR && segmentType === 20))
+                continue;
+
+            if (ignoreUnnamedPR && segmentType === 17) {
+                const primaryStreetId = s.primaryStreetId;
+                const nm = sdk.DataModel.Streets.getById({streetId: primaryStreetId}).name;
+                if (nm === null || nm.trim().length === 0) //PR
+                    continue;
+            }
+
+            const distanceToSegment = turf.pointToLineDistance(myPoint, s.geometry);
+
+            if (distanceToSegment < minDistance) {
+                minDistance = distanceToSegment;
+                closestSegment = {segment: s, closestPoint: turf.nearestPointOnLine(s.geometry, myPoint)};
+            }
+        }
+        return closestSegment;
+    };
 
     function getActiveEditor(tries = 1) {
         return new Promise((resolve, reject) => {
@@ -980,7 +1001,8 @@ function pie(tries = 1) {
             if (factor === "") $(this)[0].value = 5;
             if (factor > 10) factor = 10;
             if (factor < 0) factor = 0;
-            settings[$(this)[0].id.substr(3)] = factor;
+            settings[$(this)[0].id.substring(3)] = factor;
+            saveSettings();
         });
 
         // var i;
@@ -1017,8 +1039,11 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(!settings.CreateResidentialPlaceShortcut || sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateResidentialPlaceShortcut}))
-                settings.CreateResidentialPlaceShortcut = "";
+            if (
+                !settings.CreateResidentialPlaceShortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateResidentialPlaceShortcut })
+            )
+                settings.CreateResidentialPlaceShortcut = null;
             const rppShortcut = {
                 shortcutId: "CreateResidentialPlaceShortcut",
                 description: "Creates a resdiential Place point",
@@ -1044,8 +1069,11 @@ function pie(tries = 1) {
         //     null
         // ).add();
         try {
-            if(!settings.CreateParkingLotShortcut || sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateParkingLotShortcut}))
-                settings.CreateParkingLotShortcut = "";
+            if (
+                !settings.CreateParkingLotShortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateParkingLotShortcut })
+            )
+                settings.CreateParkingLotShortcut = null;
             const parkingLotShortcut = {
                 shortcutId: "CreateParkingLotShortcut",
                 description: "Creates a parking lot Place",
@@ -1069,8 +1097,11 @@ function pie(tries = 1) {
         //     null
         // ).add();
         try {
-            if(!settings.ToggleAreaPlacesShortcut ||  sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.ToggleAreaPlacesShortcut}))
-                settings.ToggleAreaPlacesShortcut = "";
+            if (
+                !settings.ToggleAreaPlacesShortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.ToggleAreaPlacesShortcut })
+            )
+                settings.ToggleAreaPlacesShortcut = null;
             const hideAreaPlaces = {
                 shortcutId: "HideAreaPlacesShortcut",
                 description: "Toggle hiding area Places",
@@ -1091,8 +1122,11 @@ function pie(tries = 1) {
         //     null
         // ).add();
         try {
-            if(!settings.OrthogonalizeShortcut || sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.OrthogonalizeShortcut}))
-                settings.OrthogonalizeShortcut = "";
+            if (
+                !settings.OrthogonalizeShortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.OrthogonalizeShortcut })
+            )
+                settings.OrthogonalizeShortcut = null;
             const orthogonalizeShortcut = {
                 shortcutId: "OrthogonalizeShortcut",
                 description: "Orthogonalize Area Place",
@@ -1113,8 +1147,11 @@ function pie(tries = 1) {
         //     null
         // ).add();
         try {
-            if(!settings.SimplifyPlaceShortcut && sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.SimplifyPlaceShortcut}))
-                settings.SimplifyPlaceShortcut = "";
+            if (
+                !settings.SimplifyPlaceShortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.SimplifyPlaceShortcut })
+            )
+                settings.SimplifyPlaceShortcut = null;
             const simplifyPlaceShortcut = {
                 shortcutId: "SimplifyPlaceShortcut",
                 description: "Simplify Area Place",
@@ -1137,8 +1174,11 @@ function pie(tries = 1) {
         //     null
         // ).add();
         try {
-            if(!settings.CreateItem1Shortcut && sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem1Shortcut}))
-                settings.CreateItem1Shortcut = "";
+            if (
+                !settings.CreateItem1Shortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateItem1Shortcut })
+            )
+                settings.CreateItem1Shortcut = null;
             const itemShortcut = {
                 shortcutId: "CreateItem1Shortcut",
                 description: "Create Item 1",
@@ -1164,8 +1204,11 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(!settings.CreateItem2Shortcut && sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem2Shortcut}))
-                settings.CreateItem2Shortcut = "";
+            if (
+                !settings.CreateItem2Shortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateItem2Shortcut })
+            )
+                settings.CreateItem2Shortcut = null;
             const item2Shortcut = {
                 shortcutId: "CreateItem2Shortcut",
                 description: "Create Item 2",
@@ -1190,8 +1233,11 @@ function pie(tries = 1) {
         //     null
         // ).add();
         try {
-            if(!settings.CreateItem3Shortcut)
-                settings.CreateItem3Shortcut = "";
+            if (
+                !settings.CreateItem3Shortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateItem3Shortcut })
+            )
+                settings.CreateItem3Shortcut = null;
             const item3Shortcut = {
                 shortcutId: "CreateItem3Shortcut",
                 description: "Create Item 3",
@@ -1217,8 +1263,11 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem4Shortcut || ""}))
-                settings.CreateItem4Shortcut = "";
+            if (
+                !settings.CreateItem4Shortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateItem4Shortcut })
+            )
+                settings.CreateItem4Shortcut = null;
             const item4Shortcut = {
                 shortcutId: "CreateItem4Shortcut",
                 description: "Create Item 4",
@@ -1244,8 +1293,11 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem5Shortcut || ""}))
-                settings.CreateItem5Shortcut = "";
+            if (
+                !settings.CreateItem5Shortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateItem5Shortcut })
+            )
+                settings.CreateItem5Shortcut = null;
             const item5Shortcut = {
                 shortcutId: "CreateItem5Shortcut",
                 description: "Create Item 5",
@@ -1271,8 +1323,11 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem6Shortcut || ""}))
-                settings.CreateItem6Shortcut = "";
+            if (
+                !settings.CreateItem6Shortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateItem6Shortcut })
+            )
+                settings.CreateItem6Shortcut = null;
             const item6Shortcut = {
                 shortcutId: "CreateItem6Shortcut",
                 description: "Create Item 6",
@@ -1298,8 +1353,11 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem7Shortcut || ""}))
-                settings.CreateItem7Shortcut = "";
+            if (
+                !settings.CreateItem7Shortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateItem7Shortcut })
+            )
+                settings.CreateItem7Shortcut = null;
             const item7Shortcut = {
                 shortcutId: "CreateItem7Shortcut",
                 description: "Create Item 7",
@@ -1325,8 +1383,11 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem8Shortcut || ""}))
-                settings.CreateItem8Shortcut = "";
+            if (
+                !settings.CreateItem8Shortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateItem8Shortcut })
+            )
+                settings.CreateItem8Shortcut = null;
             const item8Shortcut = {
                 shortcutId: "CreateItem8Shortcut",
                 description: "Create Item 8",
@@ -1352,8 +1413,11 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem9Shortcut || ""}))
-                settings.CreateItem9Shortcut = "";
+            if (
+                !settings.CreateItem9Shortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateItem9Shortcut })
+            )
+                settings.CreateItem9Shortcut = null;
             const item9Shortcut = {
                 shortcutId: "CreateItem9Shortcut",
                 description: "Create Item 9",
@@ -1379,8 +1443,11 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem10Shortcut || ""}))
-                settings.CreateItem10Shortcut = "";
+            if (
+                !settings.CreateItem10Shortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateItem10Shortcut })
+            )
+                settings.CreateItem10Shortcut = null;
             const item10Shortcut = {
                 shortcutId: "CreateItem10Shortcut",
                 description: "Create Item 10",
@@ -1406,8 +1473,11 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem11Shortcut || ""}))
-                settings.CreateItem11Shortcut = "";
+            if (
+                !settings.CreateItem11Shortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateItem11Shortcut })
+            )
+                settings.CreateItem11Shortcut = null;
             const item11Shortcut = {
                 shortcutId: "CreateItem11Shortcut",
                 description: "Create Item 11",
@@ -1433,8 +1503,11 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem12Shortcut || ""}))
-                settings.CreateItem12Shortcut = "";
+            if (
+                !settings.CreateItem12Shortcut ||
+                sdk.Shortcuts.areShortcutKeysInUse({ shortcutKeys: settings.CreateItem12Shortcut })
+            )
+                settings.CreateItem12Shortcut = null;
             const item12Shortcut = {
                 shortcutId: "CreateItem12Shortcut",
                 description: "Create Item 12",
@@ -2619,129 +2692,92 @@ function pie(tries = 1) {
         DisplayPlaceNames(); //refresh the name display
     }
 
-    /**
-     * Finds the closest on-screen drivable segment to the given point, ignoring PLR and PR segments if the options are set
-     * @function WazeWrap.Geometry.findClosestSegment
-     * @param {GeoJSON.Point} The given point to find the closest segment to
-     * @param {boolean} If true, Parking Lot Road segments will be ignored when finding the closest segment
-     * @param {boolean} If true, Private Road segments will be ignored when finding the closest segment
-     * @returns {Segment} Returns SDK Segment closest to a given point
-    **/
-    function findSDKClosestSegment(myPoint, ignorePLR, ignoreUnnamedPR) {
-        let minDistance = Number.POSITIVE_INFINITY;
-        let closestSegment;
-
-        for (const s of sdk.DataModel.Segments.getAll()) {
-            const segmentType = s.roadType;
-            if (segmentType === 10 || segmentType === 16 || segmentType === 18 || segmentType === 19 || (ignorePLR && segmentType === 20))
-                continue;
-
-            if (ignoreUnnamedPR && segmentType === 17) {
-                const primaryStreetId = s.primaryStreetId;
-                const nm = sdk.DataModel.Streets.getById({streetId: primaryStreetId}).name;
-                if (nm === null || nm.trim().length === 0) //PR
-                    continue;
-            }
-
-            const distanceToSegment = turf.pointToLineDistance(myPoint, s.geometry);
-
-            if (distanceToSegment.distance < minDistance) {
-                minDistance = distanceToSegment.distance;
-                closestSegment.segment = s;
-                closestSegment.closestPoint = turf.nearestPointOnLine(closestSegment.segment.geometry, myPoint);
-            }
-        }
-        return closestSegment;
-    };
     let highlightedVenue, highlighting;
     function drawNavPointClosestSegmentLines() {
         // try {
-            highlighting = false;
-            if (highlightedVenue !== null)
-                if (highlightedVenue === W.map.venueLayer.getFeatureBy("renderIntent", "highlight"))
-                    highlighting = true;
-                else sdk.Map.removeAllFeaturesFromLayer({ layerName: layerConfig.PIEShowStopPointsLayer.layerName });
-            highlightedVenue = W.map.venueLayer.getFeatureBy("renderIntent", "highlight");
+        highlighting = false;
+        if (highlightedVenue !== null)
+            if (highlightedVenue === W.map.venueLayer.getFeatureBy("renderIntent", "highlight")) highlighting = true;
+            else sdk.Map.removeAllFeaturesFromLayer({ layerName: layerConfig.PIEShowStopPointsLayer.layerName });
+        highlightedVenue = W.map.venueLayer.getFeatureBy("renderIntent", "highlight");
 
-            if (
-                highlightedVenue !== null &&
-                WazeWrap.Model.getObjectModel(highlightedVenue) &&
-                highlighting === false &&
-                sdk.Map.getZoomLevel() >= 16
-            ) {
-                const sdkVenue = sdk.DataModel.Venues.getById({ venueId: highlightedVenue.attributes.wazeFeature.id });
-                // const isArea = !WazeWrap.Model.getObjectModel(highlightedVenue).isPoint();
-                const isArea = sdkVenue.geometry.type === "Polygon";
-                let navPoint;
+        if (
+            highlightedVenue !== null &&
+            WazeWrap.Model.getObjectModel(highlightedVenue) &&
+            highlighting === false &&
+            sdk.Map.getZoomLevel() >= 16
+        ) {
+            const sdkVenue = sdk.DataModel.Venues.getById({ venueId: highlightedVenue.attributes.wazeFeature.id });
+            // const isArea = !WazeWrap.Model.getObjectModel(highlightedVenue).isPoint();
+            const isArea = sdkVenue.geometry.type === "Polygon";
+            let navPoint;
 
-                if (sdkVenue?.navigationPoints.length > 0)
+            if (sdkVenue?.navigationPoints.length > 0) {
+                // navPoint = W.userscripts.toOLGeometry(
+                //     WazeWrap.Model.getObjectModel(highlightedVenue).getNavigationPoints()[0]._point
+                // );
+                navPoint = sdkVenue.navigationPoints[0].point;
+            } else {
+                if (isArea) {
+                    // navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().getCentroid();
+                    navPoint = turf.centroid(sdkVenue.geometry);
+                } else {
+                    // navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().clone();
+                    navPoint = sdkVenue.geometry;
+                }
+            }
+
+            const closestSeg = WazeWrap.Util.findSDKClosestSegment(navPoint, false, false);
+            //nav point to closest segment
+            // const closestSeg = WazeWrap.Geometry.findClosestSegment(navPoint, false, false);
+            // let lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([navPoint, closestSeg.closestPoint]), {}, lineStyleToClosestSeg);
+            // let pointFeature = new OpenLayers.Feature.Vector(closestSeg.closestPoint, {}, pointStyle);
+            let lineFeature = turf.lineString(
+                [navPoint.coordinates, closestSeg.closestPoint.geometry.coordinates],
                 {
-                    // navPoint = W.userscripts.toOLGeometry(
-                    //     WazeWrap.Model.getObjectModel(highlightedVenue).getNavigationPoints()[0]._point
-                    // );
-                    navPoint = sdkVenue.navigationPoints[0].point;
-                }
-                else {
-                    if (isArea) {
-                        // navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().getCentroid();
-                        navPoint = turf.centroid(sdkVenue.geometry.coordinates);
-                    }
-                    else {
-                        // navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().clone();
-                        navPoint = sdkVenue.geometry;
-                    }
-                }
+                    styleName: "lineStyleToClosestSeg",
+                },
+                { id: `line_${navPoint.toString()}_${closestSeg.toString()}` }
+            );
+            let pointFeature = turf.point(
+                closestSeg.closestPoint.geometry.coordinates,
+                {
+                    styleName: "pointStyle",
+                },
+                { id: `point_${closestSeg.toString()}` }
+            );
+            // showStopPointsLayer.addFeatures([lineFeature, pointFeature]);
+            sdk.Map.addFeaturesToLayer({
+                features: [lineFeature, pointFeature],
+                layerName: layerConfig.PIEShowStopPointsLayer.layerName,
+            });
 
-                const closestSeg = findSDKClosestSegment(navPoint, false, false)
-                //nav point to closest segment
-                // const closestSeg = WazeWrap.Geometry.findClosestSegment(navPoint, false, false);
-                // let lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([navPoint, closestSeg.closestPoint]), {}, lineStyleToClosestSeg);
-                // let pointFeature = new OpenLayers.Feature.Vector(closestSeg.closestPoint, {}, pointStyle);
-                let lineFeature = turf.lineString([navPoint.geometry.coordinates, closestSeg.closestPoint.geometry.coordinates],
-                    {
-                        styleName: "lineStyleToClosestSeg",
-                    },
-                    { id: `line_${navPoint.toString()}_${closestSeg.toString()}` }
-                );
-                let pointFeature = turf.point(
-                    closestSeg.closestPoint.geometry.coordinates,
-                    {
-                        styleName: "pointStyle",
-                    },
-                    { id: `point_${closestSeg.toString()}` }
-                );
-                // showStopPointsLayer.addFeatures([lineFeature, pointFeature]);
+            //place center to nav point
+            let startPt = sdkVenue.geometry;
+            if (isArea) startPt = turf.centroid(sdkVenue.geometry);
+            // lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([startPt, navPoint]), {}, lineStyleToNavPoint);
+            lineFeature = turf.lineString(
+                [startPt.geometry.coordinates, navPoint.coordinates],
+                { styleName: "lineStyleToNavPoint" },
+                { id: `point_${navPoint.toString()}` }
+            );
+            // pointFeature = new OpenLayers.Feature.Vector(navPoint, {}, pointStyleNavPoint);
+            pointFeature = turf.point(
+                navPoint.coordinates,
+                { styleName: "pointStyleNavPoint" },
+                { id: `point_${navPoint.toString()}` }
+            );
+            if (sdkVenue?.navigationPoints.length > 0 || isArea)
                 sdk.Map.addFeaturesToLayer({
                     features: [lineFeature, pointFeature],
                     layerName: layerConfig.PIEShowStopPointsLayer.layerName,
                 });
-
-                //place center to nav point
-                let startPt = sdkVenue.geometry;
-                if (isArea) startPt = turf.centroid(sdkVenue.geometry);
-                // lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([startPt, navPoint]), {}, lineStyleToNavPoint);
-                lineFeature = turf.lineString(
-                    [startPt.geometry.coordinates, navPoint.geometry.coordinates],
-                    { styleName: "lineStyleToNavPoint" },
-                    { id: `point_${navPoint.toString()}` }
-                );
-                // pointFeature = new OpenLayers.Feature.Vector(navPoint, {}, pointStyleNavPoint);
-                pointFeature = turf.point(
-                    navPoint.geometry.coordinates,
-                    { styleName: "pointStyleNavPoint" },
-                    { id: `point_${navPoint.toString()}` }
-                );
-                if (sdkVenue?.navigationPoints.length > 0 || isArea)
-                    sdk.Map.addFeaturesToLayer({
-                        features: [lineFeature, pointFeature],
-                        layerName: layerConfig.PIEShowStopPointsLayer.layerName,
-                    });
-                // showStopPointsLayer.addFeatures([lineFeature, pointFeature]);
-            }
-            // if(highlightedVenue === null || W.map.getZoom() < 16)
-            if (highlightedVenue === null || sdk.Map.getZoomLevel() < 16)
-                // showStopPointsLayer.removeAllFeatures();
-                sdk.Map.removeAllFeaturesFromLayer({ layerName: layerConfig.PIEShowStopPointsLayer.layerName });
+            // showStopPointsLayer.addFeatures([lineFeature, pointFeature]);
+        }
+        // if(highlightedVenue === null || W.map.getZoom() < 16)
+        if (highlightedVenue === null || sdk.Map.getZoomLevel() < 16)
+            // showStopPointsLayer.removeAllFeatures();
+            sdk.Map.removeAllFeaturesFromLayer({ layerName: layerConfig.PIEShowStopPointsLayer.layerName });
         // } catch (err) {
         //     console.log(err.message);
         // }
@@ -2790,13 +2826,28 @@ function pie(tries = 1) {
     function drawLine(start, end, lStyle, pStyle) {
         // let lineFeature, pointFeature;
 
-        const lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([start, end]), {}, lStyle);
-        const pointFeature = new OpenLayers.Feature.Vector(end, {}, pStyle);
-        closestSegmentLayer.addFeatures([lineFeature, pointFeature]);
+        // const lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([start, end]), {}, lStyle);
+        const lineFeature = turf.lineString(
+            start.geometry.coordinates,
+            end.geometry.coordinates,
+            { styleName: lStyle },
+            { id: `ls_${start.toString()}_${end.toString()}` }
+        );
+        // const pointFeature = new OpenLayers.Feature.Vector(end, {}, pStyle);
+        const pointFeature = turf.point(
+            end.geometry.coordinates,
+            { styleName: pStyle },
+            { id: `landingPoint_${end.toString()}` }
+        );
+        // closestSegmentLayer.addFeatures([lineFeature, pointFeature]);
+        sdk.Map.addFeaturesToLayer({
+            features: [lineFeature, pointFeature],
+            layerName: layerConfig.closestSegmentLayer.layerName,
+        });
     }
 
-    function findNearestSegment(navPoint, ignorePLR = false, ignoreUnnamedPR = false) {
-        const closestSegment = findSDKClosestSegment(navPoint, ignorePLR, ignoreUnnamedPR);
+    function drawNearestLanding(navPoint, ignorePLR = false, ignoreUnnamedPR = false) {
+        const closestSegment = WazeWrap.Util.findSDKClosestSegment(navPoint, ignorePLR, ignoreUnnamedPR);
 
         clearClosesetSegmentLayerFeatures();
         drawLine(navPoint, closestSegment.closestPoint, lineStyleToClosestSeg, pointStyle);
@@ -2804,50 +2855,48 @@ function pie(tries = 1) {
 
     let placeIsPoint = false;
     function checkSelection() {
-        let ClosestSegmentNavPoint;
+        if (!checkConditions()) {
+            removeDragCallbacks();
+            return;
+        }
 
-        if (!checkConditions()) removeDragCallbacks();
-        else {
-            getActiveEditor().then((val) => {
-                if (WazeWrap.hasSelectedFeatures()) {
-                    const selectedItem = WazeWrap.getSelectedFeatures()[0];
+        getActiveEditor().then((val) => {
+            if (WazeWrap.hasSelectedFeatures()) {
+                const selectedItem = WazeWrap.getSelectedFeatures()[0];
 
-                    if ("venue" !== selectedItem.WW.getType()) {
-                        removeDragCallbacks();
-                        clearClosesetSegmentLayerFeatures();
-                    } else {
-                        placeIsPoint = selectedItem.WW.getObjectModel().isPoint();
-                        if (placeIsPoint) {
-                            //Event when the Place is moved
-                            /*
-                            val.dragControl.onDrag = function (e, t) {
-                                val.dragVertex.apply(val, [e, t]);
-                                let entryExitPoint = selectedItem.model.geometry.clone();
-                                if(selectedItem.model.getNavigationPoints().length > 0)
-                                    entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
-                                findNearestSegment(entryExitPoint);
-                            };*/
-                            let entryExitPoint = selectedItem.WW.getObjectModel().getOLGeometry().clone();
-                            if (selectedItem.WW.getObjectModel().getNavigationPoints().length > 0)
-                                entryExitPoint = selectedItem.WW.getObjectModel().attributes.entryExitPoints[0]._point;
-                            findNearestSegment(entryExitPoint);
-                        } else {
-                            if (selectedItem.WW.getObjectModel().getNavigationPoints().length === 0)
-                                findNearestSegment(selectedItem.WW.getObjectModel().getOLGeometry().getCentroid());
-                            else {
-                                for (let i = 0; i < selectedItem.WW.getObjectModel().getNavigationPoints().length; i++)
-                                    findNearestSegment(
-                                        selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point
-                                    );
-                            }
-                        }
-                    }
-                } else {
+                if ("venue" !== selectedItem.WW.getType()) {
                     removeDragCallbacks();
                     clearClosesetSegmentLayerFeatures();
+                } else {
+                    placeIsPoint = selectedItem.WW.getObjectModel().isPoint();
+                    if (placeIsPoint) {
+                        //Event when the Place is moved
+                        /*
+                        val.dragControl.onDrag = function (e, t) {
+                            val.dragVertex.apply(val, [e, t]);
+                            let entryExitPoint = selectedItem.model.geometry.clone();
+                            if(selectedItem.model.getNavigationPoints().length > 0)
+                                entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
+                            findNearestSegment(entryExitPoint);
+                        };*/
+                        let entryExitPoint = selectedItem.WW.getObjectModel().getOLGeometry().clone();
+                        if (selectedItem.WW.getObjectModel().getNavigationPoints().length > 0)
+                            entryExitPoint = selectedItem.WW.getObjectModel().attributes.entryExitPoints[0]._point;
+                        drawNearestLanding(entryExitPoint);
+                    } else {
+                        if (selectedItem.WW.getObjectModel().getNavigationPoints().length === 0)
+                            drawNearestLanding(selectedItem.WW.getObjectModel().getOLGeometry().getCentroid());
+                        else {
+                            for (let i = 0; i < selectedItem.WW.getObjectModel().getNavigationPoints().length; i++)
+                                drawNearestLanding(selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point);
+                        }
+                    }
                 }
-            });
-        }
+            } else {
+                removeDragCallbacks();
+                clearClosesetSegmentLayerFeatures();
+            }
+        });
     }
 
     function removeDragCallbacks() {
@@ -2860,7 +2909,7 @@ function pie(tries = 1) {
                     ClosestSegmentNavPoint.events.unregister(
                         "drag",
                         W.geometryEditing.activeEditor,
-                        findNearestSegment
+                        drawNearestLanding
                     );
                 } catch (err) {}
             }
@@ -3012,7 +3061,7 @@ function pie(tries = 1) {
                             (!isPoint && showArea && !venue.isParkingLot()) ||
                             (!isPoint && showPLA && venue.isParkingLot())
                         ) {
-                            let placeFilter = $("#piePlaceFilter").val();
+                            const placeFilter = $("#piePlaceFilter").val();
                             if (placeFilter.length > 0) {
                                 const nameMatch = RegExp($("#piePlaceFilter").val(), "ig").exec(venue.attributes.name);
                                 if (nameMatch && $("#_rbHidePlaces").prop("checked")) continue;
@@ -3181,7 +3230,9 @@ function pie(tries = 1) {
             // );
             // W.map.addControl(drawPoly);
             // drawPoly.activate();
-            sdk.Map.drawPolygon().then((coordinates) => {doneHandler(coordinates);});
+            sdk.Map.drawPolygon().then((coordinates) => {
+                doneHandler(coordinates);
+            });
         }
         document.addEventListener("keyup", keyUpHandler, false);
     }
@@ -3196,7 +3247,9 @@ function pie(tries = 1) {
         // );
         // W.map.addControl(drawPoly);
         // drawPoly.activate();
-        drawPoly = sdk.Map.drawPoly().then(() => { doneHandlerBusinessPLAPlace() });
+        drawPoly = sdk.Map.drawPoly().then(() => {
+            doneHandlerBusinessPLAPlace();
+        });
         document.addEventListener("keyup", keyUpHandler, false);
     }
 
@@ -3325,7 +3378,7 @@ function pie(tries = 1) {
 
         // let newOLgeometry;
         // if (!isPoint) newOLgeometry = new OpenLayers.Geometry.Point(pos.lon, pos.lat);
-        // else 
+        // else
         // {
         //     const points = [];
         //     let i;
@@ -3339,7 +3392,7 @@ function pie(tries = 1) {
         // }
 
         // const NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(newOLgeometry) });
-        const newPlace = sdk.DataModel.Venues.addVenue({category: category, geometry: pos});
+        const newPlace = sdk.DataModel.Venues.addVenue({ category: category, geometry: pos });
 
         // NewPlace.attributes.categories.push(category);
         if (category === resCategory) {
@@ -3350,14 +3403,14 @@ function pie(tries = 1) {
             );
             NewPlace.attributes.entryExitPoints.push(eep);
         }
-        const newVenue = sdk.DataModel.Venues.getById({venueId: newPlace.toString()});
+        const newVenue = sdk.DataModel.Venues.getById({ venueId: newPlace.toString() });
         // newPlace.attributes.lockRank = Number(settings.DefaultLockLevel);
 
         const placeCentroid = turf.centroid(pos);
-        const closestSeg = findSDKClosestSegment(placeCentroid);
+        const closestSeg = WazeWrap.Util.findSDKClosestSegment(placeCentroid);
 
         // W.model.actionManager.add(new AddPlace(NewPlace));
-        const sdkSeg = sdk.DataModel.Segments.getById({segmentId: closestSeg.attributes.id});
+        const sdkSeg = sdk.DataModel.Segments.getById({ segmentId: closestSeg.attributes.id });
         if (sdkSeg) {
             //if we were able to find a segment, try to pull the city and/or street name if the options are enabled
             // let newAttributes,
@@ -3376,23 +3429,25 @@ function pie(tries = 1) {
 
             if (settings.UseCityFromClosestSeg) {
                 // let cityName = address.attributes.city.attributes.name;
-                sdk.DataModel.Venues.updateAddress({streetId: sdkSeg.primaryStreedId, houseNumber: null, venueId: newVenue.id});
+                sdk.DataModel.Venues.updateAddress({
+                    streetId: sdkSeg.primaryStreedId,
+                    houseNumber: null,
+                    venueId: newVenue.id,
+                });
 
                 if (settings.UseAltCity && cityName === "") {
                     // if (address.attributes.altStreets.length > 0) {
-                    if(sdkSeg.alternateStreetIds.length > 0) {
+                    if (sdkSeg.alternateStreetIds.length > 0) {
                         //segment has alt names
                         // for (let j = 0; j < closestSeg.attributes.streetIDs.length; j++) {
                         //     const altCity = W.model.cities.getObjectById(
                         //         W.model.streets.getObjectById(closestSeg.attributes.streetIDs[j]).attributes.cityID
                         //     ).attributes;
-
                         //     if (altCity.name !== null && altCity.englishName !== "") {
                         //         cityName = altCity.name;
                         //         break;
                         //     }
                         // }
-
                     }
                 }
                 if (cityName !== "") newAttributes.emptyCity = null;
@@ -3444,12 +3499,12 @@ function pie(tries = 1) {
         // WazeWrap.Events.register("afteraction", null, updatePlaceSizeDisplay);
         // WazeWrap.Events.register("afterundoaction", null, updatePlaceSizeDisplay);
         // WazeWrap.Events.register("afterclearactions", null, updatePlaceSizeDisplay);
-        sdk.Events.on({eventName: "wme-selection-changed", eventHandler: updatePlaceSizeDisplay});
-        sdk.Events.on({eventName: "wme-after-undo", eventHandler: updatePlaceSizeDisplay});
-        sdk.Events.on({eventName: "wme-after-edit", eventHandler: updatePlaceSizeDisplay});
-        sdk.Events.on({eventName: "wme-after-redo-clear", eventHandler: updatePlaceSizeDisplay});
+        sdk.Events.on({ eventName: "wme-selection-changed", eventHandler: updatePlaceSizeDisplay });
+        sdk.Events.on({ eventName: "wme-after-undo", eventHandler: updatePlaceSizeDisplay });
+        sdk.Events.on({ eventName: "wme-after-edit", eventHandler: updatePlaceSizeDisplay });
+        sdk.Events.on({ eventName: "wme-after-redo-clear", eventHandler: updatePlaceSizeDisplay });
         // W.model.actionManager.events.register("noActions", null, noActions);
-        sdk.Events.on({eventName: "wme-no-edits", eventHandler: noActions});
+        sdk.Events.on({ eventName: "wme-no-edits", eventHandler: noActions });
         updatePlaceSizeDisplay();
     }
 
@@ -3458,12 +3513,12 @@ function pie(tries = 1) {
         // WazeWrap.Events.unregister("afteraction", null, updatePlaceSizeDisplay);
         // WazeWrap.Events.unregister("afterundoaction", null, updatePlaceSizeDisplay);
         // WazeWrap.Events.unregisterWazeWrap.Events.unregister("afterclearactions", null, updatePlaceSizeDisplay);
-        sdk.Events.off({eventName: "wme-selection-changed", eventHandler: updatePlaceSizeDisplay});
-        sdk.Events.off({eventName: "wme-after-undo", eventHandler: updatePlaceSizeDisplay});
-        sdk.Events.off({eventName: "wme-after-edit", eventHandler: updatePlaceSizeDisplay});
-        sdk.Events.off({eventName: "wme-after-redo-clear", eventHandler: updatePlaceSizeDisplay});
+        sdk.Events.off({ eventName: "wme-selection-changed", eventHandler: updatePlaceSizeDisplay });
+        sdk.Events.off({ eventName: "wme-after-undo", eventHandler: updatePlaceSizeDisplay });
+        sdk.Events.off({ eventName: "wme-after-edit", eventHandler: updatePlaceSizeDisplay });
+        sdk.Events.off({ eventName: "wme-after-redo-clear", eventHandler: updatePlaceSizeDisplay });
         // W.model.actionManager.events.unregister("noActions", null, noActions);
-        sdk.Events.off({eventName: "wme-no-edits", eventHandler: noActions});
+        sdk.Events.off({ eventName: "wme-no-edits", eventHandler: noActions });
     }
 
     function openPUR() {
@@ -3516,14 +3571,13 @@ function pie(tries = 1) {
     function OrthogonalizePlace() {
         const selected = sdk.Editing.getSelection();
         if (selected?.objectType === "venue") {
-            const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
-            if(selectedVenue?.geometry?.type === "Polygon") 
-            {
+            const selectedVenue = sdk.DataModel.Venues.getById({ venueId: selected.ids[0] });
+            if (selectedVenue?.geometry?.type === "Polygon") {
                 // const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
                 // const newOLGeom = WazeWrap.Util.OrthogonalizeGeometry(selected.getOLGeometry().clone().components[0].components);
                 // const olGeometry = selectedVenue.geometry.coordinates[0].map((p) => {return proj4("EPSG:4326", "EPSG:900913", p)});
                 // olGeometry.map((g) => { return OpenLayers.Geometry.Point(g[0], g[1])});
-                const newGeom = GeoJSONOrthogonalizeGeometry(selectedVenue.geometry.coordinates);
+                const newGeom = WazeWrap.Util.GeoJSONOrthogonalizeGeometry(selectedVenue.geometry.coordinates);
 
                 // const UFG = require("Waze/Action/UpdateFeatureGeometry");
                 const originalGeometry = selectedVenue.geometry;
@@ -3539,7 +3593,7 @@ function pie(tries = 1) {
                     //     W.userscripts.toGeoJSONGeometry(selected.getOLGeometry())
                     // );
                     // W.model.actionManager.add(action);
-                    sdk.Venues.updateVenue({venueId: selected.ids[0], geometry: turf.polygon(newGeom)});
+                    sdk.Venues.updateVenue({ venueId: selected.ids[0], geometry: turf.polygon(newGeom) });
                 }
             }
         }
@@ -3567,8 +3621,7 @@ function pie(tries = 1) {
 
     function SimplifyPlace() {
         const selected = sdk.Editing.getSelection();
-        if(selected) 
-        {
+        if (selected) {
             // const oldSelected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
             // const originalGeometry = selected.getOLGeometry().clone();
             // let ls = new OpenLayers.Geometry.LineString(originalGeometry.components[0].components);
@@ -3586,24 +3639,24 @@ function pie(tries = 1) {
             //         )
             //     );
             // }
-            if(selected.objectType === "venue") {
-                const venue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
-                if(venue.geometry.type === "Point") {
+            if (selected.objectType === "venue") {
+                const venue = sdk.DataModel.Venues.getById({ venueId: selected.ids[0] });
+                if (venue.geometry.type === "Point") {
                     console.log("Can't Simplify a Point Place");
                     return;
                 }
-                const newGeometry = turf.simplify(venue.geometry, {tolerance: Number.parseFloat(settings.SimplifyFactor)});
-                sdk.DataModel.Venues.updateVenue({venueId: selected.ids[0], geometry: newGeometry});
+                const toArcDegrees = proj4("EPSG:900913", "EPSG:4326", [Number.parseFloat(settings.SimplifyFactor), 0]);
+                const newGeometry = turf.simplify(venue.geometry, { tolerance: toArcDegrees[0] });
+                sdk.DataModel.Venues.updateVenue({ venueId: selected.ids[0], geometry: newGeometry });
             }
-            if(selected.objectType === "mapComment") {
-                const mc = sdk.DataModel.MapComments.getById({mapCommentId: selected.ids[0]});
-                if(mc.geometry.type === "Point") {
+            if (selected.objectType === "mapComment") {
+                const mc = sdk.DataModel.MapComments.getById({ mapCommentId: selected.ids[0] });
+                if (mc.geometry.type === "Point") {
                     console.log("Can't Simplify a Point Map Comment");
                     return;
                 }
                 // const newGeometry = turf.simplify(mc.geometry, {tolerance: settings.SimplifyFactor});
-                console.log("Waiting for Implementation of MC Geometry Updates.")
-
+                console.log("Waiting for Implementation of MC Geometry Updates.");
             }
         }
     }
@@ -3753,27 +3806,26 @@ function pie(tries = 1) {
         $("#pieViewEditGeom").remove(); //remove the Place geometry window when the option is disabled or a Place is de-selected
 
         // if ( (WazeWrap.hasPlaceSelected() || WazeWrap.hasMapCommentSelected()) &&
-        //       WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().toString().match(/^POLYGON/) ) 
+        //       WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().toString().match(/^POLYGON/) )
         const selected = sdk.Editing.getSelection();
         let geometry;
-        if(selected?.objectType === "mapComment") {
-            const mc = sdk.DataModel.MapComments.getById({mapCommentId: selected.ids[0]});
-            if(mc) {
+        if (selected?.objectType === "mapComment") {
+            const mc = sdk.DataModel.MapComments.getById({ mapCommentId: selected.ids[0] });
+            if (mc) {
                 geometry = mc.geometry;
             }
         }
-        if(selected?.objectType === "venue") {
-            const venue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
-            if(venue) {
+        if (selected?.objectType === "venue") {
+            const venue = sdk.DataModel.Venues.getById({ venueId: selected.ids[0] });
+            if (venue) {
                 geometry = venue.geometry;
             }
         }
-        if(geometry)
-        {
+        if (geometry) {
             await new Promise((r) => setTimeout(r, 150));
             const $GeomMods = $(
                 `<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls">${
-                    (selected.objectType === "mapComment")
+                    selected.objectType === "mapComment"
                         ? '<i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="piesimplifyplace" title="Simplify" class="fa fa-magic fa-2x" aria-hidden="true" style="cursor:pointer;"></i>'
                         : ""
                 } <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${
@@ -4160,15 +4212,35 @@ function pie(tries = 1) {
                     $PLSpotEstimator.html(
                         [
                             '<div style="position: absolute; text-align:center; z-index:1010; background-color:white; top:30px; left:300px; border-radius:20px; border: 2px solid; width: 300px; padding-left:10px; padding-right:10px; padding-bottom:5px;" id="PIEParkingSpotEstimator">',
-                            `<span style="font-weight:bold;">${I18n.t("pie.prefs.PSEParkingSpaceEstimator")}</span><i class="fa fa-window-close-o" aria-hidden="true" style="float:right; cursor:pointer;" id="PIECloseParkingSpotEstimator"></i>`,
+                            `<span style="font-weight:bold;">${I18n.t(
+                                "pie.prefs.PSEParkingSpaceEstimator"
+                            )}</span><i class="fa fa-window-close-o" aria-hidden="true" style="float:right; cursor:pointer;" id="PIECloseParkingSpotEstimator"></i>`,
                             "<hr>",
                             '<div style=" display:flex; justify-content:space-between;">',
-                            `<div style="display: inline;">${I18n.t("pie.prefs.PSELayoutType")}<br/><br/>${I18n.t("pie.prefs.PSESpotWidth")}</div>`,
-                            `<div style="display: inline;">${I18n.t("pie.prefs.PSE90degree")}<br/><br/><input type="text" size=2 id="PIE90DegreeSpotWidth"><button id="PIE90DegreeSpotWidthCalibration" title="Measure the width of a single 90 degree parking spot">${I18n.t("pie.prefs.PSECal")}</button><br/><button id="PIE90DegreeSpotWidthDraw" class="fa fa-pencil" title="${I18n.t("pie.prefs.PSEDraw90DegreeTitle")}"></button></div>`,
-                            `<div style="display: inline;">${I18n.t("pie.prefs.PSEAngled")}<br/><br/><input type="text" size=2 id="PIEAngledSpotWidth"><button id="PIEAngledSpotWidthCalibration" title="Measure the width of a single angled degree parking spot">${I18n.t("pie.prefs.PSECal")}</button><br/><button id="PIEAngledSpotWidthDraw" class="fa fa-pencil" title="${I18n.t("pie.prefs.PSEDrawAngledTitle")}"></button></div>`,
+                            `<div style="display: inline;">${I18n.t("pie.prefs.PSELayoutType")}<br/><br/>${I18n.t(
+                                "pie.prefs.PSESpotWidth"
+                            )}</div>`,
+                            `<div style="display: inline;">${I18n.t(
+                                "pie.prefs.PSE90degree"
+                            )}<br/><br/><input type="text" size=2 id="PIE90DegreeSpotWidth"><button id="PIE90DegreeSpotWidthCalibration" title="Measure the width of a single 90 degree parking spot">${I18n.t(
+                                "pie.prefs.PSECal"
+                            )}</button><br/><button id="PIE90DegreeSpotWidthDraw" class="fa fa-pencil" title="${I18n.t(
+                                "pie.prefs.PSEDraw90DegreeTitle"
+                            )}"></button></div>`,
+                            `<div style="display: inline;">${I18n.t(
+                                "pie.prefs.PSEAngled"
+                            )}<br/><br/><input type="text" size=2 id="PIEAngledSpotWidth"><button id="PIEAngledSpotWidthCalibration" title="Measure the width of a single angled degree parking spot">${I18n.t(
+                                "pie.prefs.PSECal"
+                            )}</button><br/><button id="PIEAngledSpotWidthDraw" class="fa fa-pencil" title="${I18n.t(
+                                "pie.prefs.PSEDrawAngledTitle"
+                            )}"></button></div>`,
                             "</div>",
                             "<hr>",
-                            `<div>${I18n.t("pie.prefs.PSEEstimatedNumOfSpots")}<span id="PIEPLSpotEstimatorTotal" style="color:blue; padding:0px 3px; font-weight:900; font-size:1.2em;" >0</span>&emsp;<div style="display:inline-block;"><button id="PIESetParkingSpacesToPlace" disabled>${I18n.t("pie.prefs.PSESet")}</button></div></div>`,
+                            `<div>${I18n.t(
+                                "pie.prefs.PSEEstimatedNumOfSpots"
+                            )}<span id="PIEPLSpotEstimatorTotal" style="color:blue; padding:0px 3px; font-weight:900; font-size:1.2em;" >0</span>&emsp;<div style="display:inline-block;"><button id="PIESetParkingSpacesToPlace" disabled>${I18n.t(
+                                "pie.prefs.PSESet"
+                            )}</button></div></div>`,
                             "</div>",
                         ].join(" ")
                     );
@@ -4256,7 +4328,7 @@ function pie(tries = 1) {
                             startPLSpotEstimatorDrawMode();
                         }
                     });
-                    
+
                     $("#PIEAngledSpotWidthDraw").on("click", () => {
                         if (PLSpotEstimatordrawControl?.active) {
                             PLSpotEstimatordrawControl.deactivate();
@@ -4291,7 +4363,6 @@ function pie(tries = 1) {
                         startPLSpotEstimatorCalibrationMode();
                     });
 
-
                     $("#PIEAngledSpotWidthCalibration").on("click", () => {
                         if (PLSpotEstimatordrawControl) {
                             PLSpotEstimatordrawControl.deactivate();
@@ -4324,23 +4395,15 @@ function pie(tries = 1) {
             extProviderTries <= 20
         )
             setTimeout(() => {
-                ReadExtProviderText(index, extProviderTries+1);
+                ReadExtProviderText(index, extProviderTries + 1);
             }, 50);
         else {
-            if (
-                $(`#${providersList[index].id}`)
-                    .parent()
-                    .parent()
-                    .data("original-title") == null
-            ) {
+            if ($(`#${providersList[index].id}`).parent().parent().data("original-title") == null) {
                 $(`#${providersList[index].id}`)
                     .parent()
                     .parent()
                     .attr("title", $(".select2-container.uuid").find("span.select2-chosen")[index].innerText);
-                $(`#${providersList[index].id}`)
-                    .parent()
-                    .parent()
-                    .tooltip();
+                $(`#${providersList[index].id}`).parent().parent().tooltip();
             } else
                 $(`#${providersList[index].id}`)
                     .parent()
@@ -4545,7 +4608,9 @@ function pie(tries = 1) {
     function AddMakePrimaryButtons() {
         if (WazeWrap.hasPlaceSelected()) {
             if ($(".aliases-view > div > ul > div > li").length > 0) {
-                const $button = $("<div>", { class: "makePrimary" }).text("Make primary").on("click", function () {
+                const $button = $("<div>", { class: "makePrimary" })
+                    .text("Make primary")
+                    .on("click", function () {
                         const obj = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
                         const toPrimary = $(this).prev().prev().val();
                         const aliases = obj.attributes.aliases.filter((i) => i !== toPrimary);
@@ -4568,7 +4633,7 @@ function pie(tries = 1) {
             if (WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue") {
                 const categoryOptions = $("[id^=pieItem]");
 
-                let $button =$("<div>", {
+                let $button = $("<div>", {
                     id: "btnPlaceCatClear",
                     title: "Clear current categories",
                     style: "display:inline-block; cursor:pointer",
@@ -4615,7 +4680,9 @@ function pie(tries = 1) {
                 new UpdateObject(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), { categories: blankCategories })
             );
         } else {
-            const newCategories = [].concat(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories);
+            const newCategories = [].concat(
+                WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories
+            );
             //console.log($('#'+buttonid)[0].getAttribute("data-category"));
             newCategories.push($(`#${buttonid}`)[0].getAttribute("data-category"));
             W.model.actionManager.add(
@@ -4628,7 +4695,7 @@ function pie(tries = 1) {
         // var centroid = venue.getOLGeometry().getCentroid();
         const centroid = turf.centroid(venue.geometry);
         // W.map.setCenter([centroid.x, centroid.y], zoom);
-        sdk.Map.centerMapOnGeometry({geometry: centroid.geometry});
+        sdk.Map.centerMapOnGeometry({ geometry: centroid.geometry });
     }
 
     function isChecked(checkboxId) {
@@ -4725,237 +4792,270 @@ function pie(tries = 1) {
 
     function buildItemList(itemNumber) {
         const $places = $("<div>");
-        $places.html(
-            [
-                `<select id="pieItem${itemNumber}">`,
-                `<option value="CAR_SERVICES" data-icon="car-services" style="font-weight:bold;">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.CAR_SERVICES
-                }</option>`,
-                `<option value="GAS_STATION" data-icon="car-services">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.GAS_STATION
-                }</option>`,
-                `<option value="GARAGE_AUTOMOTIVE_SHOP" data-icon="car-services">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.GARAGE_AUTOMOTIVE_SHOP
-                }</option>`,
-                `<option value="CAR_WASH" data-icon="car-services">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.CAR_WASH
-                }</option>`,
-                `<option value="CHARGING_STATION" data-icon="car-services">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.CHARGING_STATION
-                }</option>`,
-                `<option value="TRANSPORTATION" data-icon="transportation" style="font-weight:bold;">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.TRANSPORTATION
-                }</option>`,
-                `<option value="AIRPORT" data-icon="transportation">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.AIRPORT
-                }</option>`,
-                `<option value="BUS_STATION" data-icon="transportation">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.BUS_STATION
-                }</option>`,
-                `<option value="FERRY_PIER" data-icon="transportation">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.FERRY_PIER
-                }</option>`,
-                `<option value="SEAPORT_MARINA_HARBOR" data-icon="transportation">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.SEAPORT_MARINA_HARBOR
-                }</option>`,
-                `<option value="SUBWAY_STATION" data-icon="transportation">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.SUBWAY_STATION
-                }</option>`,
-                `<option value="TRAIN_STATION" data-icon="transportation">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.TRAIN_STATION
-                }</option>`,
-                `<option value="BRIDGE" data-icon="transportation">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.BRIDGE
-                }</option>`,
-                `<option value="TUNNEL" data-icon="transportation">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.TUNNEL
-                }</option>`,
-                `<option value="TAXI_STATION" data-icon="transportation">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.TAXI_STATION
-                }</option>`,
-                `<option value="JUNCTION_INTERCHANGE" data-icon="transportation">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.JUNCTION_INTERCHANGE
-                }</option>`,
-                `<option value="PROFESSIONAL_AND_PUBLIC" data-icon="professional-and-public" style="font-weight:bold;">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.PROFESSIONAL_AND_PUBLIC
-                }</option>`,
-                `<option value="COLLEGE_UNIVERSITY" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.COLLEGE_UNIVERSITY
-                }</option>`,
-                `<option value="SCHOOL" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.SCHOOL
-                }</option>`,
-                `<option value="CONVENTIONS_EVENT_CENTER" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.CONVENTIONS_EVENT_CENTER
-                }</option>`,
-                `<option value="GOVERNMENT" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.GOVERNMENT
-                }</option>`,
-                `<option value="LIBRARY" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.LIBRARY
-                }</option>`,
-                `<option value="CITY_HALL" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.CITY_HALL
-                }</option>`,
-                `<option value="ORGANIZATION_OR_ASSOCIATION" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.ORGANIZATION_OR_ASSOCIATION
-                }</option>`,
-                `<option value="PRISON_CORRECTIONAL_FACILITY" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.PRISON_CORRECTIONAL_FACILITY
-                }</option>`,
-                `<option value="COURTHOUSE" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.COURTHOUSE
-                }</option>`,
-                `<option value="CEMETERY" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.CEMETERY
-                }</option>`,
-                `<option value="FIRE_DEPARTMENT" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.FIRE_DEPARTMENT
-                }</option>`,
-                `<option value="POLICE_STATION" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.POLICE_STATION
-                }</option>`,
-                `<option value="MILITARY" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.MILITARY
-                }</option>`,
-                `<option value="HOSPITAL_URGENT_CARE" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.HOSPITAL_URGENT_CARE
-                }</option>`,
-                `<option value="DOCTOR_CLINIC" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.DOCTOR_CLINIC
-                }</option>`,
-                `<option value="OFFICES" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.OFFICES
-                }</option>`,
-                `<option value="POST_OFFICE" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.POST_OFFICE
-                }</option>`,
-                `<option value="RELIGIOUS_CENTER" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.RELIGIOUS_CENTER
-                }</option>`,
-                `<option value="KINDERGARTEN" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.KINDERGARDEN
-                }</option>`,
-                `<option value="FACTORY_INDUSTRIAL" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.FACTORY_INDUSTRIAL
-                }</option>`,
-                `<option value="EMBASSY_CONSULATE" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.EMBASSY_CONSULATE
-                }</option>`,
-                `<option value="INFORMATION_POINT" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.INFORMATION_POINT
-                }</option>`,
-                `<option value="EMERGENCY_SHELTER" data-icon="professional-and-public">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.EMERGENCY_SHELTER
-                }</option>`,
-                `<option value="SHOPPING_AND_SERVICES" data-icon="shopping-and-services" style="font-weight:bold;">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.SHOPPING_AND_SERVICES
-                }</option>`,
-                `<option value="ARTS_AND_CRAFTS" data-icon="shopping-and-services">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.ARTS_AND_CRAFTS
-                }</option>`,
-                `<option value="BANK_FINANCIAL" data-icon="shopping-and-services">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.BANK_FINANCIAL
-                }</option>`,
-                `<option value="SPORTING_GOODS" data-icon="shopping-and-services">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.SPORTING_GOODS
-                }</option>`,
-                `<option value="BOOKSTORE" data-icon="shopping-and-services">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.BOOKSTORE
-                }</option>`,
-                `<option value="PHOTOGRAPHY" data-icon="shopping-and-services">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.PHOTOGRAPHY
-                }</option>`,
-                `<option value="CAR_DEALERSHIP" data-icon="shopping-and-services">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.CAR_DEALERSHIP
-                }</option>`,
-                `<option value="FASHION_AND_CLOTHING" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.FASHION_AND_CLOTHING}</option>`,
-                `<option value="CONVENIENCE_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.CONVENIENCE_STORE}</option>`,
-                `<option value="PERSONAL_CARE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.PERSONAL_CARE}</option>`,
-                `<option value="DEPARTMENT_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.DEPARTMENT_STORE}</option>`,
-                `<option value="PHARMACY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.PHARMACY}</option>`,
-                `<option value="ELECTRONICS" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.ELECTRONICS}</option>`,
-                `<option value="FLOWERS" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.FLOWERS}</option>`,
-                `<option value="FURNITURE_HOME_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.FURNITURE_HOME_STORE}</option>`,
-                `<option value="GIFTS" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.GIFTS}</option>`,
-                `<option value="GYM_FITNESS" data-icon="shopping-and-services">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.GYM_FITNESS
-                }</option>`,
-                `<option value="SWIMMING_POOL" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.SWIMMING_POOL}</option>`,
-                `<option value="HARDWARE_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.HARDWARE_STORE}</option>`,
-                `<option value="MARKET" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.MARKET}</option>`,
-                `<option value="SUPERMARKET_GROCERY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.SUPERMARKET_GROCERY}</option>`,
-                `<option value="JEWELRY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.JEWELRY}</option>`,
-                `<option value="LAUNDRY_DRY_CLEAN" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.LAUNDRY_DRY_CLEAN}</option>`,
-                `<option value="SHOPPING_CENTER" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.SHOPPING_CENTER}</option>`,
-                `<option value="MUSIC_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.MUSIC_STORE}</option>`,
-                `<option value="PET_STORE_VETERINARIAN_SERVICES" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.PET_STORE_VETERINARIAN_SERVICES}</option>`,
-                `<option value="TOY_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.TOY_STORE}</option>`,
-                `<option value="TRAVEL_AGENCY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.TRAVEL_AGENCY}</option>`,
-                `<option value="ATM" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.ATM}</option>`,
-                `<option value="CURRENCY_EXCHANGE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.CURRENCY_EXCHANGE}</option>`,
-                `<option value="CAR_RENTAL" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.CAR_RENTAL}</option>`,
-                `<option value="FOOD_AND_DRINK" data-icon="food-and-drink" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.FOOD_AND_DRINK}</option>`,
-                `<option value="RESTAURANT" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.RESTAURANT}</option>`,
-                `<option value="BAKERY" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.BAKERY}</option>`,
-                `<option value="DESSERT" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.DESSERT}</option>`,
-                `<option value="CAFE" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.CAFE}</option>`,
-                `<option value="FAST_FOOD" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.FAST_FOOD}</option>`,
-                `<option value="FOOD_COURT" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.FOOD_COURT}</option>`,
-                `<option value="BAR" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.BAR}</option>`,
-                `<option value="ICE_CREAM" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.ICE_CREAM}</option>`,
-                `<option value="CULTURE_AND_ENTERTAINEMENT" data-icon="culture-and-entertainement" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.CULTURE_AND_ENTERTAINEMENT}</option>`,
-                `<option value="ART_GALLERY" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.ART_GALLERY}</option>`,
-                `<option value="CASINO" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.CASINO}</option>`,
-                `<option value="CLUB" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.CLUB}</option>`,
-                `<option value="TOURIST_ATTRACTION_HISTORIC_SITE" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.TOURIST_ATTRACTION_HISTORIC_SITE}</option>`,
-                `<option value="MOVIE_THEATER" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.MOVIE_THEATER}</option>`,
-                `<option value="MUSEUM" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.MUSEUM}</option>`,
-                `<option value="MUSIC_VENUE" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.MUSIC_VENUE}</option>`,
-                `<option value="PERFORMING_ARTS_VENUE" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.PERFORMING_ARTS_VENUE}</option>`,
-                `<option value="GAME_CLUB" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.GAME_CLUB}</option>`,
-                `<option value="STADIUM_ARENA" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.STADIUM_ARENA}</option>`,
-                `<option value="THEME_PARK" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.THEME_PARK}</option>`,
-                `<option value="ZOO_AQUARIUM" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.ZOO_AQUARIUM}</option>`,
-                `<option value="RACING_TRACK" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.RACING_TRACK}</option>`,
-                `<option value="THEATER" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.THEATER}</option>`,
-                `<option value="OTHER" data-icon="other" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.OTHER}</option>`,
-                `<option value="CONSTRUCTION_SITE" data-icon="">${I18n.translations[I18n.currentLocale()].venues.categories.CONSTRUCTION_SITE}</option>`,
-                `<option value="LODGING" data-icon="lodging" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.LODGING}</option>`,
-                `<option value="HOTEL" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.HOTEL}</option>`,
-                `<option value="HOSTEL" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.HOSTEL}</option>`,
-                `<option value="CAMPING_TRAILER_PARK" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.CAMPING_TRAILER_PARK}</option>`,
-                `<option value="COTTAGE_CABIN" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.COTTAGE_CABIN}</option>`,
-                `<option value="BED_AND_BREAKFAST" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.BED_AND_BREAKFAST}</option>`,
-                `<option value="OUTDOORS" data-icon="outdoors" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.OUTDOORS}</option>`,
-                `<option value="PARK" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.PARK}</option>`,
-                `<option value="PLAYGROUND" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.PLAYGROUND}</option>`,
-                `<option value="BEACH" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.BEACH}</option>`,
-                `<option value="SPORTS_COURT" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.SPORTS_COURT}</option>`,
-                `<option value="GOLF_COURSE" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.GOLF_COURSE}</option>`,
-                `<option value="PLAZA" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.PLAZA}</option>`,
-                `<option value="PROMENADE" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.PROMENADE}</option>`,
-                `<option value="POOL" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.POOL}</option>`,
-                `<option value="SCENIC_LOOKOUT_VIEWPOINT" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.SCENIC_LOOKOUT_VIEWPOINT}</option>`,
-                `<option value="SKI_AREA" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.SKI_AREA}</option>`,
-                `<option value="NATURAL_FEATURES" data-icon="natural-features" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.NATURAL_FEATURES}</option>`,
-                `<option value="ISLAND" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.ISLAND}</option>`,
-                `<option value="SEA_LAKE_POOL" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.SEA_LAKE_POOL}</option>`,
-                `<option value="RIVER_STREAM" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.RIVER_STREAM}</option>`,
-                `<option value="FOREST_GROVE" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.FOREST_GROVE}</option>`,
-                `<option value="FARM" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.FARM}</option>`,
-                `<option value="CANAL" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.CANAL}</option>`,
-                `<option value="SWAMP_MARSH" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.SWAMP_MARSH}</option>`,
-                `<option value="DAM" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.DAM}</option>`,
-                `<option value="PARKING_LOT" data-icon="parking-lot" style="font-weight:bold;">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.PARKING_LOT
-                }</option>`,
-                `<option value="RESIDENCE_HOME" data-icon="residential" style="font-weight:bold;">${
-                    I18n.translations[I18n.currentLocale()].venues.categories.RESIDENCE_HOME
-                }</option>`,
-                "</select>",
-            ].join(" ")
-        );
+        function _getCategorySubCategoryOptions() {
+            const mainCategories = new Map();
+            const res = [];
+            const venueCategories = sdk.DataModel.Venues.getVenueMainCategories();
+            for (const vc of venueCategories) {
+                mainCategories.set(vc.id, { localizedName: vc.localizedName, processed: false });
+            }
+            const venueSubCategories = sdk.DataModel.Venues.getVenueSubCategories();
+            for (const vsc of venueSubCategories) {
+                const mc = mainCategories.get(vsc.categoryId);
+                if (mc !== null) {
+                    if (!mc.processed) {
+                        res.push(
+                            `<option value="${vsc.categoryId}" data-icon="${vsc.categoryId
+                                .toLowerCase()
+                                .replace("_", "-")}" style="font-weight:bold;">${mc.localizedName}</option>`
+                        );
+                        mc.processed = true;
+                    }
+                    res.push(
+                        `<option value="${vsc.subCategoryId}" data-icon="${vsc.categoryId
+                            .toLowerCase()
+                            .replace("_", "-")}" style="font-weight:bold;">${vsc.localizedName}</option>`
+                    );
+                }
+            }
+            return res;
+        }
+        categories = _getCategorySubCategoryOptions();
+        const htmlItems = [`<select id="pieItem${itemNumber}">`];
+        htmlItems.push(...categories);
+        htmlItems.push("</select>");
+        // $places.html(
+        //     [
+        //         `<select id="pieItem${itemNumber}">`,
+        //         `<option value="CAR_SERVICES" data-icon="car-services" style="font-weight:bold;">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.CAR_SERVICES
+        //         }</option>`,
+        //         `<option value="GAS_STATION" data-icon="car-services">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.GAS_STATION
+        //         }</option>`,
+        //         `<option value="GARAGE_AUTOMOTIVE_SHOP" data-icon="car-services">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.GARAGE_AUTOMOTIVE_SHOP
+        //         }</option>`,
+        //         `<option value="CAR_WASH" data-icon="car-services">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.CAR_WASH
+        //         }</option>`,
+        //         `<option value="CHARGING_STATION" data-icon="car-services">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.CHARGING_STATION
+        //         }</option>`,
+        //         `<option value="TRANSPORTATION" data-icon="transportation" style="font-weight:bold;">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.TRANSPORTATION
+        //         }</option>`,
+        //         `<option value="AIRPORT" data-icon="transportation">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.AIRPORT
+        //         }</option>`,
+        //         `<option value="BUS_STATION" data-icon="transportation">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.BUS_STATION
+        //         }</option>`,
+        //         `<option value="FERRY_PIER" data-icon="transportation">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.FERRY_PIER
+        //         }</option>`,
+        //         `<option value="SEAPORT_MARINA_HARBOR" data-icon="transportation">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.SEAPORT_MARINA_HARBOR
+        //         }</option>`,
+        //         `<option value="SUBWAY_STATION" data-icon="transportation">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.SUBWAY_STATION
+        //         }</option>`,
+        //         `<option value="TRAIN_STATION" data-icon="transportation">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.TRAIN_STATION
+        //         }</option>`,
+        //         `<option value="BRIDGE" data-icon="transportation">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.BRIDGE
+        //         }</option>`,
+        //         `<option value="TUNNEL" data-icon="transportation">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.TUNNEL
+        //         }</option>`,
+        //         `<option value="TAXI_STATION" data-icon="transportation">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.TAXI_STATION
+        //         }</option>`,
+        //         `<option value="JUNCTION_INTERCHANGE" data-icon="transportation">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.JUNCTION_INTERCHANGE
+        //         }</option>`,
+        //         `<option value="PROFESSIONAL_AND_PUBLIC" data-icon="professional-and-public" style="font-weight:bold;">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.PROFESSIONAL_AND_PUBLIC
+        //         }</option>`,
+        //         `<option value="COLLEGE_UNIVERSITY" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.COLLEGE_UNIVERSITY
+        //         }</option>`,
+        //         `<option value="SCHOOL" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.SCHOOL
+        //         }</option>`,
+        //         `<option value="CONVENTIONS_EVENT_CENTER" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.CONVENTIONS_EVENT_CENTER
+        //         }</option>`,
+        //         `<option value="GOVERNMENT" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.GOVERNMENT
+        //         }</option>`,
+        //         `<option value="LIBRARY" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.LIBRARY
+        //         }</option>`,
+        //         `<option value="CITY_HALL" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.CITY_HALL
+        //         }</option>`,
+        //         `<option value="ORGANIZATION_OR_ASSOCIATION" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.ORGANIZATION_OR_ASSOCIATION
+        //         }</option>`,
+        //         `<option value="PRISON_CORRECTIONAL_FACILITY" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.PRISON_CORRECTIONAL_FACILITY
+        //         }</option>`,
+        //         `<option value="COURTHOUSE" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.COURTHOUSE
+        //         }</option>`,
+        //         `<option value="CEMETERY" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.CEMETERY
+        //         }</option>`,
+        //         `<option value="FIRE_DEPARTMENT" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.FIRE_DEPARTMENT
+        //         }</option>`,
+        //         `<option value="POLICE_STATION" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.POLICE_STATION
+        //         }</option>`,
+        //         `<option value="MILITARY" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.MILITARY
+        //         }</option>`,
+        //         `<option value="HOSPITAL_URGENT_CARE" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.HOSPITAL_URGENT_CARE
+        //         }</option>`,
+        //         `<option value="DOCTOR_CLINIC" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.DOCTOR_CLINIC
+        //         }</option>`,
+        //         `<option value="OFFICES" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.OFFICES
+        //         }</option>`,
+        //         `<option value="POST_OFFICE" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.POST_OFFICE
+        //         }</option>`,
+        //         `<option value="RELIGIOUS_CENTER" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.RELIGIOUS_CENTER
+        //         }</option>`,
+        //         `<option value="KINDERGARTEN" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.KINDERGARDEN
+        //         }</option>`,
+        //         `<option value="FACTORY_INDUSTRIAL" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.FACTORY_INDUSTRIAL
+        //         }</option>`,
+        //         `<option value="EMBASSY_CONSULATE" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.EMBASSY_CONSULATE
+        //         }</option>`,
+        //         `<option value="INFORMATION_POINT" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.INFORMATION_POINT
+        //         }</option>`,
+        //         `<option value="EMERGENCY_SHELTER" data-icon="professional-and-public">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.EMERGENCY_SHELTER
+        //         }</option>`,
+        //         `<option value="SHOPPING_AND_SERVICES" data-icon="shopping-and-services" style="font-weight:bold;">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.SHOPPING_AND_SERVICES
+        //         }</option>`,
+        //         `<option value="ARTS_AND_CRAFTS" data-icon="shopping-and-services">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.ARTS_AND_CRAFTS
+        //         }</option>`,
+        //         `<option value="BANK_FINANCIAL" data-icon="shopping-and-services">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.BANK_FINANCIAL
+        //         }</option>`,
+        //         `<option value="SPORTING_GOODS" data-icon="shopping-and-services">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.SPORTING_GOODS
+        //         }</option>`,
+        //         `<option value="BOOKSTORE" data-icon="shopping-and-services">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.BOOKSTORE
+        //         }</option>`,
+        //         `<option value="PHOTOGRAPHY" data-icon="shopping-and-services">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.PHOTOGRAPHY
+        //         }</option>`,
+        //         `<option value="CAR_DEALERSHIP" data-icon="shopping-and-services">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.CAR_DEALERSHIP
+        //         }</option>`,
+        //         `<option value="FASHION_AND_CLOTHING" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.FASHION_AND_CLOTHING}</option>`,
+        //         `<option value="CONVENIENCE_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.CONVENIENCE_STORE}</option>`,
+        //         `<option value="PERSONAL_CARE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.PERSONAL_CARE}</option>`,
+        //         `<option value="DEPARTMENT_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.DEPARTMENT_STORE}</option>`,
+        //         `<option value="PHARMACY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.PHARMACY}</option>`,
+        //         `<option value="ELECTRONICS" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.ELECTRONICS}</option>`,
+        //         `<option value="FLOWERS" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.FLOWERS}</option>`,
+        //         `<option value="FURNITURE_HOME_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.FURNITURE_HOME_STORE}</option>`,
+        //         `<option value="GIFTS" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.GIFTS}</option>`,
+        //         `<option value="GYM_FITNESS" data-icon="shopping-and-services">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.GYM_FITNESS
+        //         }</option>`,
+        //         `<option value="SWIMMING_POOL" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.SWIMMING_POOL}</option>`,
+        //         `<option value="HARDWARE_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.HARDWARE_STORE}</option>`,
+        //         `<option value="MARKET" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.MARKET}</option>`,
+        //         `<option value="SUPERMARKET_GROCERY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.SUPERMARKET_GROCERY}</option>`,
+        //         `<option value="JEWELRY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.JEWELRY}</option>`,
+        //         `<option value="LAUNDRY_DRY_CLEAN" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.LAUNDRY_DRY_CLEAN}</option>`,
+        //         `<option value="SHOPPING_CENTER" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.SHOPPING_CENTER}</option>`,
+        //         `<option value="MUSIC_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.MUSIC_STORE}</option>`,
+        //         `<option value="PET_STORE_VETERINARIAN_SERVICES" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.PET_STORE_VETERINARIAN_SERVICES}</option>`,
+        //         `<option value="TOY_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.TOY_STORE}</option>`,
+        //         `<option value="TRAVEL_AGENCY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.TRAVEL_AGENCY}</option>`,
+        //         `<option value="ATM" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.ATM}</option>`,
+        //         `<option value="CURRENCY_EXCHANGE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.CURRENCY_EXCHANGE}</option>`,
+        //         `<option value="CAR_RENTAL" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.CAR_RENTAL}</option>`,
+        //         `<option value="FOOD_AND_DRINK" data-icon="food-and-drink" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.FOOD_AND_DRINK}</option>`,
+        //         `<option value="RESTAURANT" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.RESTAURANT}</option>`,
+        //         `<option value="BAKERY" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.BAKERY}</option>`,
+        //         `<option value="DESSERT" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.DESSERT}</option>`,
+        //         `<option value="CAFE" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.CAFE}</option>`,
+        //         `<option value="FAST_FOOD" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.FAST_FOOD}</option>`,
+        //         `<option value="FOOD_COURT" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.FOOD_COURT}</option>`,
+        //         `<option value="BAR" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.BAR}</option>`,
+        //         `<option value="ICE_CREAM" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.ICE_CREAM}</option>`,
+        //         `<option value="CULTURE_AND_ENTERTAINEMENT" data-icon="culture-and-entertainement" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.CULTURE_AND_ENTERTAINEMENT}</option>`,
+        //         `<option value="ART_GALLERY" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.ART_GALLERY}</option>`,
+        //         `<option value="CASINO" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.CASINO}</option>`,
+        //         `<option value="CLUB" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.CLUB}</option>`,
+        //         `<option value="TOURIST_ATTRACTION_HISTORIC_SITE" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.TOURIST_ATTRACTION_HISTORIC_SITE}</option>`,
+        //         `<option value="MOVIE_THEATER" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.MOVIE_THEATER}</option>`,
+        //         `<option value="MUSEUM" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.MUSEUM}</option>`,
+        //         `<option value="MUSIC_VENUE" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.MUSIC_VENUE}</option>`,
+        //         `<option value="PERFORMING_ARTS_VENUE" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.PERFORMING_ARTS_VENUE}</option>`,
+        //         `<option value="GAME_CLUB" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.GAME_CLUB}</option>`,
+        //         `<option value="STADIUM_ARENA" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.STADIUM_ARENA}</option>`,
+        //         `<option value="THEME_PARK" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.THEME_PARK}</option>`,
+        //         `<option value="ZOO_AQUARIUM" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.ZOO_AQUARIUM}</option>`,
+        //         `<option value="RACING_TRACK" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.RACING_TRACK}</option>`,
+        //         `<option value="THEATER" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.THEATER}</option>`,
+        //         `<option value="OTHER" data-icon="other" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.OTHER}</option>`,
+        //         `<option value="CONSTRUCTION_SITE" data-icon="">${I18n.translations[I18n.currentLocale()].venues.categories.CONSTRUCTION_SITE}</option>`,
+        //         `<option value="LODGING" data-icon="lodging" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.LODGING}</option>`,
+        //         `<option value="HOTEL" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.HOTEL}</option>`,
+        //         `<option value="HOSTEL" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.HOSTEL}</option>`,
+        //         `<option value="CAMPING_TRAILER_PARK" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.CAMPING_TRAILER_PARK}</option>`,
+        //         `<option value="COTTAGE_CABIN" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.COTTAGE_CABIN}</option>`,
+        //         `<option value="BED_AND_BREAKFAST" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.BED_AND_BREAKFAST}</option>`,
+        //         `<option value="OUTDOORS" data-icon="outdoors" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.OUTDOORS}</option>`,
+        //         `<option value="PARK" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.PARK}</option>`,
+        //         `<option value="PLAYGROUND" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.PLAYGROUND}</option>`,
+        //         `<option value="BEACH" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.BEACH}</option>`,
+        //         `<option value="SPORTS_COURT" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.SPORTS_COURT}</option>`,
+        //         `<option value="GOLF_COURSE" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.GOLF_COURSE}</option>`,
+        //         `<option value="PLAZA" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.PLAZA}</option>`,
+        //         `<option value="PROMENADE" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.PROMENADE}</option>`,
+        //         `<option value="POOL" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.POOL}</option>`,
+        //         `<option value="SCENIC_LOOKOUT_VIEWPOINT" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.SCENIC_LOOKOUT_VIEWPOINT}</option>`,
+        //         `<option value="SKI_AREA" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.SKI_AREA}</option>`,
+        //         `<option value="NATURAL_FEATURES" data-icon="natural-features" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.NATURAL_FEATURES}</option>`,
+        //         `<option value="ISLAND" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.ISLAND}</option>`,
+        //         `<option value="SEA_LAKE_POOL" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.SEA_LAKE_POOL}</option>`,
+        //         `<option value="RIVER_STREAM" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.RIVER_STREAM}</option>`,
+        //         `<option value="FOREST_GROVE" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.FOREST_GROVE}</option>`,
+        //         `<option value="FARM" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.FARM}</option>`,
+        //         `<option value="CANAL" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.CANAL}</option>`,
+        //         `<option value="SWAMP_MARSH" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.SWAMP_MARSH}</option>`,
+        //         `<option value="DAM" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.DAM}</option>`,
+        //         `<option value="PARKING_LOT" data-icon="parking-lot" style="font-weight:bold;">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.PARKING_LOT
+        //         }</option>`,
+        //         `<option value="RESIDENCE_HOME" data-icon="residential" style="font-weight:bold;">${
+        //             I18n.translations[I18n.currentLocale()].venues.categories.RESIDENCE_HOME
+        //         }</option>`,
+        //         "</select>",
+        //     ].join(" ")
+        // );
+        $places.html(htmlItems.join(" "));
 
         return $places.html();
     }
@@ -5184,7 +5284,7 @@ function pie(tries = 1) {
 
             for (const name in W.accelerators.Actions) {
                 let TempKeys = "";
-                if (W.accelerators.Actions[name].group === "wme-place-interface-ehancements") {
+                if (W.accelerators.Actions[name].group === "wme-place-interface-enhancements") {
                     if (W.accelerators.Actions[name].shortcut) {
                         if (W.accelerators.Actions[name].shortcut.altKey === true) TempKeys += "A";
                         if (W.accelerators.Actions[name].shortcut.shiftKey === true) TempKeys += "S";
@@ -5328,7 +5428,7 @@ function pie(tries = 1) {
                     GeometryMods: "Enable geometry modification options",
                     GeometryModsTitle:
                         "Enables options for modifying the geometry such as: orthogonalization, ability to rotate or resize (scale up/down) area Places",
-                    SimplifyFactor: "Simplify Factor",
+                    SimplifyFactor: "Simplify Factor (px)",
                     SimplifyFactorTitle: "The larger the simplification factor the more nodes will be removed",
                     PhotoViewer: "Enable photo viewer",
                     PhotoViewerTitle: "",
