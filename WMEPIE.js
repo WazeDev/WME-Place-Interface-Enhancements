@@ -45,6 +45,9 @@
 let UpdateObject;
 let MultiAction;
 
+// import { WmeSDK, DataModel, Editing, Venues } from "./node_modules/wme-sdk-typings/index";
+// import "./node_modules/@turf/turf";
+// import { simplify } from "./node_modules/@turf/turf/dist/esm/index";
 /**
  * @var sdk
  * @type WmeSDK
@@ -1014,8 +1017,8 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateResidentialPlaceShortcut}))
-                settings.CreateResidentialPlaceShortcut = null;
+            if(!settings.CreateResidentialPlaceShortcut || sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateResidentialPlaceShortcut}))
+                settings.CreateResidentialPlaceShortcut = "";
             const rppShortcut = {
                 shortcutId: "CreateResidentialPlaceShortcut",
                 description: "Creates a resdiential Place point",
@@ -1041,8 +1044,8 @@ function pie(tries = 1) {
         //     null
         // ).add();
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateParkingLotShortcut}))
-                settings.CreateParkingLotShortcut = null;
+            if(!settings.CreateParkingLotShortcut || sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateParkingLotShortcut}))
+                settings.CreateParkingLotShortcut = "";
             const parkingLotShortcut = {
                 shortcutId: "CreateParkingLotShortcut",
                 description: "Creates a parking lot Place",
@@ -1066,8 +1069,8 @@ function pie(tries = 1) {
         //     null
         // ).add();
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.ToggleAreaPlacesShortcut}))
-                settings.ToggleAreaPlacesShortcut = null;
+            if(!settings.ToggleAreaPlacesShortcut ||  sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.ToggleAreaPlacesShortcut}))
+                settings.ToggleAreaPlacesShortcut = "";
             const hideAreaPlaces = {
                 shortcutId: "HideAreaPlacesShortcut",
                 description: "Toggle hiding area Places",
@@ -1088,8 +1091,8 @@ function pie(tries = 1) {
         //     null
         // ).add();
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.OrthogonalizeShortcut}))
-                settings.OrthogonalizeShortcut = null;
+            if(!settings.OrthogonalizeShortcut || sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.OrthogonalizeShortcut}))
+                settings.OrthogonalizeShortcut = "";
             const orthogonalizeShortcut = {
                 shortcutId: "OrthogonalizeShortcut",
                 description: "Orthogonalize Area Place",
@@ -1110,8 +1113,8 @@ function pie(tries = 1) {
         //     null
         // ).add();
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.SimplifyPlaceShortcut}))
-                settings.SimplifyPlaceShortcut = null;
+            if(!settings.SimplifyPlaceShortcut && sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.SimplifyPlaceShortcut}))
+                settings.SimplifyPlaceShortcut = "";
             const simplifyPlaceShortcut = {
                 shortcutId: "SimplifyPlaceShortcut",
                 description: "Simplify Area Place",
@@ -1134,8 +1137,8 @@ function pie(tries = 1) {
         //     null
         // ).add();
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem1Shortcut}))
-                settings.CreateItem1Shortcut = null;
+            if(!settings.CreateItem1Shortcut && sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem1Shortcut}))
+                settings.CreateItem1Shortcut = "";
             const itemShortcut = {
                 shortcutId: "CreateItem1Shortcut",
                 description: "Create Item 1",
@@ -1161,8 +1164,8 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem2Shortcut}))
-                settings.CreateItem2Shortcut = null;
+            if(!settings.CreateItem2Shortcut && sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem2Shortcut}))
+                settings.CreateItem2Shortcut = "";
             const item2Shortcut = {
                 shortcutId: "CreateItem2Shortcut",
                 description: "Create Item 2",
@@ -1187,8 +1190,8 @@ function pie(tries = 1) {
         //     null
         // ).add();
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem3Shortcut}))
-                settings.CreateItem3Shortcut = null;
+            if(!settings.CreateItem3Shortcut)
+                settings.CreateItem3Shortcut = "";
             const item3Shortcut = {
                 shortcutId: "CreateItem3Shortcut",
                 description: "Create Item 3",
@@ -1214,8 +1217,8 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem4Shortcut}))
-                settings.CreateItem4Shortcut = null;
+            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem4Shortcut || ""}))
+                settings.CreateItem4Shortcut = "";
             const item4Shortcut = {
                 shortcutId: "CreateItem4Shortcut",
                 description: "Create Item 4",
@@ -1241,8 +1244,8 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem5Shortcut}))
-                settings.CreateItem5Shortcut = null;
+            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem5Shortcut || ""}))
+                settings.CreateItem5Shortcut = "";
             const item5Shortcut = {
                 shortcutId: "CreateItem5Shortcut",
                 description: "Create Item 5",
@@ -1268,8 +1271,8 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem6Shortcut}))
-                settings.CreateItem6Shortcut = null;
+            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem6Shortcut || ""}))
+                settings.CreateItem6Shortcut = "";
             const item6Shortcut = {
                 shortcutId: "CreateItem6Shortcut",
                 description: "Create Item 6",
@@ -1295,8 +1298,8 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem7Shortcut}))
-                settings.CreateItem7Shortcut = null;
+            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem7Shortcut || ""}))
+                settings.CreateItem7Shortcut = "";
             const item7Shortcut = {
                 shortcutId: "CreateItem7Shortcut",
                 description: "Create Item 7",
@@ -1322,8 +1325,8 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem8Shortcut}))
-                settings.CreateItem8Shortcut = null;
+            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem8Shortcut || ""}))
+                settings.CreateItem8Shortcut = "";
             const item8Shortcut = {
                 shortcutId: "CreateItem8Shortcut",
                 description: "Create Item 8",
@@ -1349,8 +1352,8 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem9Shortcut}))
-                settings.CreateItem9Shortcut = null;
+            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem9Shortcut || ""}))
+                settings.CreateItem9Shortcut = "";
             const item9Shortcut = {
                 shortcutId: "CreateItem9Shortcut",
                 description: "Create Item 9",
@@ -1376,8 +1379,8 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem10Shortcut}))
-                settings.CreateItem10Shortcut = null;
+            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem10Shortcut || ""}))
+                settings.CreateItem10Shortcut = "";
             const item10Shortcut = {
                 shortcutId: "CreateItem10Shortcut",
                 description: "Create Item 10",
@@ -1403,8 +1406,8 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem11Shortcut}))
-                settings.CreateItem11Shortcut = null;
+            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem11Shortcut || ""}))
+                settings.CreateItem11Shortcut = "";
             const item11Shortcut = {
                 shortcutId: "CreateItem11Shortcut",
                 description: "Create Item 11",
@@ -1430,8 +1433,8 @@ function pie(tries = 1) {
         // ).add();
 
         try {
-            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem12Shortcut}))
-                settings.CreateItem12Shortcut = null;
+            if(sdk.Shortcuts.areShortcutKeysInUse({shortcutKeys: settings.CreateItem12Shortcut || ""}))
+                settings.CreateItem12Shortcut = "";
             const item12Shortcut = {
                 shortcutId: "CreateItem12Shortcut",
                 description: "Create Item 12",
@@ -2640,14 +2643,14 @@ function pie(tries = 1) {
                     continue;
             }
 
-            const distanceToSegment = turf.pointtoLineDistance(myPoint, s.geometry);
+            const distanceToSegment = turf.pointToLineDistance(myPoint, s.geometry);
 
             if (distanceToSegment.distance < minDistance) {
                 minDistance = distanceToSegment.distance;
                 closestSegment.segment = s;
+                closestSegment.closestPoint = turf.nearestPointOnLine(closestSegment.segment.geometry, myPoint);
             }
         }
-        closestSegment.closestPoint = turf.nearestPointOnLine(closestSegment.segment.gemetry, myPoint);
         return closestSegment;
     };
     let highlightedVenue, highlighting;
@@ -2792,15 +2795,8 @@ function pie(tries = 1) {
         closestSegmentLayer.addFeatures([lineFeature, pointFeature]);
     }
 
-    function findNearestSegment(navPoint) {
-        let closestSegment = {};
-        if (navPoint.element)
-            navPoint = new OpenLayers.Geometry.Point(
-                W.geometryEditing.activeEditor._navigationPointMarker.lonlat.lon,
-                W.geometryEditing.activeEditor._navigationPointMarker.lonlat.lat
-            );
-
-        closestSegment = WazeWrap.Geometry.findClosestSegment(navPoint, false, false);
+    function findNearestSegment(navPoint, ignorePLR = false, ignoreUnnamedPR = false) {
+        const closestSegment = findSDKClosestSegment(navPoint, ignorePLR, ignoreUnnamedPR);
 
         clearClosesetSegmentLayerFeatures();
         drawLine(navPoint, closestSegment.closestPoint, lineStyleToClosestSeg, pointStyle);
@@ -3358,12 +3354,7 @@ function pie(tries = 1) {
         // newPlace.attributes.lockRank = Number(settings.DefaultLockLevel);
 
         const placeCentroid = turf.centroid(pos);
-        const olCoordinates = proj4("EPSG:4326", "EPSG:3857", placeCentroid.geometry.coordinates);
-        const closestSeg = WazeWrap.Geometry.findClosestSegment(
-            new OpenLayers.Geometry.Point(olCoordinates[0], olCoordinates[1]),
-            settings.SkipPLR,
-            settings.SkipPLR
-        );
+        const closestSeg = findSDKClosestSegment(placeCentroid);
 
         // W.model.actionManager.add(new AddPlace(NewPlace));
         const sdkSeg = sdk.DataModel.Segments.getById({segmentId: closestSeg.attributes.id});
@@ -3575,30 +3566,44 @@ function pie(tries = 1) {
     }
 
     function SimplifyPlace() {
-        if (
-            WazeWrap.hasPlaceSelected() &&
-            WazeWrap.getSelectedFeatures()[0]
-                .WW.getObjectModel()
-                .getOLGeometry()
-                .toString()
-                .match(/^POLYGON/)
-        ) {
-            const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-            const originalGeometry = selected.getOLGeometry().clone();
-            let ls = new OpenLayers.Geometry.LineString(originalGeometry.components[0].components);
-            ls = ls.simplify(settings.SimplifyFactor);
-            const newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
+        const selected = sdk.Editing.getSelection();
+        if(selected) 
+        {
+            // const oldSelected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+            // const originalGeometry = selected.getOLGeometry().clone();
+            // let ls = new OpenLayers.Geometry.LineString(originalGeometry.components[0].components);
+            // ls = ls.simplify(settings.SimplifyFactor);
+            // const newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
 
-            if (newGeometry.components[0].components.length < originalGeometry.components[0].components.length) {
-                const UFG = require("Waze/Action/UpdateFeatureGeometry");
-                W.model.actionManager.add(
-                    new UFG(
-                        selected,
-                        W.model.venues,
-                        W.userscripts.toGeoJSONGeometry(originalGeometry),
-                        W.userscripts.toGeoJSONGeometry(newGeometry)
-                    )
-                );
+            // if (newGeometry.components[0].components.length < originalGeometry.components[0].components.length) {
+            //     const UFG = require("Waze/Action/UpdateFeatureGeometry");
+            //     W.model.actionManager.add(
+            //         new UFG(
+            //             selected,
+            //             W.model.venues,
+            //             W.userscripts.toGeoJSONGeometry(originalGeometry),
+            //             W.userscripts.toGeoJSONGeometry(newGeometry)
+            //         )
+            //     );
+            // }
+            if(selected.objectType === "venue") {
+                const venue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+                if(venue.geometry.type === "Point") {
+                    console.log("Can't Simplify a Point Place");
+                    return;
+                }
+                const newGeometry = turf.simplify(venue.geometry, {tolerance: Number.parseFloat(settings.SimplifyFactor)});
+                sdk.DataModel.Venues.updateVenue({venueId: selected.ids[0], geometry: newGeometry});
+            }
+            if(selected.objectType === "mapComment") {
+                const mc = sdk.DataModel.MapComments.getById({mapCommentId: selected.ids[0]});
+                if(mc.geometry.type === "Point") {
+                    console.log("Can't Simplify a Point Map Comment");
+                    return;
+                }
+                // const newGeometry = turf.simplify(mc.geometry, {tolerance: settings.SimplifyFactor});
+                console.log("Waiting for Implementation of MC Geometry Updates.")
+
             }
         }
     }
@@ -5179,7 +5184,7 @@ function pie(tries = 1) {
 
             for (const name in W.accelerators.Actions) {
                 let TempKeys = "";
-                if (W.accelerators.Actions[name].group === "wmepie") {
+                if (W.accelerators.Actions[name].group === "wme-place-interface-ehancements") {
                     if (W.accelerators.Actions[name].shortcut) {
                         if (W.accelerators.Actions[name].shortcut.altKey === true) TempKeys += "A";
                         if (W.accelerators.Actions[name].shortcut.shiftKey === true) TempKeys += "S";
