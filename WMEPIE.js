@@ -44,7 +44,7 @@
 let UpdateObject;
 let MultiAction;
 
-// import { WmeSDK, DataModel, Editing, Venues } from "./node_modules/wme-sdk-typings/index";
+import { WmeSDK, DataModel, Editing, Venues } from "./node_modules/wme-sdk-typings/index";
 // import "./node_modules/@turf/turf";
 // import { simplify } from "./node_modules/@turf/turf/dist/esm/index";
 /**
@@ -3054,7 +3054,11 @@ function pie(tries = 1) {
                 const isPoint = (venue.geometry.type === "Point");
 
                 if ((isPoint && sdk.Map.getZoomLevel() >= 17) || (!isPoint && sdk.Map.getZoomLevel() >= 15)) {
-                    if (WazeWrap.Geometry.isGeometryInMapExtent(venue.getOLGeometry())) {
+                    const mapExtent = sdk.Map.getMapExtent();
+                    const polygon = turf.bboxPolygon(mapExtent);
+
+                    if ((isPoint && turf.booleanPointInPolygon(venue.geometry, polygon)) ||
+                        (!isPoint && turf.intersect(venue.geometry, polygon))) {
                         if (
                             (isPoint && showPoint) ||
                             (!isPoint && showArea && !venue.isParkingLot()) ||
@@ -3062,7 +3066,7 @@ function pie(tries = 1) {
                         ) {
                             const placeFilter = $("#piePlaceFilter").val();
                             if (placeFilter.length > 0) {
-                                const nameMatch = RegExp($("#piePlaceFilter").val(), "ig").exec(venue.attributes.name);
+                                const nameMatch = RegExp($("#piePlaceFilter").val(), "ig").exec(venue.name);
                                 if (nameMatch && $("#_rbHidePlaces").prop("checked")) continue;
                                 if (!nameMatch && !$("#_rbHidePlaces").prop("checked"))
                                     //no name match and show only
@@ -3072,19 +3076,22 @@ function pie(tries = 1) {
                             let textLoc;
 
                             if (isPoint)
-                                textLoc = new OpenLayers.Geometry.Point(
-                                    venue.getOLGeometry().x,
-                                    venue.getOLGeometry().y
-                                );
-                            else textLoc = venue.getOLGeometry().getCentroid();
+                                // textLoc = new OpenLayers.Geometry.Point(
+                                //     venue.getOLGeometry().x,
+                                //     venue.getOLGeometry().y
+                                // );
+                                textLoc = venue.geometry;
+                            else textLoc = turf.centroid(venue.geometry);
                             let placeName = WordWrap(
-                                venue.attributes.name.trim() + (showLock ? ` (L${venue.attributes.lockRank + 1})` : "")
+                                venue.name.trim() + (showLock ? ` (L${venue.lockRank + 1})` : "")
                             );
-                            if (venue.attributes.categories[0] === "RESIDENCE_HOME")
+                            if (venue.categories[0] === "RESIDENTIAL") {
+                                const venueAddress = sdk.DataModel.Venues.getAddress(venue.id);
                                 placeName =
-                                    venue.attributes.houseNumber +
-                                    (venue.attributes.name.trim() !== "" ? ` - ${venue.attributes.name}` : "") +
-                                    (showLock ? ` (L${venue.attributes.lockRank + 1})` : "");
+                                    (venueAddress?.houseNumber || "") +
+                                    (venue.name.trim() !== "" ? ` - ${venue.name}` : "") +
+                                    (showLock ? ` (L${venue.lockRank + 1})` : "");
+                            }
                             const placeNameLabel = new OpenLayers.Feature.Vector(textLoc, {
                                 display: "block",
                                 labelText: placeName.trim(),
