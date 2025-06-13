@@ -45,7 +45,6 @@
 let UpdateObject;
 let MultiAction;
 
-// import { WmeSDK, Editing, Venues } from "./node_modules/wme-sdk-typings/index";
 /**
  * @var sdk
  * @type WmeSDK
@@ -2617,9 +2616,43 @@ function pie(tries = 1) {
         DisplayPlaceNames(); //refresh the name display
     }
 
+    /**
+     * Finds the closest on-screen drivable segment to the given point, ignoring PLR and PR segments if the options are set
+     * @function WazeWrap.Geometry.findClosestSegment
+     * @param {GeoJSON.Point} The given point to find the closest segment to
+     * @param {boolean} If true, Parking Lot Road segments will be ignored when finding the closest segment
+     * @param {boolean} If true, Private Road segments will be ignored when finding the closest segment
+     * @returns {Segment} Returns SDK Segment closest to a given point
+    **/
+    function findSDKClosestSegment(myPoint, ignorePLR, ignoreUnnamedPR) {
+        let minDistance = Number.POSITIVE_INFINITY;
+        let closestSegment;
+
+        for (const s of sdk.DataModel.Segments.getAll()) {
+            const segmentType = s.roadType;
+            if (segmentType === 10 || segmentType === 16 || segmentType === 18 || segmentType === 19 || (ignorePLR && segmentType === 20))
+                continue;
+
+            if (ignoreUnnamedPR && segmentType === 17) {
+                const primaryStreetId = s.primaryStreetId;
+                const nm = sdk.DataModel.Streets.getById({streetId: primaryStreetId}).name;
+                if (nm === null || nm.trim().length === 0) //PR
+                    continue;
+            }
+
+            const distanceToSegment = turf.pointtoLineDistance(myPoint, s.geometry);
+
+            if (distanceToSegment.distance < minDistance) {
+                minDistance = distanceToSegment.distance;
+                closestSegment.segment = s;
+            }
+        }
+        closestSegment.closestPoint = turf.nearestPointOnLine(closestSegment.segment.gemetry, myPoint);
+        return closestSegment;
+    };
     let highlightedVenue, highlighting;
     function drawNavPointClosestSegmentLines() {
-        try {
+        // try {
             highlighting = false;
             if (highlightedVenue !== null)
                 if (highlightedVenue === W.map.venueLayer.getFeatureBy("renderIntent", "highlight"))
@@ -2634,35 +2667,41 @@ function pie(tries = 1) {
                 sdk.Map.getZoomLevel() >= 16
             ) {
                 const sdkVenue = sdk.DataModel.Venues.getById({ venueId: highlightedVenue.attributes.wazeFeature.id });
-                const isArea = !WazeWrap.Model.getObjectModel(highlightedVenue).isPoint();
+                // const isArea = !WazeWrap.Model.getObjectModel(highlightedVenue).isPoint();
+                const isArea = sdkVenue.geometry.type === "Polygon";
                 let navPoint;
 
-                if (WazeWrap.Model.getObjectModel(highlightedVenue).getNavigationPoints().length > 0)
-                    navPoint = W.userscripts.toOLGeometry(
-                        WazeWrap.Model.getObjectModel(highlightedVenue).getNavigationPoints()[0]._point
-                    );
+                if (sdkVenue?.navigationPoints.length > 0)
+                {
+                    // navPoint = W.userscripts.toOLGeometry(
+                    //     WazeWrap.Model.getObjectModel(highlightedVenue).getNavigationPoints()[0]._point
+                    // );
+                    navPoint = sdkVenue.navigationPoints[0].point;
+                }
                 else {
-                    if (isArea)
-                        navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().getCentroid();
-                    else navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().clone();
+                    if (isArea) {
+                        // navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().getCentroid();
+                        navPoint = turf.centroid(sdkVenue.geometry.coordinates);
+                    }
+                    else {
+                        // navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().clone();
+                        navPoint = sdkVenue.geometry;
+                    }
                 }
 
+                const closestSeg = findSDKClosestSegment(navPoint, false, false)
                 //nav point to closest segment
-                const closestSeg = WazeWrap.Geometry.findClosestSegment(navPoint, false, false);
+                // const closestSeg = WazeWrap.Geometry.findClosestSegment(navPoint, false, false);
                 // let lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([navPoint, closestSeg.closestPoint]), {}, lineStyleToClosestSeg);
                 // let pointFeature = new OpenLayers.Feature.Vector(closestSeg.closestPoint, {}, pointStyle);
-                let lineFeature = turf.lineString(
-                    [
-                        proj4("EPSG:3857", "EPSG:4326", [navPoint.x, navPoint.y]),
-                        proj4("EPSG:3857", "EPSG:4326", [closestSeg.closestPoint.x, closestSeg.closestPoint.y]),
-                    ],
+                let lineFeature = turf.lineString([navPoint.geometry.coordinates, closestSeg.closestPoint.geometry.coordinates],
                     {
                         styleName: "lineStyleToClosestSeg",
                     },
                     { id: `line_${navPoint.toString()}_${closestSeg.toString()}` }
                 );
                 let pointFeature = turf.point(
-                    proj4("EPSG:3857", "EPSG:4326", [closestSeg.closestPoint.x, closestSeg.closestPoint.y]),
+                    closestSeg.closestPoint.geometry.coordinates,
                     {
                         styleName: "pointStyle",
                     },
@@ -2679,17 +2718,17 @@ function pie(tries = 1) {
                 if (isArea) startPt = turf.centroid(sdkVenue.geometry);
                 // lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([startPt, navPoint]), {}, lineStyleToNavPoint);
                 lineFeature = turf.lineString(
-                    [startPt.coordinates, proj4("EPSG:3857", "EPSG:4326", [navPoint.x, navPoint.y])],
+                    [startPt.geometry.coordinates, navPoint.geometry.coordinates],
                     { styleName: "lineStyleToNavPoint" },
                     { id: `point_${navPoint.toString()}` }
                 );
                 // pointFeature = new OpenLayers.Feature.Vector(navPoint, {}, pointStyleNavPoint);
                 pointFeature = turf.point(
-                    proj4("EPSG:3857", "EPSG:4326", [navPoint.x, navPoint.y]),
+                    navPoint.geometry.coordinates,
                     { styleName: "pointStyleNavPoint" },
                     { id: `point_${navPoint.toString()}` }
                 );
-                if (sdkVenue.navigationPoints.length > 0 || isArea)
+                if (sdkVenue?.navigationPoints.length > 0 || isArea)
                     sdk.Map.addFeaturesToLayer({
                         features: [lineFeature, pointFeature],
                         layerName: layerConfig.PIEShowStopPointsLayer.layerName,
@@ -2700,9 +2739,9 @@ function pie(tries = 1) {
             if (highlightedVenue === null || sdk.Map.getZoomLevel() < 16)
                 // showStopPointsLayer.removeAllFeatures();
                 sdk.Map.removeAllFeaturesFromLayer({ layerName: layerConfig.PIEShowStopPointsLayer.layerName });
-        } catch (err) {
-            console.error(err.message);
-        }
+        // } catch (err) {
+        //     console.log(err.message);
+        // }
     }
 
     function ObjectsChanged() {
@@ -2775,7 +2814,7 @@ function pie(tries = 1) {
         else {
             getActiveEditor().then((val) => {
                 if (WazeWrap.hasSelectedFeatures()) {
-                    let selectedItem = WazeWrap.getSelectedFeatures()[0];
+                    const selectedItem = WazeWrap.getSelectedFeatures()[0];
 
                     if ("venue" !== selectedItem.WW.getType()) {
                         removeDragCallbacks();
@@ -2820,7 +2859,7 @@ function pie(tries = 1) {
             W.geometryEditing.activeEditor.dragControl.onDrag = (e, t) => {
                 W.geometryEditing.activeEditor.dragVertex.apply(W.geometryEditing.activeEditor, [e, t]);
             };
-            if (null !== typeof ClosestSegmentNavPoint) {
+            if (ClosestSegmentNavPoint === null) {
                 try {
                     ClosestSegmentNavPoint.events.unregister(
                         "drag",
@@ -3483,223 +3522,6 @@ function pie(tries = 1) {
             _hidePaymentType();
     }
 
-    /**
-     * Returns orthogonalized geometry for the given geometry and threshold
-     * @function WazeWrap.Util.GeoJSONOrthogonalizeGeometry
-     * @param {GeoJSON.Geometry} The OpenLayers.Geometry to orthogonalize
-     * @param {integer} threshold to use for orthogonalization - the higher the threshold, the more nodes that will be removed
-     * @return {GeoJSON.Geometry } Orthogonalized geometry
-    **/
-    GeoJSONOrthogonalizeGeometry = function (geometry, threshold = 12) {
-        const nomthreshold = threshold, // degrees within right or straight to alter
-            lowerThreshold = Math.cos((90 - nomthreshold) * Math.PI / 180),
-            upperThreshold = Math.cos(nomthreshold * Math.PI / 180);
-
-        function Orthogonalize() {
-            let nodes = geometry.coordinates[0],
-                points = nodes.slice(0, -1).map((n) => {
-                    const p = n;
-                    p[1] = lat2latp(p[1]);
-                    return p;
-                }),
-                corner = { i: 0, dotp: 1 },
-                epsilon = 1e-4,
-                i, j, score, motions;
-
-            // Triangle
-            if (points.length === 4) {
-                for (i = 0; i < 1000; i++) {
-                    motions = points.map(calcMotion);
-
-                    const tmp = addPoints(points[corner.i], motions[corner.i]);
-                    points[corner.i][0] = tmp[0];
-                    points[corner.i][1] = tmp[1];
-
-                    score = corner.dotp;
-                    if (score < epsilon)
-                        break;
-                }
-
-                const n = points[corner.i];
-                n[1] = latp2lat(n[1]);
-                const pp = n;
-                // const pp = proj4("EPSG:4326", "EPSG:900913",n);
-
-                const id = nodes[corner.i].id;
-                for (i = 0; i < nodes.length; i++) {
-                    if (nodes[i].id !== id)
-                        continue;
-
-                    nodes[i][0] = pp[0];
-                    nodes[i][1] = pp[1];
-                }
-
-                return nodes;
-            }
-            
-            let best,
-                originalPoints = nodes.slice(0, -1).map((n) => {
-                    const p = n;
-                    p[1] = lat2latp(p[1]);
-                    return p;
-                });
-            score = Number.POSITIVE_INFINITY;
-
-            for (i = 0; i < 1000; i++) {
-                motions = points.map(calcMotion);
-                for (j = 0; j < motions.length; j++) {
-                    const tmp = addPoints(points[j], motions[j]);
-                    points[j][0] = tmp[0];
-                    points[j][1] = tmp[1];
-                }
-                const newScore = squareness(points);
-                if (newScore < score) {
-                    best = [].concat(points);
-                    score = newScore;
-                }
-                if (score < epsilon)
-                    break;
-            }
-
-            points = best;
-
-            for (i = 0; i < points.length; i++) {
-                // only move the points that actually moved
-                if (originalPoints[i][0] !== points[i][0] || originalPoints[i][1] !== points[i][1]) {
-                    const n = points[i];
-                    n[1] = latp2lat(n[1]);
-                    const pp = n;
-
-                    const id = nodes[i].id;
-                    for (j = 0; j < nodes.length; j++) {
-                        if (nodes[j].id !== id)
-                            continue;
-
-                        nodes[j][0] = pp[0];
-                        nodes[j][1] = pp[1];
-                    }
-                }
-            }
-
-            // remove empty nodes on straight sections
-            for (i = 0; i < points.length; i++) {
-                const dotp = normalizedDotProduct(i, points);
-                if (dotp < -1 + epsilon) {
-                    id = nodes[i].id;
-                    for (j = 0; j < nodes.length; j++) {
-                        if (nodes[j].id !== id)
-                            continue;
-
-                        nodes[j] = false;
-                    }
-                }
-            }
-
-            return nodes.filter(item => item !== false);
-
-            function calcMotion(b, i, array) {
-                let a = array[(i - 1 + array.length) % array.length],
-                    c = array[(i + 1) % array.length],
-                    p = subtractPoints(a, b),
-                    q = subtractPoints(c, b),
-                    scale, dotp;
-
-                scale = 2 * Math.min(euclideanDistance(p, [0, 0]), euclideanDistance(q, [0, 0]));
-                p = normalizePoint(p, 1.0);
-                q = normalizePoint(q, 1.0);
-
-                dotp = filterDotProduct(p[0] * q[0] + p[1] * q[1]);
-
-                // nasty hack to deal with almost-straight segments (angle is closer to 180 than to 90/270).
-                if (array.length > 3) {
-                    if (dotp < -Math.SQRT1_2)
-                        dotp += 1.0;
-                } else if (dotp && Math.abs(dotp) < corner.dotp) {
-                    corner.i = i;
-                    corner.dotp = Math.abs(dotp);
-                }
-
-                return normalizePoint(addPoints(p, q), 0.1 * dotp * scale);
-            }
-        };
-
-        function lat2latp(lat) {
-            return 180 / Math.PI * Math.log(Math.tan(Math.PI / 4 + lat * (Math.PI / 180) / 2));
-        }
-
-        function latp2lat(a) {
-            return 180 / Math.PI * (2 * Math.atan(Math.exp(a * Math.PI / 180)) - Math.PI / 2);
-        }
-
-        function squareness(points) {
-            return points.reduce((sum, _val, i, array) => {
-                let dotp = normalizedDotProduct(i, array);
-
-                dotp = filterDotProduct(dotp);
-                return sum + 2.0 * Math.min(Math.abs(dotp - 1.0), Math.min(Math.abs(dotp), Math.abs(dotp + 1)));
-            }, 0);
-        }
-
-        function normalizedDotProduct(i, points) {
-            let a = points[(i - 1 + points.length) % points.length],
-                b = points[i],
-                c = points[(i + 1) % points.length],
-                p = subtractPoints(a, b),
-                q = subtractPoints(c, b);
-
-            p = normalizePoint(p, 1.0);
-            q = normalizePoint(q, 1.0);
-
-            return p[0] * q[0] + p[1] * q[1];
-        }
-
-        function subtractPoints(a, b) {
-            return [a[0] - b[0], a[1] - b[1]];
-        }
-
-        function addPoints(a, b) {
-            return [a[0] + b[0], a[1] + b[1]];
-        }
-
-        function euclideanDistance(a, b) {
-            const x = a[0] - b[0], y = a[1] - b[1];
-            return Math.sqrt((x * x) + (y * y));
-        }
-
-        function normalizePoint(point, scale) {
-            const vector = [0, 0];
-            const length = Math.sqrt(point[0] * point[0] + point[1] * point[1]);
-            if (length !== 0) {
-                vector[0] = point[0] / length;
-                vector[1] = point[1] / length;
-            }
-
-            vector[0] *= scale;
-            vector[1] *= scale;
-
-            return vector;
-        }
-
-        function filterDotProduct(dotp) {
-            if (lowerThreshold > Math.abs(dotp) || Math.abs(dotp) > upperThreshold)
-                return dotp;
-
-            return 0;
-        }
-
-        this.isDisabled = (nodes) => {
-            const points = nodes.slice(0, -1).map((n) => {
-                // const p = n.toLonLat().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-                const p = n;
-                return [p[0], p[1]];
-            });
-
-            return squareness(points);
-        };
-
-        return Orthogonalize();
-    };
-
     function OrthogonalizePlace() {
         const selected = sdk.Editing.getSelection();
         if (selected?.objectType === "venue") {
@@ -3707,23 +3529,26 @@ function pie(tries = 1) {
             if(selectedVenue?.geometry?.type === "Polygon") 
             {
                 // const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-                // const newGeom = WazeWrap.Util.OrthogonalizeGeometry(selectedVenue.geometry);
-                const newGeom = GeoJSONOrthogonalizeGeometry(selectedVenue.geometry);
+                // const newOLGeom = WazeWrap.Util.OrthogonalizeGeometry(selected.getOLGeometry().clone().components[0].components);
+                // const olGeometry = selectedVenue.geometry.coordinates[0].map((p) => {return proj4("EPSG:4326", "EPSG:900913", p)});
+                // olGeometry.map((g) => { return OpenLayers.Geometry.Point(g[0], g[1])});
+                const newGeom = GeoJSONOrthogonalizeGeometry(selectedVenue.geometry.coordinates);
 
                 // const UFG = require("Waze/Action/UpdateFeatureGeometry");
-                const originalGeometry = selected.geometry;
+                const originalGeometry = selectedVenue.geometry;
 
-                if (!GeomArraysEqual(originalGeometry.components[0].components, newGeom)) {
-                    selected.getOLGeometry().components[0].components = [].concat(newGeom);
-                    selected.getOLGeometry().components[0].clearBounds();
+                if (!GeomArraysEqual(originalGeometry.coordinates[0], newGeom)) {
+                    // selected.getOLGeometry().components[0].components = [].concat(newGeom);
+                    // selected.getOLGeometry().components[0].clearBounds();
 
-                    const action = new UFG(
-                        selected,
-                        W.model.venues,
-                        W.userscripts.toGeoJSONGeometry(originalGeometry),
-                        W.userscripts.toGeoJSONGeometry(selected.getOLGeometry())
-                    );
-                    W.model.actionManager.add(action);
+                    // const action = new UFG(
+                    //     selected,
+                    //     W.model.venues,
+                    //     W.userscripts.toGeoJSONGeometry(originalGeometry),
+                    //     W.userscripts.toGeoJSONGeometry(selected.getOLGeometry())
+                    // );
+                    // W.model.actionManager.add(action);
+                    sdk.Venues.updateVenue({venueId: selected.ids[0], geometry: turf.polygon(newGeom)});
                 }
             }
         }
@@ -3733,13 +3558,13 @@ function pie(tries = 1) {
         if (geom1.length !== geom2.length) return false;
 
         for (let i = 0; i < geom1.length; i++) {
-            if (different(geom1[i].x, geom2[i].x, 0.1) || different(geom1[i].y, geom2[i].y, 0.1)) return false;
+            if (different(geom1[i].x, geom2[i].x, 1e-6) || different(geom1[i].y, geom2[i].y, 1e-6)) return false;
         }
         return true;
     }
 
     function different(num1, num2, deltaLimit) {
-        if (Math.abs(num1) - Math.abs(num2) > Math.abs(deltaLimit)) return true;
+        if (Math.abs(num1 - num2) > Math.abs(deltaLimit)) return true;
         return false;
     }
 
