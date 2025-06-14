@@ -44,7 +44,7 @@
 let UpdateObject;
 let MultiAction;
 
-import { WmeSDK, DataModel, Editing, Venues } from "./node_modules/wme-sdk-typings/index";
+// import { WmeSDK, DataModel, Editing, Venues } from "./node_modules/wme-sdk-typings/index";
 // import "./node_modules/@turf/turf";
 // import { simplify } from "./node_modules/@turf/turf/dist/esm/index";
 /**
@@ -120,6 +120,9 @@ function pie(tries = 1) {
             labelText: (context) => {
                 return context?.feature?.properties?.style?.labelText;
             },
+            display: (context) => {
+                return context?.feature?.properties?.style?.display;
+            }
         },
         styleRules: [
             {
@@ -186,6 +189,16 @@ function pie(tries = 1) {
                     graphicHeight: 22,
                 },
             },
+            {
+                predicate: (properties) => {
+                    return properties.styleName === "placeNameLabel";
+                },
+                style: {
+                    display: "${display}",
+                    labelText: "${labelText}",
+                    labelYOffset: "${labelYOffset}"
+                },
+            },
         ],
     };
 
@@ -249,6 +262,15 @@ function pie(tries = 1) {
         } catch (ex) {
             // Report, but don't stop if ScriptUpdateMonitor fails.
             console.error(`${SCRIPT_NAME}:`, ex);
+        }
+    }
+    
+    function _setLayerVisibility(layerName, visibility) {
+        if (visibility) {
+            sdk.Map.setLayerVisibility({
+                layerName: layerName,
+                visibility: true,
+            });
         }
     }
 
@@ -395,17 +417,17 @@ function pie(tries = 1) {
                 )}"><input type="checkbox" id="_cbShowPlaceNamesPoint" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesPoint">${I18n.t(
                     "pie.prefs.ShowPointNames"
                 )}</label></div>`,
-                `<div id="divShowNamesArea"class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t(
+                `<div id="divShowNamesArea" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t(
                     "pie.prefs.ShowAreaNamesTitle"
                 )}"><input type="checkbox" id="_cbShowPlaceNamesArea" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesArea">${I18n.t(
                     "pie.prefs.ShowAreaNames"
                 )}</label></div>`,
-                `<br><div id="divShowNamesPLA"class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t(
+                `<br><div id="divShowNamesPLA" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t(
                     "pie.prefs.ShowPLANameTitle"
                 )}"><input type="checkbox" id="_cbShowPlaceNamesPLA" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesPLA">${I18n.t(
                     "pie.prefs.ShowPLAName"
                 )}</label></div>`,
-                `<br><div id="divShowNamesLock"class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t(
+                `<br><div id="divShowNamesLock" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t(
                     "pie.prefs.ShowLockLevelTitle"
                 )}"><input type="checkbox" id="_cbShowPlaceNamesLock" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesLock">${I18n.t(
                     "pie.prefs.ShowLockLevel"
@@ -504,14 +526,6 @@ function pie(tries = 1) {
         //     fontWeight: (settings.PlaceNameFontBold ? 'bold' : ''),
         // });
 
-        function _setLayerVisibility(layerName, visibility) {
-            if (visibility) {
-                sdk.Map.setLayerVisibility({
-                    layerName: layerName,
-                    visibility: true,
-                });
-            }
-        }
         function _addDisplayLayer(name, visible = false) {
             sdk.Map.addLayer(layerConfig[name]);
             if (layerConfig[name].displayInLayerSwitcher) {
@@ -659,7 +673,7 @@ function pie(tries = 1) {
 
         $("#_cbShowPlaceNames").on("change", function () {
             // PIEPlaceNameLayer.setVisibility(this.checked);
-            _setLayerVisibility("PIEPlaceNameLayer", this.checked);
+            _setLayerVisibility(layerConfig.PIEPlaceNameLayer.layerName, this.checked);
             $("#_cbShowPlaceNamesPoint")[0].disabled = !this.checked;
             $("#_cbShowPlaceNamesArea")[0].disabled = !this.checked;
             $("#_cbShowPlaceNamesPLA")[0].disabled = !this.checked;
@@ -1991,8 +2005,8 @@ function pie(tries = 1) {
         } else {
             $("#photoViewerButton").css("cursor", "pointer");
             $("#photoViewerButton").attr("title", "");
-            $("#photoViewerButton").unbind("click");
-            $("#photoViewerButton").click(show_visio);
+            $("#photoViewerButton").off("click");
+            $("#photoViewerButton").on("click", show_visio);
         }
     }
 
@@ -3048,7 +3062,7 @@ function pie(tries = 1) {
         if (showNames) {
             // var isPoint;
             // for (var placeID in W.model.venues.objects) {
-            for (const venue in sdk.DataModel.Venues.getAll()) {
+            for (const venue of sdk.DataModel.Venues.getAll()) {
                 // var venue = W.model.venues.getObjectById(placeID);
                 // isPoint = venue.isPoint();
                 const isPoint = (venue.geometry.type === "Point");
@@ -3092,12 +3106,18 @@ function pie(tries = 1) {
                                     (venue.name.trim() !== "" ? ` - ${venue.name}` : "") +
                                     (showLock ? ` (L${venue.lockRank + 1})` : "");
                             }
-                            const placeNameLabel = new OpenLayers.Feature.Vector(textLoc, {
+                            const placeNameLabel = turf.point(textLoc.coordinates, { styleName: "placeNameLabel", style: {
                                 display: "block",
                                 labelText: placeName.trim(),
-                                yOffset: isPoint ? -13 - placeName.split("\n").length * 5 : 0,
-                            });
-                            PIEPlaceNameLayer.addFeatures([placeNameLabel]);
+                                labelYOffset: isPoint ? -13 - placeName.split("\n").length * 5 : 0,
+                            }}, { id: `placeNameLabelPoint_${placeName.trim()}`});
+                            // const placeNameLabel = new OpenLayers.Feature.Vector(textLoc, {
+                            //     display: "block",
+                            //     labelText: placeName.trim(),
+                            //     yOffset: isPoint ? -13 - placeName.split("\n").length * 5 : 0,
+                            // });
+                            // PIEPlaceNameLayer.addFeatures([placeNameLabel]);
+                            sdk.Map.addFeatureToLayer({feature: placeNameLabel, layerName: layerConfig.PIEPlaceNameLayer.layerName});
                         }
                     }
                 }
