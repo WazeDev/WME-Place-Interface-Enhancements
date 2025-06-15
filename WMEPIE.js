@@ -3100,7 +3100,7 @@ function pie(tries = 1) {
                     const polygon = turf.bboxPolygon(mapExtent);
 
                     if ((isPoint && turf.booleanPointInPolygon(venue.geometry, polygon)) ||
-                        (!isPoint && turf.intersect(venue.geometry, polygon))) {
+                        (!isPoint && turf.intersect(turf.featureCollection([turf.polygon(venue.geometry.coordinates), polygon])))) {
                         if (
                             (isPoint && showPoint) ||
                             (!isPoint && showArea && !venue.isParkingLot()) ||
@@ -3637,7 +3637,7 @@ function pie(tries = 1) {
         function Orthogonalize() {
             let nodes = geometry[0],
                 points = nodes.slice(0, -1).map((n) => {
-                    const p = n;
+                    const p = [...n];
                     p[1] = lat2latp(p[1]);
                     return p;
                 }),
@@ -4041,8 +4041,20 @@ function pie(tries = 1) {
     }
 
     function updateGeometryInputs() {
-        const currPlaceModel = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-        const currPlaceGeom = currPlaceModel.getOLGeometry().components[0].clone().components;
+        // const currPlaceModel = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+        // const currPlaceGeom = currPlaceModel.getOLGeometry().components[0].clone().components;
+        const selection = sdk.Editing.getSelection();
+        if(selection.objectType !== "venue") {
+            console.error("Unable to edit geomtry for Non Venue");
+            return;
+        }
+        const selectedVenue = sdk.DataModel.Venues.getById({venueId: selection.ids[0]});
+        if(selectedVenue.geometry.type === "Point") {
+            console.error("No Point in Editing Geometry of a point venue");
+            return;
+        }
+        const currPlaceGeom = selectedVenue.geometry.coordinates[0];
+
         let standardGeom = "",
             WMEGeom = "",
             WKTGeom = "";
@@ -4059,11 +4071,11 @@ function pie(tries = 1) {
             }
             coord = currPlaceGeom[i];
             if (i < currPlaceGeom.length - 1) {
-                coord = coord.transform(W.Config.map.projection.local, W.Config.map.projection.remote);
-                standardGeom += `${coord.y}, ${coord.x}`;
-                WMEGeom += `${coord.x} ${coord.y}`;
+                // coord = coord.transform(W.Config.map.projection.local, W.Config.map.projection.remote);
+                standardGeom += `${coord[1]}, ${coord[0]}`;
+                WMEGeom += `${coord[0]} ${coord[1]}`;
             }
-            WKTGeom += `${coord.x} ${coord.y}`;
+            WKTGeom += `${coord[0]} ${coord[1]}`;
         }
         WKTGeom += ")";
         $("#piePlaceGeomWKT").val(WKTGeom);
@@ -4095,7 +4107,7 @@ function pie(tries = 1) {
             await new Promise((r) => setTimeout(r, 150));
             const $GeomMods = $(
                 `<div class="form-group" id="pieGeometryMods"><label class="control-label">Geometry</label><div class="controls">${
-                    selected.objectType === "mapComment"
+                    selected.objectType !== "mapComment"
                         ? '<i id="pieorthogonalize" title="Orthogonalize" class="fa fa-plus-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="piesimplifyplace" title="Simplify" class="fa fa-magic fa-2x" aria-hidden="true" style="cursor:pointer;"></i>'
                         : ""
                 } <i id="pierotate" title="Allow rotating the Place" class="fa fa-repeat fa-2x" aria-hidden="true" style="cursor:pointer; color:${
