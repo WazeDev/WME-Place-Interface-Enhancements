@@ -35,7 +35,7 @@
 /* global I18n */
 /* global _ */
 /* global WazeWrap */
-/* global GoogleLinkEnhancer */
+/* global SDKGoogleLinkEnhancer */
 /* global HoursParser */
 /* global require */
 /* global idbPVKeyval */
@@ -276,7 +276,7 @@ function pie(tries = 1) {
 
     async function init() {
         loadTranslations();
-        GLE = new GoogleLinkEnhancer(sdk);
+        GLE = new SDKGoogleLinkEnhancer(sdk, turf);
         hoursparser = new HoursParser();
 
         const $section = $("<div>", { style: "padding:8px 16px", id: "WMEPIESettings" });
@@ -2039,25 +2039,29 @@ function pie(tries = 1) {
                     return Number.parseInt(b.attributes.images.length) - Number.parseInt(a.attributes.images.length);
                 return Number.parseInt(b.attributes[property]) - Number.parseInt(a.attributes[property]);
             }
-            if (property === "name") return a.attributes[property].localeCompare(b.attributes[property]);
+            if (property === "name") return a.name.localeCompare(b.name);
             if (property === "ImageCount")
-                return Number.parseInt(a.attributes.images.length) - Number.parseInt(b.attributes.images.length);
-            return Number.parseInt(a.attributes[property]) - Number.parseInt(b.attributes[property]);
+                return a.images.length - b.images.length;
+            return Number.parseInt(a[property]) - Number.parseInt(b[property]);
         };
     }
 
     function Photos_scan() {
         catalog = [];
-        const venues = [];
-        for (const poi in W.model.venues.objects) venues.push(W.model.venues.getObjectById(poi));
+        // const venues = [];
+        // for (const poi in W.model.venues.objects) venues.push(W.model.venues.getObjectById(poi));
+        const venues = sdk.DataModel.Venues.getAll();
 
         venues.sort(dynamicSort((settings.sortOrder === "sortDesc" ? "-" : "") + settings.sortBy.substr(6)));
-        for (let i = 0; i < venues.length; i++) {
-            const venue = venues[i];
-            const vattr = venue.attributes;
-            if (typeof venue === "undefined" || vattr.id === null || venue.isSelected()) continue;
+        // for (let i = 0; i < venues.length; i++) {
+        //     const venue = venues[i];
+        //     const vattr = venue.attributes;
+        //     if (typeof venue === "undefined" || vattr.id === null || venue.isSelected()) continue;
 
-            if (vattr.images.length !== 0 && onScreen(venue)) catalog.push(vattr.id);
+        //     if (vattr.images.length !== 0 && onScreen(venue)) catalog.push(vattr.id);
+        // }
+        for(const venue of venues) {
+            if(venue?.images.length !== 0) catalog.push(venue.id);
         }
         Photos_show();
     }
@@ -2066,18 +2070,18 @@ function pie(tries = 1) {
         $("#showDiv").html("");
         let c = 0;
         let picCount = 0;
-        for (let i = 0; catalog[i]; i++) {
-            const venue = W.model.venues.getObjectById(catalog[i]);
-            const vattr = venue.attributes;
-            const myplace = await idbPVKeyval.get("Places", vattr.id);
+        for (const vId of catalog) {
+            const venue = sdk.DataModel.Venues.getById({venueId: vId});
+            // const vattr = venue.attributes;
+            const myplace = await idbPVKeyval.get("Places", vId);
             let matchCount = 0;
 
             if (!settings.PhotoViewerShowHiddenPlaces) {
                 if (typeof myplace !== "undefined") {
-                    for (let j = 0; j < vattr.images.length; j++) {
-                        if (myplace.placePicturesIDs.indexOf(vattr.images[j].id) > -1) matchCount++;
+                    for (let j = 0; j < venue.images.length; j++) {
+                        if (myplace.placePicturesIDs.indexOf(venue.images[j].id) > -1) matchCount++;
                     }
-                    if (matchCount === vattr.images.length)
+                    if (matchCount === venue.images.length)
                         //if all images are in the "okayed" list, skip displaying this Place
                         continue;
                 }
@@ -2095,14 +2099,14 @@ function pie(tries = 1) {
                 color: "white",
                 "overflow-y": "auto",
             });
-            if (vattr.approved) {
+            if (venue.approved) {
                 venueDiv.style.border = "1px solid #26bae8";
                 //venueDiv.title='This POI is approved';
             } else {
                 venueDiv.style.border = "1px solid #f00";
                 venueDiv.title = "This POI is not approved";
             }
-            if (vattr.adLocked) {
+            if (venue.isAdLocked) {
                 venueDiv.style.backgroundColor = "#600";
                 venueDiv.title = I18n.translations[I18n.currentLocale()].objects.venue.fields.adLocked;
                 //continue; Hide POI if it's adloacked (option)
@@ -2112,14 +2116,16 @@ function pie(tries = 1) {
             // POI's Name
             const venueName = document.createElement("span");
             venueName.style.float = "left";
-            venueName.innerHTML = vattr.name; // + ` (${parseInt(vattr.lockRank) + 1})`;
-            if (vattr.categories[0] === "RESIDENCE_HOME") {
-                const address = venue.getAddress();
-                venueName.innerHTML = `${address.attributes.houseNumber} ${address.attributes.street.name}`;
+            venueName.innerHTML = venue.name; // + ` (${parseInt(vattr.lockRank) + 1})`;
+            if (venue.categories[0] === "RESIDENCE") {
+                const address = sdk.DataModel.Venues.getAddress({venueId: venue.id});
+                if(address !== null) {
+                    venueName.innerHTML = `${address?.houseNumber} ${address?.street.name}`;
+                }
             }
             venueDiv.appendChild(venueName);
 
-            if (vattr.approved) {
+            if (venue.approved) {
                 // Whitelist button
                 const venueCheck = document.createElement("span");
                 venueCheck.style.float = "right";
@@ -2132,22 +2138,22 @@ function pie(tries = 1) {
                     ((venue, venueDiv) =>
                         async function () {
                             await idbPVKeyval.set("Places", {
-                                placeID: venue.attributes.id,
-                                placeName: venue.attributes.name,
-                                placePicturesIDs: venue.attributes.images.map((image) => {
-                                    if (image.attributes.approved) return image.id;
+                                placeID: venue.id,
+                                placeName: venue.name,
+                                placePicturesIDs: venue.images.map((image) => {
+                                    if (image.isApproved) return image.id;
                                 }),
                             });
 
                             if (
                                 !settings.PhotoViewerShowHiddenPlaces &&
-                                ((matchCount > 0 && matchCount === vattr.images.length) || matchCount == 0)
+                                ((matchCount > 0 && matchCount === venue.images.length) || matchCount === 0)
                             ) {
                                 if (settings.PhotoViewerPreserveLayout) $(this).parent().css("visibility", "hidden");
                                 else $(this).parent().remove();
                                 $("#placessqty").html($("#placessqty").html() - 1);
                                 $("#imagesqty").html(
-                                    $("#imagesqty").html() - Number.parseInt(venue.attributes.images.length)
+                                    $("#imagesqty").html() - Number.parseInt(venue.images.length)
                                 );
                             } else if (settings.PhotoViewerShowHiddenPlaces)
                                 $(this).parent().find(".approvedImage.pvImage").css("border-color", "#fff"); //turn the border white on the images that are not in a PUR
@@ -2215,22 +2221,29 @@ function pie(tries = 1) {
             venuePos.style.margin = "0 5px";
             venuePos.style.cursor = "pointer";
             venuePos.innerHTML = '<i style="color:#aaa;" class="fa fa-crosshairs" title="Geolocate and Select"></i>'; // title="'+ I18n.translations[I18n.currentLocale()].geolocation.focus-btn +'"
-            venuePos.id = catalog[i];
+            venuePos.id = vId;
             venuePos.addEventListener(
                 "click",
                 ((geo, id) => () => {
                     hide_visio();
                     // debugger;
                     const venueList = [];
-                    venueList.push(W.model.venues.objects[id]);
+                //     venueList.push(W.model.venues.objects[id]);
 
-                    const lon = ((geo.left + geo.right) / 2 + geo.right) / 2;
-                    const lat = ((geo.bottom + geo.top) / 2 + geo.bottom) / 2;
-                    W.map.setCenter(new OpenLayers.Geometry.Point(lon, lat));
-                    W.map.getOLMap().zoomTo(17);
-                    W.selectionManager.unselectAll();
-                    W.selectionManager.setSelectedModels(venueList);
-                })(vattr.geometry.bounds, catalog[i]),
+                //     const lon = ((geo.left + geo.right) / 2 + geo.right) / 2;
+                //     const lat = ((geo.bottom + geo.top) / 2 + geo.bottom) / 2;
+                //     W.map.setCenter(new OpenLayers.Geometry.Point(lon, lat));
+                //     W.map.getOLMap().zoomTo(17);
+                //     W.selectionManager.unselectAll();
+                //     W.selectionManager.setSelectedModels(venueList);
+                    // venueList.push(sdk.DataModel.Venues.getById({venueId: id}));
+
+                    const lon = ((geo[0] + geo[2]) / 2 + geo[2]) / 2;
+                    const lat = ((geo[3] + geo[1]) / 2 + geo[3]) / 2;
+                    sdk.Map.setMapCenter({lonLat: {lat: lat, lon: lon}, zoomLevel: 17});
+                    sdk.Editing.clearSelection();
+                    sdk.Editing.setSelection({selection: {ids: [id], objectType: "venue"}});
+                })(venue.geometry?.bbox ? venue.geometry?.bbox : turf.bbox(venue.geometry) , vId),
                 false
             );
             venueDiv.appendChild(venuePos);
@@ -2241,22 +2254,22 @@ function pie(tries = 1) {
             const venueLock = document.createElement("div");
             venueLock.innerHTML = `<span style="font-size:10px; color:#aaa;">${
                 I18n.translations[I18n.currentLocale()].edit.segment.fields.lock
-            }: ${vattr.lockRank + 1}</span>`;
+            }: ${venue.lockRank + 1}</span>`;
             venueDiv.appendChild(venueLock);
             //Show differents categories
             const venueCat = document.createElement("div");
-            for (let j = 0; I18n.translations[I18n.currentLocale()].venues.categories[vattr.categories[j]]; j++)
+            for (let j = 0; I18n.translations[I18n.currentLocale()].venues.categories[venue.categories[j]]; j++)
                 venueCat.innerHTML += `<span style="font-size:10px;color:#aaa;">${
-                    I18n.translations[I18n.currentLocale()].venues.categories[vattr.categories[j]]
-                }${j < vattr.categories.length - 1 ? "," : ""} </span>`;
+                    I18n.translations[I18n.currentLocale()].venues.categories[venue.categories[j]]
+                }${j < venue.categories.length - 1 ? "," : ""} </span>`;
 
             venueCat.innerHTML += '<div style="clear:both;"></div>';
             venueDiv.appendChild(venueCat);
 
             //Show differents images
-            for (let k = 0; vattr.images[k]; k++) {
+            for (let k = 0; venue.images[k]; k++) {
                 const imgDIV = document.createElement("div");
-                imgDIV.id = vattr.images[k].attributes.id;
+                imgDIV.id = venue.images[k].id;
                 $(imgDIV).addClass("pvImage");
                 $(imgDIV).css({ float: "left", "padding-right": "3px" });
                 if (k > 0) $(imgDIV).css("margin-left", "5px");
@@ -2268,10 +2281,10 @@ function pie(tries = 1) {
                     margin: "5px",
                     cursor: "pointer",
                 });
-                venueImg.src = `https://venue-image.waze.com/thumbs/thumb347_${vattr.images[k].attributes.id}`;
-                if (vattr.images[k].attributes.approved === true) {
+                venueImg.src = `https://venue-image.waze.com/thumbs/thumb347_${venue.images[k].id}`;
+                if (venue.images[k].isApproved) {
                     const picIsWhitelisted =
-                        typeof myplace !== "undefined" && myplace.placePicturesIDs.indexOf(vattr.images[k].id) > -1;
+                        typeof myplace !== "undefined" && myplace.placePicturesIDs.indexOf(venue.images[k].id) > -1;
                     imgDIV.style.border = `1px solid ${picIsWhitelisted ? "#fff" : "#0f0"}`;
                     $(imgDIV).addClass("approvedImage");
                     if (picIsWhitelisted) imgDIV.title = "This image has been whitelisted";
@@ -2283,30 +2296,31 @@ function pie(tries = 1) {
                     "click",
                     ((imageid, venue, approved) => () => {
                         Photos_zoom(venue, imageid, approved);
-                        W.selectionManager.unselectAll();
+                        // W.selectionManager.unselectAll();
+                        sdk.Editing.clearSelection();
                         //Disabling selecting the Place when viewing the expanded picture
                         //let venueList = [];
                         //venueList.push(W.model.venues.objects[idvenue]);
                         //W.selectionManager.setSelectedModels(venueList);
                         $("#venue-edit-photos").css("display", "block");
                         $("#venue-edit-general").css("display", "none");
-                    })(vattr.images[k].attributes.id, venue, vattr.images[k].attributes.approved),
+                    })(venue.images[k].id, venue, venue.images[k].isApproved),
                     false
                 );
 
-                if (vattr.images[k].attributes.approved) {
+                if (venue.images[k].isApproved) {
                     //Add a trash can icon to delete a picture if the picture is approved on the Place (not a PUR)
                     const deleteImg = document.createElement("i");
                     $(deleteImg).addClass("fa fa-trash-o");
                     $(deleteImg).css({ float: "right", cursor: "pointer", title: "Delete photo" });
-                    $(deleteImg).prop({ "data-id": vattr.id, "data-imageID": vattr.images[k].attributes.id });
-                    $(deleteImg).click(function () {
+                    $(deleteImg).prop({ "data-id": venue.id, "data-imageID": venue.images[k].id });
+                    $(deleteImg).on("click", function () {
                         const imageID = $(this).prop("data-imageID");
                         DeleteImage(venue, imageID);
                     });
                     imgDIV.appendChild(deleteImg);
                 } else {
-                    if (vattr.approved) {
+                    if (venue.isApproved) {
                         const purActions = document.createElement("span");
                         purActions.style.float = "right";
                         purActions.style.marginRight = "5px";
@@ -2316,7 +2330,7 @@ function pie(tries = 1) {
                         purApprove.title = "Approve this picture";
                         purApprove.style.color = "#0f0";
                         purApprove.venue = venue;
-                        purApprove.currImage = vattr.images[k].attributes.id;
+                        purApprove.currImage = venue.images[k].id;
                         purApprove.addEventListener(
                             "click",
                             function (evt) {
@@ -2336,7 +2350,7 @@ function pie(tries = 1) {
                         purReject.title = "Reject this picture";
                         purReject.style.color = "#f00";
                         purReject.venue = venue;
-                        purReject.currImage = vattr.images[k].attributes.id;
+                        purReject.currImage = venue.images[k].id;
                         purReject.addEventListener(
                             "click",
                             function (evt) {
@@ -2374,10 +2388,16 @@ function pie(tries = 1) {
         }
         if (pur) W.model.actionManager.add(new (require("Waze/Action/UpdatePlaceUpdate"))(ven, pur, approve));
     }
-
+    /**
+     * Finds the closest on-screen drivable segment to the given point, ignoring PLR and PR segments if the options are set
+     * Similar to WazeWrap.Util just using turf.
+     * @function Photos_zoom
+     * @param {Venue} Venue Being Modified
+     * @param {String} Image ID
+     **/
     function DeleteImage(venue, imageID) {
         const UpdateObject = require("Waze/Action/UpdateObject");
-        const newimages = [].concat(venue.attributes.images);
+        const newimages = [].concat(venue.images);
         for (let i = newimages.length - 1; i >= 0; i--) {
             if (newimages[i].id === imageID) newimages.splice(i, 1);
         }
@@ -2394,15 +2414,23 @@ function pie(tries = 1) {
         }
     }
 
-    function onScreen(obj) {
-        if (obj.getOLGeometry()) return W.map.getExtent().intersectsBounds(obj.getOLGeometry().getBounds());
-        return false;
-    }
+    // function onScreen(obj) {
+    //     if (obj.getOLGeometry()) return W.map.getExtent().intersectsBounds(obj.getOLGeometry().getBounds());
+    //     return false;
+    // }
 
+    /**
+     * Finds the closest on-screen drivable segment to the given point, ignoring PLR and PR segments if the options are set
+     * Similar to WazeWrap.Util just using turf.
+     * @function Photos_zoom
+     * @param {Venue} The given point to find the closest segment to
+     * @param {String} If true, Parking Lot Road segments will be ignored when finding the closest segment
+     * @param {boolean} If true, Private Road segments will be ignored when finding the closest segment
+     **/
     function Photos_zoom(venue, id, approved) {
         const zoom = document.createElement("div");
         let zoomPicIndex = null;
-        const images = venue.attributes.images;
+        const images = venue.images;
         for (let i = 0; i < images.length; i++) {
             if (images[i].id === id) {
                 zoomPicIndex = i;
@@ -2432,11 +2460,11 @@ function pie(tries = 1) {
         const zoomDateDiv = document.createElement("div");
         zoomDateDiv.setAttribute("id", "zoomDate");
         $(zoomDateDiv).css({ "text-align": "center", position: "relative", top: "30px", color: "white" });
-        const d = new Date(images[zoomPicIndex].attributes.date);
+        const d = new Date(images[zoomPicIndex].creationDate);
         zoomDateDiv.innerHTML = `${d.toLocaleString()}`;
         zoom.appendChild(zoomDateDiv);
 
-        if (venue.attributes.images.length > 1) {
+        if (venue.images.length > 1) {
             const zoomNavDiv = document.createElement("div");
             $(zoomNavDiv).css({ "text-align": "center", position: "relative", top: "30px" });
             zoomNavDiv.innerHTML =
@@ -2452,23 +2480,23 @@ function pie(tries = 1) {
             DeleteImage(venue, id);
         });
 
-        $("#zoomPrev").on("click", () => {
+        $("#zoomPrev").on("click", (event) => {
             if (zoomPicIndex > 0) {
                 zoomPicIndex--;
                 $("#zoomImage").attr("src", `https://venue-image.waze.com/thumbs/thumb700_${images[zoomPicIndex].id}`);
                 id = images[zoomPicIndex].id;
-                const d = new Date(images[zoomPicIndex].attributes.date);
+                const d = new Date(images[zoomPicIndex].creationDate);
                 $("#zoomDate").text(d.toLocaleString());
             }
             event.stopPropagation();
         });
 
-        $("#zoomNext").on("click", () => {
+        $("#zoomNext").on("click", (event) => {
             if (zoomPicIndex < images.length - 1) {
                 zoomPicIndex++;
                 $("#zoomImage").attr("src", `https://venue-image.waze.com/thumbs/thumb700_${images[zoomPicIndex].id}`);
                 id = images[zoomPicIndex].id;
-                const d = new Date(images[zoomPicIndex].attributes.date);
+                const d = new Date(images[zoomPicIndex].creationDate);
                 $("#zoomDate").text(d.toLocaleString());
             }
             event.stopPropagation();
@@ -2696,7 +2724,7 @@ function pie(tries = 1) {
                 },
                 name: "PIEHide",
             });
-            W.map.venueLayer.styleMap.styles["default"].rules.push(myRule);
+            W.map.venueLayer.styleMap.styles.default.rules.push(myRule);
             W.map.venueLayer.redraw();
         } else {
             W.map.venueLayer.styleMap.styles.default.rules.splice(index, 1);
@@ -3949,7 +3977,7 @@ function pie(tries = 1) {
             updateGeometryInputs();
         });
 
-        $("#pieBtnApplyWazeGeom").click(() => {
+        $("#pieBtnApplyWazeGeom").on("click", () => {
             const lines = $("#piePlaceGeomWaze").val().split("\n");
 
             for (let i = 0; i < lines.length; i++) {
@@ -3969,7 +3997,7 @@ function pie(tries = 1) {
             updateGeometryInputs();
         });
 
-        $("#pieBtnApplyWKTGeom").click(() => {
+        $("#pieBtnApplyWKTGeom").on("click", () => {
             const lines = $("#piePlaceGeomWKT")
                 .val()
                 .match(/POLYGON\((.*)\)/)[1]
@@ -3989,7 +4017,7 @@ function pie(tries = 1) {
             updateGeometryInputs();
         });
 
-        $("#pieGeomClose").click(() => {
+        $("#pieGeomClose").on("click", () => {
             $("#pieViewEditGeom").remove();
         });
     }
@@ -4093,27 +4121,50 @@ function pie(tries = 1) {
             });
 
             $("#pieClearGeom").on("click", () => {
-                const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-                const centerLonLat = selected.getOLGeometry().bounds.getCenterLonLat();
-                const newGeom = OpenLayers.Geometry.Polygon.createRegularPolygon(
-                    new OpenLayers.Geometry.Point(centerLonLat.lon, centerLonLat.lat),
-                    20,
-                    4,
-                    null
-                ).components[0].components;
-                const UFG = require("Waze/Action/UpdateFeatureGeometry");
-                const originalGeometry = selected.getOLGeometry().clone();
+                // const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+                const selected = sdk.Editing.getSelection();
+                if(!selected || selected.objectType !== "venue") {
+                    console.error("Unable to clear Geometry on Someothing other than place");
+                    return;
+                }
+                const selectedVenue = sdk.DataModel.Venues.getById({venueId : selected.ids[0]});
+                if(selectedVenue.geometry.type === "Point") {
+                    console.error("Unable to clear Geometry of a Point");
+                    return;
+                }
+                // const centerLonLat = selected.getOLGeometry().bounds.getCenterLonLat();
+                const centerPoint = turf.centroid(selectedVenue.geometry);
+                // Because SDK keeps everything in Degrees of Lattitude and Longitude we have to figure out
+                // What 20 points is.
+                const offsetValues = proj4("EPSG:900913", "EPSG:4326", [20, 0]);
+                const polygonCoordinates = [
+                    [centerPoint.geometry.coordinates[0], centerPoint.geometry.coordinates[1] - offsetValues[0]],
+                    [centerPoint.geometry.coordinates[0] - offsetValues[0], centerPoint.geometry.coordinates[1]],
+                    [centerPoint.geometry.coordinates[0], centerPoint.geometry.coordinates[1] + offsetValues[0]],
+                    [centerPoint.geometry.coordinates[0] + offsetValues[0], centerPoint.geometry.coordinates[1]],
+                    [centerPoint.geometry.coordinates[0], centerPoint.geometry.coordinates[1] - offsetValues[0]],
+                ]
+                // const newGeom = OpenLayers.Geometry.Polygon.createRegularPolygon(
+                //     new OpenLayers.Geometry.Point(centerLonLat.lon, centerLonLat.lat),
+                //     20,
+                //     4,
+                //     null
+                // ).components[0].components;
+                const newGeom = turf.polygon([polygonCoordinates]);
+                // const UFG = require("Waze/Action/UpdateFeatureGeometry");
+                // const originalGeometry = selected.getOLGeometry().clone();
 
-                selected.getOLGeometry().components[0].components = [].concat(newGeom);
-                selected.getOLGeometry().components[0].clearBounds();
+                // selected.getOLGeometry().components[0].components = [].concat(newGeom);
+                // selected.getOLGeometry().components[0].clearBounds();
 
-                const action = new UFG(
-                    selected,
-                    W.model.venues,
-                    W.userscripts.toGeoJSONGeometry(originalGeometry),
-                    W.userscripts.toGeoJSONGeometry(selected.getOLGeometry())
-                );
-                W.model.actionManager.add(action);
+                // const action = new UFG(
+                //     selected,
+                //     W.model.venues,
+                //     W.userscripts.toGeoJSONGeometry(originalGeometry),
+                //     W.userscripts.toGeoJSONGeometry(selected.getOLGeometry())
+                // );
+                // W.model.actionManager.add(action);
+                sdk.DataModel.Venues.updateVenue({venueId: selectedVenue.id, geometry: newGeom.geometry});
             });
 
             $("#pierotate").on("click", () => {
