@@ -2795,10 +2795,10 @@ function pie(tries = 1) {
 
             //place center to nav point
             let startPt = sdkVenue.geometry;
-            if (isArea) startPt = turf.centroid(sdkVenue.geometry);
+            if (isArea) startPt = turf.centroid(sdkVenue.geometry).geometry;
             // lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([startPt, navPoint]), {}, lineStyleToNavPoint);
             lineFeature = turf.lineString(
-                [startPt.geometry.coordinates, navPoint.coordinates],
+                [startPt.coordinates, navPoint.coordinates],
                 { styleName: "lineStyleToNavPoint" },
                 { id: `point_${navPoint.toString()}` }
             );
@@ -2902,14 +2902,14 @@ function pie(tries = 1) {
         }
 
         getActiveEditor().then((val) => {
-            if (WazeWrap.hasSelectedFeatures()) {
-                const selectedItem = WazeWrap.getSelectedFeatures()[0];
-
-                if ("venue" !== selectedItem.WW.getType()) {
+            const selected = sdk.Editing.getSelection();
+            if (selected !== null) {
+                if ("venue" !== selected.objectType) {
                     removeDragCallbacks();
                     clearClosesetSegmentLayerFeatures();
                 } else {
-                    placeIsPoint = selectedItem.WW.getObjectModel().isPoint();
+                    const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+                    placeIsPoint = (selectedVenue.geometry.type === "Point");
                     if (placeIsPoint) {
                         //Event when the Place is moved
                         /*
@@ -2920,16 +2920,16 @@ function pie(tries = 1) {
                                 entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
                             findNearestSegment(entryExitPoint);
                         };*/
-                        let entryExitPoint = selectedItem.WW.getObjectModel().getOLGeometry().clone();
-                        if (selectedItem.WW.getObjectModel().getNavigationPoints().length > 0)
-                            entryExitPoint = selectedItem.WW.getObjectModel().attributes.entryExitPoints[0]._point;
+                        let entryExitPoint = selectedVenue.geometry;
+                        if (selectedVenue.navigationPoints.length > 0)
+                            entryExitPoint = selectedVenue.navigationPoints[0].point;
                         drawNearestLanding(entryExitPoint);
                     } else {
-                        if (selectedItem.WW.getObjectModel().getNavigationPoints().length === 0)
-                            drawNearestLanding(selectedItem.WW.getObjectModel().getOLGeometry().getCentroid());
+                        if (selectedVenue.navigationPoints.length === 0)
+                            drawNearestLanding(turf.centroid(selectedVenue.geometry));
                         else {
-                            for (let i = 0; i < selectedItem.WW.getObjectModel().getNavigationPoints().length; i++)
-                                drawNearestLanding(selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point);
+                            for (let i = 0; i < selectedVenue.navigationPoints.length; i++)
+                                drawNearestLanding(selectedVenue.navigationPoints.point);
                         }
                     }
                 }
@@ -3048,7 +3048,7 @@ function pie(tries = 1) {
         // WazeWrap.Events.register("afteraction",null, handler);
         sdk.Events.on({ eventName: "wme-selection-changed", eventHandler: handler });
         sdk.Events.on({ eventName: "wme-after-undo", eventHandler: handler });
-        sdk.Events.on({ eventName: "wme-after-redo-clear", eventHandler: handler });
+        // sdk.Events.on({ eventName: "wme-after-redo-clear", eventHandler: handler });
         sdk.Events.on({ eventName: "wme-after-edit", eventHandler: handler });
     }
 
@@ -3556,7 +3556,7 @@ function pie(tries = 1) {
         sdk.Events.on({ eventName: "wme-selection-changed", eventHandler: updatePlaceSizeDisplay });
         sdk.Events.on({ eventName: "wme-after-undo", eventHandler: updatePlaceSizeDisplay });
         sdk.Events.on({ eventName: "wme-after-edit", eventHandler: updatePlaceSizeDisplay });
-        sdk.Events.on({ eventName: "wme-after-redo-clear", eventHandler: updatePlaceSizeDisplay });
+        // sdk.Events.on({ eventName: "wme-after-redo-clear", eventHandler: updatePlaceSizeDisplay });
         // W.model.actionManager.events.register("noActions", null, noActions);
         sdk.Events.on({ eventName: "wme-no-edits", eventHandler: noActions });
         updatePlaceSizeDisplay();
@@ -3635,7 +3635,7 @@ function pie(tries = 1) {
             upperThreshold = Math.cos(nomthreshold * Math.PI / 180);
 
         function Orthogonalize() {
-            let nodes = geometry[0],
+            let nodes = structuredClone(geometry[0]),
                 points = nodes.slice(0, -1).map((n) => {
                     const p = [...n];
                     p[1] = lat2latp(p[1]);
@@ -3663,9 +3663,9 @@ function pie(tries = 1) {
                 n[1] = latp2lat(n[1]);
                 const pp = n;
 
-                const id = nodes[corner.i].id;
+                const id = nodes[corner.i].toString();
                 for (i = 0; i < nodes.length; i++) {
-                    if (nodes[i].id !== id)
+                    if (nodes[i].toString() !== id)
                         continue;
 
                     nodes[i][0] = pp[0];
@@ -3675,15 +3675,14 @@ function pie(tries = 1) {
                 return nodes;
             }
             
-            let best,
-                originalPoints = nodes.slice(0, -1).map((n) => {
-                    const p = n;
+            const originalPoints = nodes.slice(0, -1).map((n) => {
+                    const p = [...n];
                     p[1] = lat2latp(p[1]);
                     return p;
                 });
             score = Number.POSITIVE_INFINITY;
 
-            for (i = 0; i < 1000; i++) {
+            for (i = 0; i < 1000 && !(score < epsilon); i++) {
                 motions = points.map(calcMotion);
                 for (j = 0; j < motions.length; j++) {
                     const tmp = addPoints(points[j], motions[j]);
@@ -3692,14 +3691,14 @@ function pie(tries = 1) {
                 }
                 const newScore = squareness(points);
                 if (newScore < score) {
-                    best = [].concat(points);
+                    // best = [].concat(points);
                     score = newScore;
                 }
-                if (score < epsilon)
-                    break;
+                // if (score < epsilon)
+                //     break;
             }
 
-            points = best;
+            // points = best;
 
             for (i = 0; i < points.length; i++) {
                 // only move the points that actually moved
@@ -3708,9 +3707,9 @@ function pie(tries = 1) {
                     n[1] = latp2lat(n[1]);
                     const pp = n;
 
-                    const id = nodes[i].id;
+                    const id = nodes[i].toString();
                     for (j = 0; j < nodes.length; j++) {
-                        if (nodes[j].id !== id)
+                        if (nodes[j].toString() !== id)
                             continue;
 
                         nodes[j][0] = pp[0];
@@ -3723,9 +3722,9 @@ function pie(tries = 1) {
             for (i = 0; i < points.length; i++) {
                 const dotp = normalizedDotProduct(i, points);
                 if (dotp < -1 + epsilon) {
-                    id = nodes[i].id;
+                    id = nodes[i].toString();
                     for (j = 0; j < nodes.length; j++) {
-                        if (nodes[j].id !== id)
+                        if (nodes[j].toString() !== id)
                             continue;
 
                         nodes[j] = false;
@@ -3863,7 +3862,8 @@ function pie(tries = 1) {
                     //     W.userscripts.toGeoJSONGeometry(selected.getOLGeometry())
                     // );
                     // W.model.actionManager.add(action);
-                    sdk.Venues.updateVenue({ venueId: selected.ids[0], geometry: turf.polygon(newGeom) });
+                    const newPolygon = turf.polygon([newGeom]);
+                    sdk.DataModel.Venues.updateVenue({ venueId: selected.ids[0], geometry: newPolygon.geometry });
                 }
             }
         }
@@ -3873,7 +3873,7 @@ function pie(tries = 1) {
         if (geom1.length !== geom2.length) return false;
 
         for (let i = 0; i < geom1.length; i++) {
-            if (different(geom1[i].x, geom2[i].x, 1e-6) || different(geom1[i].y, geom2[i].y, 1e-6)) return false;
+            if (different(geom1[i][0], geom2[i][0], 1e-6) || different(geom1[i][1], geom2[i][1], 1e-6)) return false;
         }
         return true;
     }
@@ -4184,10 +4184,10 @@ function pie(tries = 1) {
                 $("#pierotate").css("color", settings.Rotate ? "rgb(0,180,0)" : "black");
                 saveSettings();
                 getActiveEditor().then((val) => {
-                    if ((val.mode & OpenLayers.Control.ModifyFeature.ROTATE) === 0)
-                        val.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
-                    else val.mode &= ~OpenLayers.Control.ModifyFeature.ROTATE;
-                    val.resetVertices();
+                    if ((val.olControl.mode & OpenLayers.Control.ModifyFeature.ROTATE) === 0)
+                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
+                    else val.olControl.mode &= ~OpenLayers.Control.ModifyFeature.ROTATE;
+                    val.olControl.resetVertices();
                 });
             });
 
@@ -4196,27 +4196,27 @@ function pie(tries = 1) {
                 $("#pieresize").css("color", settings.Resize ? "rgb(0,180,0)" : "black");
                 saveSettings();
                 getActiveEditor().then((val) => {
-                    if ((val.mode & OpenLayers.Control.ModifyFeature.RESIZE) === 0)
-                        val.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
-                    else val.mode &= ~OpenLayers.Control.ModifyFeature.RESIZE;
-                    val.resetVertices();
+                    if ((val.olControl.mode & OpenLayers.Control.ModifyFeature.RESIZE) === 0)
+                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
+                    else val.olControl.mode &= ~OpenLayers.Control.ModifyFeature.RESIZE;
+                    val.olControl.resetVertices();
                 });
             });
 
             //activate the changes when a Place is selected
             if (settings.Rotate) {
                 getActiveEditor().then((val) => {
-                    if ((val.mode & OpenLayers.Control.ModifyFeature.ROTATE) === 0)
-                        val.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
-                    val.resetVertices();
+                    if ((val.olControl.mode & OpenLayers.Control.ModifyFeature.ROTATE) === 0)
+                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
+                    val.olControl.resetVertices();
                 });
             }
 
             if (settings.Resize) {
                 getActiveEditor().then((val) => {
-                    if ((val.mode & OpenLayers.Control.ModifyFeature.RESIZE) === 0)
-                        val.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
-                    val.resetVertices();
+                    if ((val.olControl.mode & OpenLayers.Control.ModifyFeature.RESIZE) === 0)
+                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
+                    val.olControl.resetVertices();
                 });
             }
         } else if (
