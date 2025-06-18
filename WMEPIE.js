@@ -13,7 +13,7 @@
 // @author       JustinS83
 // @grant        GM_xmlhttpRequest
 // @require      https://cdn.jsdelivr.net/npm/@turf/turf@7.2.0/turf.min.js
-// @require      https://cdn.jsdelivr.net/npm/proj4@2.17.0/dist/proj4.min.js
+// @require      https://cdn.jsdelivr.net/npm/proj4@2.16.2/dist/proj4.min.js
 // @require      https://greasyfork.org/scripts/24851-wazewrap/code/WazeWrap.js
 // @require      https://greasyfork.org/scripts/27023-jscolor/code/JSColor.js
 // @require      https://update.greasyfork.org/scripts/37486/1158035/WME%20Utils%20-%20HoursParser.js
@@ -63,6 +63,7 @@ unsafeWindow.SDK_INITIALIZED.then(() => {
 
     console.log(`SDK v ${sdk.getSDKVersion()} on ${sdk.getWMEVersion()} initialized`);
     sdk.Events.once({ eventName: "wme-ready" }).then(pie);
+    LetsCallSomeGarbage();
 });
 
 function pie(tries = 1) {
@@ -753,7 +754,7 @@ function pie(tries = 1) {
                 // W.model.venues.on('objectschanged', ObjectsChanged);
                 sdk.Events.on({ eventName: "wme-after-undo", eventHandler: checkSelection });
                 sdk.Events.on({ eventName: "wme-selection-changed", eventHandler: checkSelection });
-                sdk.Events.on({ eventName: "me-data-model-objects-changed", eventHandler: ObjectsChanged });
+                // sdk.Events.on({ eventName: "wme-data-model-objects-changed", eventHandler: ObjectsChanged });
             } else {
                 // WazeWrap.Events.unregister('afterundoaction', this, checkSelection);
                 // WazeWrap.Events.unregister('afteraction', this, checkSelection);
@@ -761,7 +762,7 @@ function pie(tries = 1) {
                 // W.model.venues.off('objectschanged', ObjectsChanged);
                 sdk.Events.off({ eventName: "wme-after-undo", eventHandler: checkSelection });
                 sdk.Events.off({ eventName: "wme-selection-changed", eventHandler: checkSelection });
-                sdk.Events.off({ eventName: "me-data-model-objects-changed", eventHandler: ObjectsChanged });
+                // sdk.Events.off({ eventName: "wme-data-model-objects-changed", eventHandler: ObjectsChanged });
             }
         });
 
@@ -932,7 +933,7 @@ function pie(tries = 1) {
             // WazeWrap.Events.register('selectionchanged', null, checkSelection);
             sdk.Events.on({ eventName: "wme-selection-changed", eventHandler: checkSelection });
             // W.model.venues.on('objectschanged', ObjectsChanged);
-            sdk.Events.on({ eventName: "wme-data-model-objects-changed", eventHandler: ObjectsChanged });
+            // sdk.Events.on({ eventName: "wme-data-model-objects-changed", eventHandler: ObjectsChanged });
         }
 
         if (settings.OpenPUR)
@@ -1593,26 +1594,26 @@ function pie(tries = 1) {
         //         console.error("PIE:", ex);
         //     }
         // });
-        sdk.Events.on({
-            eventName: "wme-data-model-objects-changed",
-            eventHandler: (dataModelName, objectIds) => {
-                try {
-                    const selection = sdk.Editing.getSelection();
-                    if (selection !== null && dataModelName === "venues") {
-                        for (const objId of objectIds) {
-                            for (const category of sdk.DataModel.Venues.getById({ venueId: objId }).categories) {
-                                if (settings.HideShopAndServices && category === "SHOPPING_AND_SERVICES") {
-                                    $("wz-card.categories-card:eq(1)").hide();
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                } catch (ex) {
-                    console.error("PIE: ", ex);
-                }
-            },
-        });
+        // sdk.Events.on({
+        //     eventName: "wme-data-model-objects-changed",
+        //     eventHandler: (dataModelName, objectIds) => {
+        //         try {
+        //             const selection = sdk.Editing.getSelection();
+        //             if (selection !== null && dataModelName === "venues") {
+        //                 for (const objId of objectIds) {
+        //                     for (const category of sdk.DataModel.Venues.getById({ venueId: objId }).categories) {
+        //                         if (settings.HideShopAndServices && category === "SHOPPING_AND_SERVICES") {
+        //                             $("wz-card.categories-card:eq(1)").hide();
+        //                             break;
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         } catch (ex) {
+        //             console.error("PIE: ", ex);
+        //         }
+        //     },
+        // });
 
         extprovobserver.observe(document.getElementById("edit-panel"), { childList: true, subtree: true });
 
@@ -1764,8 +1765,38 @@ function pie(tries = 1) {
         sdk.Events.on({ eventName: "wme-map-layer-changed", eventHandler: DisplayPlaceNames });
 
         //Shamelessly copied from URO+
-        const MO_MPLayer = new MutationObserver(MPLayerChanged);
-        MO_MPLayer.observe(W.map.getLayerByName("mapProblems").div, { childList: true });
+        // const MO_MPLayer = new MutationObserver(MPLayerChanged);
+        // MO_MPLayer.observe(W.map.getLayerByName("mapProblems").div, { childList: true });
+        function dataModelObjectUpdate(dataModelName, objectIds) {
+            if(dataModelName === "mapProblems") {
+                for(const objId of objectIds) {
+                    MarkerClick(objId);
+                }
+            }
+            if(dataModelName === "venues") {
+                const selection = sdk.Editing.getSelection();
+                try {
+                    if (selection !== null) {
+                        for (const objId of objectIds) {
+                            for (const category of sdk.DataModel.Venues.getById({ venueId: objId }).categories) {
+                                if (settings.HideShopAndServices && category === "SHOPPING_AND_SERVICES") {
+                                    $("wz-card.categories-card:eq(1)").hide();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } catch (ex) {
+                    console.error("PIE: ", ex);
+                }
+                if(settings.ShowClosestSegmentSelected) {
+                    ObjectsChanged(selection !== null);
+                }
+            }
+        }
+        sdk.Events.on({ eventName: "wme-data-model-objects-changed", eventHandler: dataModelObjectUpdate});
+        sdk.Events.on({ eventName: "wme-data-model-objects-added", eventHandler: dataModelObjectUpdate});
+        sdk.Events.on({ eventName: "wme-data-model-objects-removed", eventHandler: dataModelObjectUpdate});
 
         wazePL = document.querySelector(".WazeControlPermalink>a.fa-link");
         if (wazePL == null) wazePL = document.querySelector(".permalink");
@@ -2824,8 +2855,8 @@ function pie(tries = 1) {
         // }
     }
 
-    function ObjectsChanged() {
-        if (W.map.getLayerByUniqueName("venues").selectedFeatures.length > 0)
+    function ObjectsChanged(selectionExists = false) {
+        if (selectionExists)
             getActiveEditor().then((val) => {
                 if (placeIsPoint && val.vertices.length > 0) {
                     removeDragCallbacks();
@@ -2853,10 +2884,10 @@ function pie(tries = 1) {
 
     function checkConditions() {
         const a = sdk.Map.getZoomLevel() > 15, //W.map.getZoom() > 15,
-            b = sdk.Map.isLayerVisibile({ layerName: "venues" }), // W.map.venueLayer.getVisibility(),
-            c = sdk.Map.isLayerVisibile({ layerName: layerConfig.PIEClosestSegment.layerName }), //closestSegmentLayer.getVisibility(),
+            b = sdk.Map.isLayerVisible({ layerName: "venues" }), // W.map.venueLayer.getVisibility(),
+            c = sdk.Map.isLayerVisible({ layerName: layerConfig.PIEClosestSegment.layerName }), //closestSegmentLayer.getVisibility(),
             d = !$("#map-lightbox > div").is(":visible"), //$('#map-lightbox > div').length === 0,/* Check for HN editing */
-            e = sdk.Editing.getSelection().type === "bigJunction"; //WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].WW.getType() !== "bigJunction";
+            e = sdk.Editing.getSelection()?.objectType === "bigJunction"; //WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].WW.getType() !== "bigJunction";
 
         return a && b && c && d && e;
         // 	return true;
@@ -3165,14 +3196,14 @@ function pie(tries = 1) {
     }
 
     //Shamelessly copied from URO+
-    function MPLayerChanged() {
-        for (const mObj in W.map.getLayerByName("mapProblems").markers) {
-            const mIcon = W.map.getLayerByName("mapProblems").markers[mObj].icon.div;
-            mIcon.addEventListener("click", MarkerClick, false);
-        }
-    }
+    // function MPLayerChanged() {
+    //     for (const mObj in W.map.getLayerByName("mapProblems").markers) {
+    //         const mIcon = W.map.getLayerByName("mapProblems").markers[mObj].icon.div;
+    //         mIcon.addEventListener("click", MarkerClick, false);
+    //     }
+    // }
 
-    function MarkerClick() {
+    function MarkerClick(objectId) {
         const markerType = GetMarkerType(this.className);
         if (markerType !== null) {
             const markerID = this.attributes["data-id"].value;
@@ -3622,221 +3653,6 @@ function pie(tries = 1) {
             _hidePaymentType();
     }
 
-    /**
-     * Returns orthogonalized geometry for the given geometry and threshold
-     * @function WazeWrap.Util.GeoJSONOrthogonalizeGeometry
-     * @param {GeoJSON.Geometry} The SDK/GeoJSON.Geometry to orthogonalize
-     * @param {integer} threshold to use for orthogonalization - the higher the threshold, the more nodes that will be removed
-     * @return {GeoJSON.Geometry } Orthogonalized geometry
-    **/
-    function GeoJSONOrthogonalizeGeometry(geometry, threshold = 12) {
-        const nomthreshold = threshold, // degrees within right or straight to alter
-            lowerThreshold = Math.cos((90 - nomthreshold) * Math.PI / 180),
-            upperThreshold = Math.cos(nomthreshold * Math.PI / 180);
-
-        function Orthogonalize() {
-            let nodes = structuredClone(geometry[0]),
-                points = nodes.slice(0, -1).map((n) => {
-                    const p = [...n];
-                    p[1] = lat2latp(p[1]);
-                    return p;
-                }),
-                corner = { i: 0, dotp: 1 },
-                epsilon = 1e-4,
-                i, j, score, motions;
-
-            // Triangle
-            if (points.length === 4) {
-                for (i = 0; i < 1000; i++) {
-                    motions = points.map(calcMotion);
-
-                    const tmp = addPoints(points[corner.i], motions[corner.i]);
-                    points[corner.i][0] = tmp[0];
-                    points[corner.i][1] = tmp[1];
-
-                    score = corner.dotp;
-                    if (score < epsilon)
-                        break;
-                }
-
-                const n = points[corner.i];
-                n[1] = latp2lat(n[1]);
-                const pp = n;
-
-                const id = nodes[corner.i].toString();
-                for (i = 0; i < nodes.length; i++) {
-                    if (nodes[i].toString() !== id)
-                        continue;
-
-                    nodes[i][0] = pp[0];
-                    nodes[i][1] = pp[1];
-                }
-
-                return nodes;
-            }
-            
-            const originalPoints = nodes.slice(0, -1).map((n) => {
-                    const p = [...n];
-                    p[1] = lat2latp(p[1]);
-                    return p;
-                });
-            score = Number.POSITIVE_INFINITY;
-
-            for (i = 0; i < 1000 && !(score < epsilon); i++) {
-                motions = points.map(calcMotion);
-                for (j = 0; j < motions.length; j++) {
-                    const tmp = addPoints(points[j], motions[j]);
-                    points[j][0] = tmp[0];
-                    points[j][1] = tmp[1];
-                }
-                const newScore = squareness(points);
-                if (newScore < score) {
-                    // best = [].concat(points);
-                    score = newScore;
-                }
-                // if (score < epsilon)
-                //     break;
-            }
-
-            // points = best;
-
-            for (i = 0; i < points.length; i++) {
-                // only move the points that actually moved
-                if (originalPoints[i][0] !== points[i][0] || originalPoints[i][1] !== points[i][1]) {
-                    const n = points[i];
-                    n[1] = latp2lat(n[1]);
-                    const pp = n;
-
-                    const id = nodes[i].toString();
-                    for (j = 0; j < nodes.length; j++) {
-                        if (nodes[j].toString() !== id)
-                            continue;
-
-                        nodes[j][0] = pp[0];
-                        nodes[j][1] = pp[1];
-                    }
-                }
-            }
-
-            // remove empty nodes on straight sections
-            for (i = 0; i < points.length; i++) {
-                const dotp = normalizedDotProduct(i, points);
-                if (dotp < -1 + epsilon) {
-                    id = nodes[i].toString();
-                    for (j = 0; j < nodes.length; j++) {
-                        if (nodes[j].toString() !== id)
-                            continue;
-
-                        nodes[j] = false;
-                    }
-                }
-            }
-
-            return nodes.filter(item => item !== false);
-
-            function calcMotion(b, i, array) {
-                let a = array[(i - 1 + array.length) % array.length],
-                    c = array[(i + 1) % array.length],
-                    p = subtractPoints(a, b),
-                    q = subtractPoints(c, b),
-                    scale, dotp;
-
-                scale = 2 * Math.min(euclideanDistance(p, [0, 0]), euclideanDistance(q, [0, 0]));
-                p = normalizePoint(p, 1.0);
-                q = normalizePoint(q, 1.0);
-
-                dotp = filterDotProduct(p[0] * q[0] + p[1] * q[1]);
-
-                // nasty hack to deal with almost-straight segments (angle is closer to 180 than to 90/270).
-                if (array.length > 3) {
-                    if (dotp < -Math.SQRT1_2)
-                        dotp += 1.0;
-                } else if (dotp && Math.abs(dotp) < corner.dotp) {
-                    corner.i = i;
-                    corner.dotp = Math.abs(dotp);
-                }
-
-                return normalizePoint(addPoints(p, q), 0.1 * dotp * scale);
-            }
-        };
-
-        function lat2latp(lat) {
-            return 180 / Math.PI * Math.log(Math.tan(Math.PI / 4 + lat * (Math.PI / 180) / 2));
-        }
-
-        function latp2lat(a) {
-            return 180 / Math.PI * (2 * Math.atan(Math.exp(a * Math.PI / 180)) - Math.PI / 2);
-        }
-
-        function squareness(points) {
-            return points.reduce((sum, _val, i, array) => {
-                let dotp = normalizedDotProduct(i, array);
-
-                dotp = filterDotProduct(dotp);
-                return sum + 2.0 * Math.min(Math.abs(dotp - 1.0), Math.min(Math.abs(dotp), Math.abs(dotp + 1)));
-            }, 0);
-        }
-
-        function normalizedDotProduct(i, points) {
-            let a = points[(i - 1 + points.length) % points.length],
-                b = points[i],
-                c = points[(i + 1) % points.length],
-                p = subtractPoints(a, b),
-                q = subtractPoints(c, b);
-
-            p = normalizePoint(p, 1.0);
-            q = normalizePoint(q, 1.0);
-
-            return p[0] * q[0] + p[1] * q[1];
-        }
-
-        function subtractPoints(a, b) {
-            return [a[0] - b[0], a[1] - b[1]];
-        }
-
-        function addPoints(a, b) {
-            return [a[0] + b[0], a[1] + b[1]];
-        }
-
-        function euclideanDistance(a, b) {
-            const x = a[0] - b[0], y = a[1] - b[1];
-            return Math.sqrt((x * x) + (y * y));
-        }
-
-        function normalizePoint(point, scale) {
-            const vector = [0, 0];
-            const length = Math.sqrt(point[0] * point[0] + point[1] * point[1]);
-            if (length !== 0) {
-                vector[0] = point[0] / length;
-                vector[1] = point[1] / length;
-            }
-
-            vector[0] *= scale;
-            vector[1] *= scale;
-
-            return vector;
-        }
-
-        function filterDotProduct(dotp) {
-            if (lowerThreshold > Math.abs(dotp) || Math.abs(dotp) > upperThreshold)
-                return dotp;
-
-            return 0;
-        }
-
-        this.isDisabled = (nodes) => {
-            const points = nodes.slice(0, -1).map((n) => {
-                const p = n;
-                return [p[0], p[1]];
-            });
-
-            return squareness(points);
-        };
-
-        return Orthogonalize();
-    };
-
-
     function OrthogonalizePlace() {
         const selected = sdk.Editing.getSelection();
         if (selected?.objectType === "venue") {
@@ -3846,7 +3662,7 @@ function pie(tries = 1) {
                 // const newOLGeom = WazeWrap.Util.OrthogonalizeGeometry(selected.getOLGeometry().clone().components[0].components);
                 // const olGeometry = selectedVenue.geometry.coordinates[0].map((p) => {return proj4("EPSG:4326", "EPSG:900913", p)});
                 // olGeometry.map((g) => { return OpenLayers.Geometry.Point(g[0], g[1])});
-                const newGeom = GeoJSONOrthogonalizeGeometry(selectedVenue.geometry.coordinates);
+                const newGeom = WazeWrap.Util.GeoJSONOrthogonalizeGeometry(selectedVenue.geometry.coordinates);
 
                 // const UFG = require("Waze/Action/UpdateFeatureGeometry");
                 const originalGeometry = selectedVenue.geometry;
