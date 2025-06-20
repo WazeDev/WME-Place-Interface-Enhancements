@@ -63,7 +63,6 @@ unsafeWindow.SDK_INITIALIZED.then(() => {
 
     console.log(`SDK v ${sdk.getSDKVersion()} on ${sdk.getWMEVersion()} initialized`);
     sdk.Events.once({ eventName: "wme-ready" }).then(pie);
-    LetsCallSomeGarbage();
 });
 
 function pie(tries = 1) {
@@ -91,7 +90,7 @@ function pie(tries = 1) {
     const SCRIPT_NAME = GM_info.script.name;
     const DOWNLOAD_URL = GM_info.script.fileURL;
     const mainLayerName = "WME PIE";
-    let newPlaceLayer, PLSpotEstimatorLayer, PLSpotEstimatorCalibrationLayer;
+    let PLSpotEstimatorLayer, PLSpotEstimatorCalibrationLayer;
     let PIEPlaceNameLayer;
     // let showStopPointsLayer;
     let closestSegmentLayer;
@@ -118,12 +117,27 @@ function pie(tries = 1) {
             fontStyle: (context) => {
                 return context?.feature?.properties?.style?.fontStyle;
             },
-            labelText: (context) => {
-                return context?.feature?.properties?.style?.labelText;
+            label: (context) => {
+                return context?.feature?.properties?.style?.label;
             },
             display: (context) => {
                 return context?.feature?.properties?.style?.display;
-            }
+            },
+            fontWeight: (context) => {
+                return context?.feature?.properties?.style?.fontWeight;
+            },
+            fontSize: (context) => {
+                return context?.feature?.properties?.style?.fontSize;
+            },
+            labelOutlineWidth: (context) => {
+                return context?.feature?.properties?.style?.labelOutlineWidth;
+            },
+            fontColor: (context) => {
+                return context?.feature?.properties?.style?.fontColor;
+            },
+            labelOutlineColor: (context) => {
+                return context?.feature?.properties?.style?.labelOutlineColor;
+            },
         },
         styleRules: [
             {
@@ -132,17 +146,17 @@ function pie(tries = 1) {
                 },
                 style: {
                     pointRadius: "${pointRadius}",
-                    label: "${labelText}",
+                    label: "${label}",
                     fontFamily: "Tahoma, Arial, Verdana",
                     labelOutlineColor: settings.PlaceNameFontOutline,
                     labelOutlineWidth: Number(settings.PlaceNameFontOutlineWidth),
                     labelAlign: "cm",
-                    fontColor: settings.PlaceNameFontColor,
+                    fontColor: "${fontColor}",
                     fontOpacity: 1.0,
-                    fontSize: `${settings.PlaceNameFontSize}px`,
+                    fontSize: "${fontSize}",
                     labelYOffset: "${labelYOffset}",
                     fontStyle: "${fontStyle}",
-                    fontWeight: settings.PlaceNameFontBold ? "bold" : "",
+                    fontWeight: "${fontWeight}",
                 },
             },
             {
@@ -196,8 +210,13 @@ function pie(tries = 1) {
                 },
                 style: {
                     display: "${display}",
-                    labelText: "${labelText}",
-                    labelYOffset: "${labelYOffset}"
+                    label: "${label}",
+                    labelYOffset: "${labelYOffset}",
+                    fontWeight: "${fontWeight}",
+                    fontSize: "${fontSize}",
+                    labelOutlineWidth: "${labelOutlineWidth}",
+                    fontColor: "${fontColor}",
+                    labelOutlineColor: "${labelOutlineColor}",
                 },
             },
         ],
@@ -265,14 +284,12 @@ function pie(tries = 1) {
             console.error(`${SCRIPT_NAME}:`, ex);
         }
     }
-    
+
     function _setLayerVisibility(layerName, visibility) {
-        if (visibility) {
-            sdk.Map.setLayerVisibility({
-                layerName: layerName,
-                visibility: true,
-            });
-        }
+        sdk.Map.setLayerVisibility({
+            layerName: layerName,
+            visibility: visibility,
+        });
     }
 
     async function init() {
@@ -286,17 +303,31 @@ function pie(tries = 1) {
                 `<h4 style="margin-bottom:0px;"><b>${I18n.t("pie.prefs.title")}</b></h4>`,
                 `<h6 style="margin-top:0px;">${curr_ver}</h6>`,
                 '<fieldset id="fieldPlaceFilter" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t("pie.filter.PlaceFilterPanel")}</h4></legend>`,
-                `<div class="controls-container pie-controls-container" id="divPlaceFilter">${I18n.t("pie.filter.filter")} <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>`,
+                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t(
+                    "pie.filter.PlaceFilterPanel"
+                )}</h4></legend>`,
+                `<div class="controls-container pie-controls-container" id="divPlaceFilter">${I18n.t(
+                    "pie.filter.filter"
+                )} <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>`,
                 "</br>",
-                `<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">${I18n.t("pie.filter.Hide")}</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">${I18n.t("pie.filter.Show")}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">${I18n.t(
+                    "pie.filter.Hide"
+                )}</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">${I18n.t(
+                    "pie.filter.Show"
+                )}</label></div>`,
                 "</fieldset>",
 
                 '<fieldset id="fieldPlacePanel" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t("pie.prefs.PropertiesPanel")}</h4></legend>`,
+                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t(
+                    "pie.prefs.PropertiesPanel"
+                )}</h4></legend>`,
                 '<div class="controls-container pie-controls-container" id="divAreaPlaceSizeControls">',
-                `<div id="divShowAreaPlaceSize" class="controls-container pie-controls-container"><input type="checkbox" id="_cbShowAreaPlaceSize" class="pieSettingsCheckbox" /><label for="_cbShowAreaPlaceSize">${I18n.t("pie.prefs.ShowAreaPlaceSize")}</label></div>`,
-                `<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">${I18n.t("pie.prefs.ShowImperial")}</label></div>`,
+                `<div id="divShowAreaPlaceSize" class="controls-container pie-controls-container"><input type="checkbox" id="_cbShowAreaPlaceSize" class="pieSettingsCheckbox" /><label for="_cbShowAreaPlaceSize">${I18n.t(
+                    "pie.prefs.ShowAreaPlaceSize"
+                )}</label></div>`,
+                `<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">${I18n.t(
+                    "pie.prefs.ShowImperial"
+                )}</label></div>`,
                 `<div id="divShowAreaPlaceSizeMetric" class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeMetric" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeMetric">${I18n.t(
                     "pie.prefs.ShowMetric"
                 )}</label></div>`,
@@ -610,20 +641,27 @@ function pie(tries = 1) {
      * @param {boolean} If true, Parking Lot Road segments will be ignored when finding the closest segment
      * @param {boolean} If true, Private Road segments will be ignored when finding the closest segment
      * @returns {Object} Returns an Object containing the Segment and Closest Point on the Segment
-    **/
+     **/
     function findSDKClosestSegment(myPoint, ignorePLR, ignoreUnnamedPR) {
         let minDistance = Number.POSITIVE_INFINITY;
         let closestSegment;
 
         for (const s of sdk.DataModel.Segments.getAll()) {
             const segmentType = s.roadType;
-            if (segmentType === 10 || segmentType === 16 || segmentType === 18 || segmentType === 19 || (ignorePLR && segmentType === 20))
+            if (
+                segmentType === 10 ||
+                segmentType === 16 ||
+                segmentType === 18 ||
+                segmentType === 19 ||
+                (ignorePLR && segmentType === 20)
+            )
                 continue;
 
             if (ignoreUnnamedPR && segmentType === 17) {
                 const primaryStreetId = s.primaryStreetId;
-                const nm = sdk.DataModel.Streets.getById({streetId: primaryStreetId}).name;
-                if (nm === null || nm.trim().length === 0) //PR
+                const nm = sdk.DataModel.Streets.getById({ streetId: primaryStreetId }).name;
+                if (nm === null || nm.trim().length === 0)
+                    //PR
                     continue;
             }
 
@@ -631,11 +669,11 @@ function pie(tries = 1) {
 
             if (distanceToSegment < minDistance) {
                 minDistance = distanceToSegment;
-                closestSegment = {segment: s, closestPoint: turf.nearestPointOnLine(s.geometry, myPoint)};
+                closestSegment = { segment: s, closestPoint: turf.nearestPointOnLine(s.geometry, myPoint) };
             }
         }
         return closestSegment;
-    };
+    }
 
     function getActiveEditor(tries = 1) {
         return new Promise((resolve, reject) => {
@@ -979,8 +1017,7 @@ function pie(tries = 1) {
             saveSettings();
         });
 
-        $("#_cbPlaceNameFontBold").on("change", function () {
-            PIEPlaceNameLayer.styleMap.styles.default.defaultStyle.fontWeight = this.checked ? "bold" : "";
+        $("#_cbPlaceNameFontBold").on("change", () => {
             DisplayPlaceNames();
         });
 
@@ -989,7 +1026,7 @@ function pie(tries = 1) {
             if (fontSize === "" || fontSize === "0") $(this)[0].value = 12;
             settings[$(this)[0].id.substr(3)] = fontSize;
             saveSettings();
-            PIEPlaceNameLayer.styleMap.styles.default.defaultStyle.fontSize = `${fontSize}px`;
+            // PIEPlaceNameLayer.styleMap.styles.default.defaultStyle.fontSize = `${fontSize}px`;
             DisplayPlaceNames();
         });
 
@@ -998,7 +1035,7 @@ function pie(tries = 1) {
             if (outlineWidth === "" || outlineWidth === "0") $(this)[0].value = 3;
             settings[$(this)[0].id.substr(3)] = outlineWidth;
             saveSettings();
-            PIEPlaceNameLayer.styleMap.styles.default.defaultStyle.labelOutlineWidth = outlineWidth;
+            // PIEPlaceNameLayer.styleMap.styles.default.defaultStyle.labelOutlineWidth = outlineWidth;
             DisplayPlaceNames();
         });
 
@@ -1768,12 +1805,12 @@ function pie(tries = 1) {
         // const MO_MPLayer = new MutationObserver(MPLayerChanged);
         // MO_MPLayer.observe(W.map.getLayerByName("mapProblems").div, { childList: true });
         function dataModelObjectUpdate(dataModelName, objectIds) {
-            if(dataModelName === "mapProblems") {
-                for(const objId of objectIds) {
+            if (dataModelName === "mapProblems") {
+                for (const objId of objectIds) {
                     MarkerClick(objId);
                 }
             }
-            if(dataModelName === "venues") {
+            if (dataModelName === "venues") {
                 const selection = sdk.Editing.getSelection();
                 try {
                     if (selection !== null) {
@@ -1789,14 +1826,14 @@ function pie(tries = 1) {
                 } catch (ex) {
                     console.error("PIE: ", ex);
                 }
-                if(settings.ShowClosestSegmentSelected) {
+                if (settings.ShowClosestSegmentSelected) {
                     ObjectsChanged(selection !== null);
                 }
             }
         }
-        sdk.Events.on({ eventName: "wme-data-model-objects-changed", eventHandler: dataModelObjectUpdate});
-        sdk.Events.on({ eventName: "wme-data-model-objects-added", eventHandler: dataModelObjectUpdate});
-        sdk.Events.on({ eventName: "wme-data-model-objects-removed", eventHandler: dataModelObjectUpdate});
+        sdk.Events.on({ eventName: "wme-data-model-objects-changed", eventHandler: dataModelObjectUpdate });
+        sdk.Events.on({ eventName: "wme-data-model-objects-added", eventHandler: dataModelObjectUpdate });
+        sdk.Events.on({ eventName: "wme-data-model-objects-removed", eventHandler: dataModelObjectUpdate });
 
         wazePL = document.querySelector(".WazeControlPermalink>a.fa-link");
         if (wazePL == null) wazePL = document.querySelector(".permalink");
@@ -2071,8 +2108,7 @@ function pie(tries = 1) {
                 return Number.parseInt(b.attributes[property]) - Number.parseInt(a.attributes[property]);
             }
             if (property === "name") return a.name.localeCompare(b.name);
-            if (property === "ImageCount")
-                return a.images.length - b.images.length;
+            if (property === "ImageCount") return a.images.length - b.images.length;
             return Number.parseInt(a[property]) - Number.parseInt(b[property]);
         };
     }
@@ -2091,8 +2127,8 @@ function pie(tries = 1) {
 
         //     if (vattr.images.length !== 0 && onScreen(venue)) catalog.push(vattr.id);
         // }
-        for(const venue of venues) {
-            if(venue?.images.length !== 0) catalog.push(venue.id);
+        for (const venue of venues) {
+            if (venue?.images.length !== 0) catalog.push(venue.id);
         }
         Photos_show();
     }
@@ -2102,7 +2138,7 @@ function pie(tries = 1) {
         let c = 0;
         let picCount = 0;
         for (const vId of catalog) {
-            const venue = sdk.DataModel.Venues.getById({venueId: vId});
+            const venue = sdk.DataModel.Venues.getById({ venueId: vId });
             // const vattr = venue.attributes;
             const myplace = await idbPVKeyval.get("Places", vId);
             let matchCount = 0;
@@ -2149,8 +2185,8 @@ function pie(tries = 1) {
             venueName.style.float = "left";
             venueName.innerHTML = venue.name; // + ` (${parseInt(vattr.lockRank) + 1})`;
             if (venue.categories[0] === "RESIDENCE") {
-                const address = sdk.DataModel.Venues.getAddress({venueId: venue.id});
-                if(address !== null) {
+                const address = sdk.DataModel.Venues.getAddress({ venueId: venue.id });
+                if (address !== null) {
                     venueName.innerHTML = `${address?.houseNumber} ${address?.street.name}`;
                 }
             }
@@ -2183,9 +2219,7 @@ function pie(tries = 1) {
                                 if (settings.PhotoViewerPreserveLayout) $(this).parent().css("visibility", "hidden");
                                 else $(this).parent().remove();
                                 $("#placessqty").html($("#placessqty").html() - 1);
-                                $("#imagesqty").html(
-                                    $("#imagesqty").html() - Number.parseInt(venue.images.length)
-                                );
+                                $("#imagesqty").html($("#imagesqty").html() - Number.parseInt(venue.images.length));
                             } else if (settings.PhotoViewerShowHiddenPlaces)
                                 $(this).parent().find(".approvedImage.pvImage").css("border-color", "#fff"); //turn the border white on the images that are not in a PUR
                         })(venue, venueDiv),
@@ -2259,22 +2293,22 @@ function pie(tries = 1) {
                     hide_visio();
                     // debugger;
                     const venueList = [];
-                //     venueList.push(W.model.venues.objects[id]);
+                    //     venueList.push(W.model.venues.objects[id]);
 
-                //     const lon = ((geo.left + geo.right) / 2 + geo.right) / 2;
-                //     const lat = ((geo.bottom + geo.top) / 2 + geo.bottom) / 2;
-                //     W.map.setCenter(new OpenLayers.Geometry.Point(lon, lat));
-                //     W.map.getOLMap().zoomTo(17);
-                //     W.selectionManager.unselectAll();
-                //     W.selectionManager.setSelectedModels(venueList);
+                    //     const lon = ((geo.left + geo.right) / 2 + geo.right) / 2;
+                    //     const lat = ((geo.bottom + geo.top) / 2 + geo.bottom) / 2;
+                    //     W.map.setCenter(new OpenLayers.Geometry.Point(lon, lat));
+                    //     W.map.getOLMap().zoomTo(17);
+                    //     W.selectionManager.unselectAll();
+                    //     W.selectionManager.setSelectedModels(venueList);
                     // venueList.push(sdk.DataModel.Venues.getById({venueId: id}));
 
                     const lon = ((geo[0] + geo[2]) / 2 + geo[2]) / 2;
                     const lat = ((geo[3] + geo[1]) / 2 + geo[3]) / 2;
-                    sdk.Map.setMapCenter({lonLat: {lat: lat, lon: lon}, zoomLevel: 17});
+                    sdk.Map.setMapCenter({ lonLat: { lat: lat, lon: lon }, zoomLevel: 17 });
                     sdk.Editing.clearSelection();
-                    sdk.Editing.setSelection({selection: {ids: [id], objectType: "venue"}});
-                })(venue.geometry?.bbox ? venue.geometry?.bbox : turf.bbox(venue.geometry) , vId),
+                    sdk.Editing.setSelection({ selection: { ids: [id], objectType: "venue" } });
+                })(venue.geometry?.bbox ? venue.geometry?.bbox : turf.bbox(venue.geometry), vId),
                 false
             );
             venueDiv.appendChild(venuePos);
@@ -2939,8 +2973,8 @@ function pie(tries = 1) {
                     removeDragCallbacks();
                     clearClosesetSegmentLayerFeatures();
                 } else {
-                    const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
-                    placeIsPoint = (selectedVenue.geometry.type === "Point");
+                    const selectedVenue = sdk.DataModel.Venues.getById({ venueId: selected.ids[0] });
+                    placeIsPoint = selectedVenue.geometry.type === "Point";
                     if (placeIsPoint) {
                         //Event when the Place is moved
                         /*
@@ -3091,7 +3125,7 @@ function pie(tries = 1) {
         // WazeWrap.Events.unregister("afteraction",null, handler);
         sdk.Events.off({ eventName: "wme-selection-changed", eventHandler: handler });
         sdk.Events.off({ eventName: "wme-after-undo", eventHandler: handler });
-        sdk.Events.off({ eventName: "wme-after-redo-clear", eventHandler: handler });
+        // sdk.Events.off({ eventName: "wme-after-redo-clear", eventHandler: handler });
         sdk.Events.off({ eventName: "wme-after-edit", eventHandler: handler });
     }
 
@@ -3124,18 +3158,21 @@ function pie(tries = 1) {
             for (const venue of sdk.DataModel.Venues.getAll()) {
                 // var venue = W.model.venues.getObjectById(placeID);
                 // isPoint = venue.isPoint();
-                const isPoint = (venue.geometry.type === "Point");
+                const isPoint = venue.geometry.type === "Point";
 
                 if ((isPoint && sdk.Map.getZoomLevel() >= 17) || (!isPoint && sdk.Map.getZoomLevel() >= 15)) {
                     const mapExtent = sdk.Map.getMapExtent();
                     const polygon = turf.bboxPolygon(mapExtent);
 
-                    if ((isPoint && turf.booleanPointInPolygon(venue.geometry, polygon)) ||
-                        (!isPoint && turf.intersect(turf.featureCollection([turf.polygon(venue.geometry.coordinates), polygon])))) {
+                    if (
+                        (isPoint && turf.booleanPointInPolygon(venue.geometry, polygon)) ||
+                        (!isPoint &&
+                            turf.intersect(turf.featureCollection([turf.polygon(venue.geometry.coordinates), polygon])))
+                    ) {
                         if (
                             (isPoint && showPoint) ||
-                            (!isPoint && showArea && !venue.isParkingLot()) ||
-                            (!isPoint && showPLA && venue.isParkingLot())
+                            (!isPoint && showArea && venue.categories[0] !== "PARKING_LOT") ||
+                            (!isPoint && showPLA && venue.categories[0] === "PARKING_LOT")
                         ) {
                             const placeFilter = $("#piePlaceFilter").val();
                             if (placeFilter.length > 0) {
@@ -3154,10 +3191,8 @@ function pie(tries = 1) {
                                 //     venue.getOLGeometry().y
                                 // );
                                 textLoc = venue.geometry;
-                            else textLoc = turf.centroid(venue.geometry);
-                            let placeName = WordWrap(
-                                venue.name.trim() + (showLock ? ` (L${venue.lockRank + 1})` : "")
-                            );
+                            else textLoc = turf.centroid(venue.geometry).geometry;
+                            let placeName = WordWrap(venue.name.trim() + (showLock ? ` (L${venue.lockRank + 1})` : ""));
                             if (venue.categories[0] === "RESIDENTIAL") {
                                 const venueAddress = sdk.DataModel.Venues.getAddress(venue.id);
                                 placeName =
@@ -3165,18 +3200,33 @@ function pie(tries = 1) {
                                     (venue.name.trim() !== "" ? ` - ${venue.name}` : "") +
                                     (showLock ? ` (L${venue.lockRank + 1})` : "");
                             }
-                            const placeNameLabel = turf.point(textLoc.coordinates, { styleName: "placeNameLabel", style: {
-                                display: "block",
-                                labelText: placeName.trim(),
-                                labelYOffset: isPoint ? -13 - placeName.split("\n").length * 5 : 0,
-                            }}, { id: `placeNameLabelPoint_${placeName.trim()}`});
+                            const placeNameLabel = turf.point(
+                                textLoc.coordinates,
+                                {
+                                    styleName: "placeNameLabel",
+                                    style: {
+                                        display: "block",
+                                        label: placeName.trim(),
+                                        labelYOffset: isPoint ? -13 - placeName.split("\n").length * 5 : 0,
+                                        fontWeight: settings.PlaceNameFontBold ? "bold" : "",
+                                        fontSize: Number.parseInt(settings.PlaceNameFontSize),
+                                        labelOutlineWidth: settings.PlaceNameFontOutlineWidth,
+                                        fontColor: settings.PlaceNameFontColor,
+                                        labelOutlineColor: settings.PlaceNameFontOutline,
+                                    },
+                                },
+                                { id: `placeNameLabelPoint_${placeName.trim()}` }
+                            );
                             // const placeNameLabel = new OpenLayers.Feature.Vector(textLoc, {
                             //     display: "block",
                             //     labelText: placeName.trim(),
                             //     yOffset: isPoint ? -13 - placeName.split("\n").length * 5 : 0,
                             // });
                             // PIEPlaceNameLayer.addFeatures([placeNameLabel]);
-                            sdk.Map.addFeatureToLayer({feature: placeNameLabel, layerName: layerConfig.PIEPlaceNameLayer.layerName});
+                            sdk.Map.addFeatureToLayer({
+                                feature: placeNameLabel,
+                                layerName: layerConfig.PIEPlaceNameLayer.layerName,
+                            });
                         }
                     }
                 }
@@ -3601,7 +3651,7 @@ function pie(tries = 1) {
         sdk.Events.off({ eventName: "wme-selection-changed", eventHandler: updatePlaceSizeDisplay });
         sdk.Events.off({ eventName: "wme-after-undo", eventHandler: updatePlaceSizeDisplay });
         sdk.Events.off({ eventName: "wme-after-edit", eventHandler: updatePlaceSizeDisplay });
-        sdk.Events.off({ eventName: "wme-after-redo-clear", eventHandler: updatePlaceSizeDisplay });
+        // sdk.Events.off({ eventName: "wme-after-redo-clear", eventHandler: updatePlaceSizeDisplay });
         // W.model.actionManager.events.unregister("noActions", null, noActions);
         sdk.Events.off({ eventName: "wme-no-edits", eventHandler: noActions });
     }
@@ -3860,12 +3910,12 @@ function pie(tries = 1) {
         // const currPlaceModel = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
         // const currPlaceGeom = currPlaceModel.getOLGeometry().components[0].clone().components;
         const selection = sdk.Editing.getSelection();
-        if(selection.objectType !== "venue") {
+        if (selection.objectType !== "venue") {
             console.error("Unable to edit geomtry for Non Venue");
             return;
         }
-        const selectedVenue = sdk.DataModel.Venues.getById({venueId: selection.ids[0]});
-        if(selectedVenue.geometry.type === "Point") {
+        const selectedVenue = sdk.DataModel.Venues.getById({ venueId: selection.ids[0] });
+        if (selectedVenue.geometry.type === "Point") {
             console.error("No Point in Editing Geometry of a point venue");
             return;
         }
@@ -3951,12 +4001,12 @@ function pie(tries = 1) {
             $("#pieClearGeom").on("click", () => {
                 // const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
                 const selected = sdk.Editing.getSelection();
-                if(!selected || selected.objectType !== "venue") {
+                if (!selected || selected.objectType !== "venue") {
                     console.error("Unable to clear Geometry on Someothing other than place");
                     return;
                 }
-                const selectedVenue = sdk.DataModel.Venues.getById({venueId : selected.ids[0]});
-                if(selectedVenue.geometry.type === "Point") {
+                const selectedVenue = sdk.DataModel.Venues.getById({ venueId: selected.ids[0] });
+                if (selectedVenue.geometry.type === "Point") {
                     console.error("Unable to clear Geometry of a Point");
                     return;
                 }
@@ -3971,7 +4021,7 @@ function pie(tries = 1) {
                     [centerPoint.geometry.coordinates[0], centerPoint.geometry.coordinates[1] + offsetValues[0]],
                     [centerPoint.geometry.coordinates[0] + offsetValues[0], centerPoint.geometry.coordinates[1]],
                     [centerPoint.geometry.coordinates[0], centerPoint.geometry.coordinates[1] - offsetValues[0]],
-                ]
+                ];
                 // const newGeom = OpenLayers.Geometry.Polygon.createRegularPolygon(
                 //     new OpenLayers.Geometry.Point(centerLonLat.lon, centerLonLat.lat),
                 //     20,
@@ -3992,7 +4042,7 @@ function pie(tries = 1) {
                 //     W.userscripts.toGeoJSONGeometry(selected.getOLGeometry())
                 // );
                 // W.model.actionManager.add(action);
-                sdk.DataModel.Venues.updateVenue({venueId: selectedVenue.id, geometry: newGeom.geometry});
+                sdk.DataModel.Venues.updateVenue({ venueId: selectedVenue.id, geometry: newGeom.geometry });
             });
 
             $("#pierotate").on("click", () => {
@@ -4152,25 +4202,26 @@ function pie(tries = 1) {
     function ShowPLSpotEstimatorButton() {
         $(".PIEParkingSpotEstimatorButton").remove();
 
-        if (WazeWrap.getSelectedFeatures().length > 0) {
-            if (
-                WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue" &&
-                WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories.includes("PARKING_LOT")
-            ) {
-                // let $ParkingSpotEstimatorButton;
-                const $ParkingSpotEstimatorButton = $(
-                    `<div style="font-size:18px; float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" class="PIEParkingSpotEstimatorButton" title="${I18n.t(
-                        "pie.prefs.PSEDisplayButtonTitle"
-                    )}">#</div>`
-                );
-                $("#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label").after(
-                    $ParkingSpotEstimatorButton
-                );
+        const selected = sdk.Editing.getSelection();
+        if (selected !== null) {
+            if (selected.objectType === "venue") {
+                const venue = sdk.DataModel.Venues.getById({ venueId: selected.ids[0] });
+                if (venue?.categories.includes("PARKING_LOT")) {
+                    // let $ParkingSpotEstimatorButton;
+                    const $ParkingSpotEstimatorButton = $(
+                        `<div style="font-size:18px; float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" class="PIEParkingSpotEstimatorButton" title="${I18n.t(
+                            "pie.prefs.PSEDisplayButtonTitle"
+                        )}">#</div>`
+                    );
+                    $("#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label").after(
+                        $ParkingSpotEstimatorButton
+                    );
 
-                $('select[name="estimatedNumberOfSpots"]').before($ParkingSpotEstimatorButton.clone());
+                    $('select[name="estimatedNumberOfSpots"]').before($ParkingSpotEstimatorButton.clone());
 
-                $(".PIEParkingSpotEstimatorButton").click(ShowPLSpotEstimator);
-                totalSpots = 0;
+                    $(".PIEParkingSpotEstimatorButton").on("click", ShowPLSpotEstimator);
+                    totalSpots = 0;
+                }
             }
         } else $("#PIEParkingSpotEstimator").remove(); //if they de-select the Place, remove the tool from the screen
     }
@@ -4322,12 +4373,11 @@ function pie(tries = 1) {
     function ShowPLSpotEstimator() {
         if ($("#PIEParkingSpotEstimator").length > 0) $("#PIEParkingSpotEstimator").remove();
         else {
-            if (WazeWrap.getSelectedFeatures().length > 0) {
-                if (
-                    WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue" &&
-                    WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories.includes("PARKING_LOT")
-                ) {
-                    W.map.addLayer(PLSpotEstimatorLayer);
+            const selected = sdk.Editing.getSelection();
+            if (selected?.objectType === "venue") {
+                const venue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+                if (venue.categories.includes("PARKING_LOT")) {
+                    // W.map.addLayer(PLSpotEstimatorLayer);
                     PLSpotEstimatorLayer.setZIndex(1000);
                     const $PLSpotEstimator = $("<div>");
                     $PLSpotEstimator.html(
