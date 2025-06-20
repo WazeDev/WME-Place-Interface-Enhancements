@@ -2,6 +2,6 @@
     "compilerOptions": {
         "target": "es2017"
     },
-    "typeAcquisition": {"include": ["jquery"]},
+    "typeAcquisition": {"include": ["jquery", "turf", "proj4"]},
     "exclude": ["node_modules"]
 }

@@ -4199,6 +4199,46 @@ function pie(tries = 1) {
     }
 
     let calibratingAngledWidth = false;
+    // Function used in LaneTools.
+    // Waiting for Element to Be Loaded, which is necessary due to shadowRoot delayed rendering.
+    function waitForElementLoaded(selector, root = undefined) {
+        return new Promise((resolve) => {
+            if (!root) {
+                if (document.querySelector(selector)) {
+                    return resolve(document.querySelector(selector));
+                }
+
+                const observer = new MutationObserver((mutations) => {
+                    if (document.querySelector(selector)) {
+                        observer.disconnect();
+                        resolve(document.querySelector(selector));
+                    }
+                });
+
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true,
+                });
+            } else {
+                if (root.querySelector(selector)) {
+                    return resolve(root.querySelector(selector));
+                }
+
+                const observer = new MutationObserver((mutations) => {
+                    if (root.querySelector(selector)) {
+                        observer.disconnect();
+                        resolve(root.querySelector(selector));
+                    }
+                });
+
+                observer.observe(root, {
+                    childList: true,
+                    subtree: true,
+                });
+            }
+        });
+    }
+
     function ShowPLSpotEstimatorButton() {
         $(".PIEParkingSpotEstimatorButton").remove();
 
@@ -4217,9 +4257,11 @@ function pie(tries = 1) {
                         $ParkingSpotEstimatorButton
                     );
 
-                    $('select[name="estimatedNumberOfSpots"]').before($ParkingSpotEstimatorButton.clone());
+                    waitForElementLoaded('wz-select[name="estimatedNumberOfSpots"]').then(() => {
+                        $('wz-select[name="estimatedNumberOfSpots"]').before($ParkingSpotEstimatorButton.clone());
+                        $(".PIEParkingSpotEstimatorButton").on("click", ShowPLSpotEstimator);
+                    });
 
-                    $(".PIEParkingSpotEstimatorButton").on("click", ShowPLSpotEstimator);
                     totalSpots = 0;
                 }
             }
@@ -4227,32 +4269,37 @@ function pie(tries = 1) {
     }
 
     function startPLSpotEstimatorDrawMode() {
-        const polyDrawFeatureOptions = { callbacks: { done: PLSpotEstimatordoneHandler, point: pointHandler } };
-        PLSpotEstimatorLayer.setZIndex(1000);
-        PLSpotEstimatordrawControl = new OpenLayers.Control.DrawFeature(
-            PLSpotEstimatorLayer,
-            OpenLayers.Handler.Path,
-            polyDrawFeatureOptions
-        );
-        W.map.addControl(PLSpotEstimatordrawControl);
-        PLSpotEstimatordrawControl.activate();
+        // const polyDrawFeatureOptions = { callbacks: { done: PLSpotEstimatorDoneHandler, point: pointHandler } };
+        sdk.Map.setLayerZIndex({layerName: layerConfig.PIEPLSpotEstimatorLayer.layerName, zIndex: 3001});
+        // PLSpotEstimatorLayer.setZIndex(1000);
+        // PLSpotEstimatordrawControl = new OpenLayers.Control.DrawFeature(
+        //     PLSpotEstimatorLayer,
+        //     OpenLayers.Handler.Path,
+        //     polyDrawFeatureOptions
+        // );
+        // W.map.addControl(PLSpotEstimatordrawControl);
+        // PLSpotEstimatordrawControl.activate();
+        sdk.Map.drawLine().then((ls) => {PLSpotEstimatorDoneHandler(ls)});
 
         $("div#WazeMap.view-area.olMap").keydown(PLSpotEstimatorkeyUpHandler);
     }
 
     function startPLSpotEstimatorCalibrationMode() {
-        const polyDrawFeatureOptions = {
-            callbacks: { done: PLSpotEstimatorCalibrationdoneHandler, point: pointHandler },
-        };
-        W.map.addLayer(PLSpotEstimatorCalibrationLayer);
-        PLSpotEstimatorCalibrationLayer.setZIndex(1005);
-        PLSpotEstimatorCalibrationdrawControl = new OpenLayers.Control.DrawFeature(
-            PLSpotEstimatorCalibrationLayer,
-            OpenLayers.Handler.Path,
-            polyDrawFeatureOptions
-        );
-        W.map.addControl(PLSpotEstimatorCalibrationdrawControl);
-        PLSpotEstimatorCalibrationdrawControl.activate();
+        // const polyDrawFeatureOptions = {
+        //     callbacks: { done: PLSpotEstimatorCalibrationdoneHandler, point: pointHandler },
+        // };
+        // W.map.addLayer(PLSpotEstimatorCalibrationLayer);
+        // PLSpotEstimatorCalibrationLayer.setZIndex(1005);
+        // sdk.Map.addLayer({layerName: layerConfig.PIEPLSpotEstimatorCalibrationLayer.layerName, styleContext: styleConfig.styleContext, styleRules: styleConfig.styleRules, zIndex: 3005});
+        sdk.Map.setLayerZIndex({layerName: layerConfig.PIEPLSpotEstimatorCalibrationLayer.layerName, zIndex: 3005});
+        sdk.Map.drawLine().then((ls) => {PLSpotEstimatorCalibrationdoneHandler(ls)});
+        // PLSpotEstimatorCalibrationdrawControl = new OpenLayers.Control.DrawFeature(
+        //     PLSpotEstimatorCalibrationLayer,
+        //     OpenLayers.Handler.Path,
+        //     polyDrawFeatureOptions
+        // );
+        // W.map.addControl(PLSpotEstimatorCalibrationdrawControl);
+        // PLSpotEstimatorCalibrationdrawControl.activate();
 
         $("div#WazeMap.view-area.olMap").keydown(PLSpotEstimatorCalibrationkeyUpHandler);
     }
@@ -4326,9 +4373,9 @@ function pie(tries = 1) {
     }
 
     let totalSpots = 0;
-    function PLSpotEstimatordoneHandler(geom) {
+    function PLSpotEstimatorDoneHandler(geom) {
         const style = { strokeWidth: 3, strokeColor: "#ee9900" };
-        PLSpotEstimatorLayer.addFeatures(new OpenLayers.Feature.Vector(geom, {}, style));
+        // PLSpotEstimatorLayer.addFeatures(new OpenLayers.Feature.Vector(geom, {}, style));
 
         const spots = Math.round(
             WazeWrap.Geometry.calculateDistance(geom.components) /
@@ -4349,10 +4396,11 @@ function pie(tries = 1) {
         sdk.Map.addFeaturesToLayer({ layername: PLSpotEstimatorCalibrationLayer.layerName, features: geom }); //.addFeatures(new OpenLayers.Feature.Vector(geom,{}, style));
         let totalLength = 0;
 
-        PLSpotEstimatorCalibrationLayer.features.forEach((f) => {
-            const length = Math.round(WazeWrap.Geometry.calculateDistance(f.getOLGeometry().components) * 100) / 100;
-            totalLength += length;
-        });
+        // PLSpotEstimatorCalibrationLayer.features.forEach((f) => {
+        //     const length = Math.round(WazeWrap.Geometry.calculateDistance(f.getOLGeometry().components) * 100) / 100;
+        //     totalLength += length;
+        // });
+        totalLength = turf.length(geom);
 
         if (calibratingAngledWidth) {
             $("#PIEAngledSpotWidth")[0].value = totalLength;
@@ -4375,10 +4423,11 @@ function pie(tries = 1) {
         else {
             const selected = sdk.Editing.getSelection();
             if (selected?.objectType === "venue") {
-                const venue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+                const venue = sdk.DataModel.Venues.getById({ venueId: selected.ids[0] });
                 if (venue.categories.includes("PARKING_LOT")) {
                     // W.map.addLayer(PLSpotEstimatorLayer);
-                    PLSpotEstimatorLayer.setZIndex(1000);
+                    // PLSpotEstimatorLayer.setZIndex(1000);
+                    sdk.Map.setLayerZIndex({layerName: layerConfig.PIEPLSpotEstimatorLayer.layerName, zIndex: 3000});
                     const $PLSpotEstimator = $("<div>");
                     $PLSpotEstimator.html(
                         [
