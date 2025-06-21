@@ -4378,7 +4378,8 @@ function pie(tries = 1) {
         // PLSpotEstimatorLayer.addFeatures(new OpenLayers.Feature.Vector(geom, {}, style));
 
         const spots = Math.round(
-            WazeWrap.Geometry.calculateDistance(geom.components) /
+            // WazeWrap.Geometry.calculateDistance(geom.components) /
+                turf.length(geom) /
                 ($("#PIE90DegreeSpotWidthDraw").hasClass("PSESelected")
                     ? $("#PIE90DegreeSpotWidth")[0].value
                     : $("#PIEAngledSpotWidth")[0].value)
@@ -4393,7 +4394,7 @@ function pie(tries = 1) {
 
     function PLSpotEstimatorCalibrationdoneHandler(geom) {
         const style = { strokeWidth: 3, strokeColor: "#00ee00" };
-        sdk.Map.addFeaturesToLayer({ layername: PLSpotEstimatorCalibrationLayer.layerName, features: geom }); //.addFeatures(new OpenLayers.Feature.Vector(geom,{}, style));
+        sdk.Map.addFeaturesToLayer({ layername: layerConfig.PIEPLSpotEstimatorCalibrationLayer.layerName, features: geom }); //.addFeatures(new OpenLayers.Feature.Vector(geom,{}, style));
         let totalLength = 0;
 
         // PLSpotEstimatorCalibrationLayer.features.forEach((f) => {
@@ -4428,39 +4429,19 @@ function pie(tries = 1) {
                     // W.map.addLayer(PLSpotEstimatorLayer);
                     // PLSpotEstimatorLayer.setZIndex(1000);
                     sdk.Map.setLayerZIndex({layerName: layerConfig.PIEPLSpotEstimatorLayer.layerName, zIndex: 3000});
-                    const $PLSpotEstimator = $("<div>");
+                    const $PLSpotEstimator = $('<div>');
                     $PLSpotEstimator.html(
                         [
-                            '<div style="position: absolute; text-align:center; z-index:1010; background-color:white; top:30px; left:300px; border-radius:20px; border: 2px solid; width: 300px; padding-left:10px; padding-right:10px; padding-bottom:5px;" id="PIEParkingSpotEstimator">',
-                            `<span style="font-weight:bold;">${I18n.t(
-                                "pie.prefs.PSEParkingSpaceEstimator"
-                            )}</span><i class="fa fa-window-close-o" aria-hidden="true" style="float:right; cursor:pointer;" id="PIECloseParkingSpotEstimator"></i>`,
+                            '<div style="position: absolute; text-align:center; z-index:1010; background-color:white; top:30px; left:300px; border-radius:20px; border: 2px solid; width: 300px; padding-left:10px; padding-right:10px; padding-bottom:5px; " draggable="true" id="PIEParkingSpotEstimator">',
+                            `<span style="font-weight:bold;">${I18n.t("pie.prefs.PSEParkingSpaceEstimator")}</span><i class="fa fa-window-close-o" aria-hidden="true" style="float:right; cursor:pointer;" id="PIECloseParkingSpotEstimator"></i>`,
                             "<hr>",
                             '<div style=" display:flex; justify-content:space-between;">',
-                            `<div style="display: inline;">${I18n.t("pie.prefs.PSELayoutType")}<br/><br/>${I18n.t(
-                                "pie.prefs.PSESpotWidth"
-                            )}</div>`,
-                            `<div style="display: inline;">${I18n.t(
-                                "pie.prefs.PSE90degree"
-                            )}<br/><br/><input type="text" size=2 id="PIE90DegreeSpotWidth"><button id="PIE90DegreeSpotWidthCalibration" title="Measure the width of a single 90 degree parking spot">${I18n.t(
-                                "pie.prefs.PSECal"
-                            )}</button><br/><button id="PIE90DegreeSpotWidthDraw" class="fa fa-pencil" title="${I18n.t(
-                                "pie.prefs.PSEDraw90DegreeTitle"
-                            )}"></button></div>`,
-                            `<div style="display: inline;">${I18n.t(
-                                "pie.prefs.PSEAngled"
-                            )}<br/><br/><input type="text" size=2 id="PIEAngledSpotWidth"><button id="PIEAngledSpotWidthCalibration" title="Measure the width of a single angled degree parking spot">${I18n.t(
-                                "pie.prefs.PSECal"
-                            )}</button><br/><button id="PIEAngledSpotWidthDraw" class="fa fa-pencil" title="${I18n.t(
-                                "pie.prefs.PSEDrawAngledTitle"
-                            )}"></button></div>`,
+                            `<div style="display: inline;">${I18n.t("pie.prefs.PSELayoutType")}<br/><br/>${I18n.t("pie.prefs.PSESpotWidth")}</div>`,
+                            `<div style="display: inline;">${I18n.t("pie.prefs.PSE90degree")}<br/><br/><input type="text" size=2 id="PIE90DegreeSpotWidth"><button id="PIE90DegreeSpotWidthCalibration" title="Measure the width of a single 90 degree parking spot">${I18n.t("pie.prefs.PSECal")}</button><br/><button id="PIE90DegreeSpotWidthDraw" class="fa fa-pencil" title="${I18n.t("pie.prefs.PSEDraw90DegreeTitle")}"></button></div>`,
+                            `<div style="display: inline;">${I18n.t("pie.prefs.PSEAngled")}<br/><br/><input type="text" size=2 id="PIEAngledSpotWidth"><button id="PIEAngledSpotWidthCalibration" title="Measure the width of a single angled degree parking spot">${I18n.t("pie.prefs.PSECal")}</button><br/><button id="PIEAngledSpotWidthDraw" class="fa fa-pencil" title="${I18n.t("pie.prefs.PSEDrawAngledTitle")}"></button></div>`,
                             "</div>",
                             "<hr>",
-                            `<div>${I18n.t(
-                                "pie.prefs.PSEEstimatedNumOfSpots"
-                            )}<span id="PIEPLSpotEstimatorTotal" style="color:blue; padding:0px 3px; font-weight:900; font-size:1.2em;" >0</span>&emsp;<div style="display:inline-block;"><button id="PIESetParkingSpacesToPlace" disabled>${I18n.t(
-                                "pie.prefs.PSESet"
-                            )}</button></div></div>`,
+                            `<div>${I18n.t("pie.prefs.PSEEstimatedNumOfSpots")}<span id="PIEPLSpotEstimatorTotal" style="color:blue; padding:0px 3px; font-weight:900; font-size:1.2em;" >0</span>&emsp;<div style="display:inline-block;"><button id="PIESetParkingSpacesToPlace" disabled>${I18n.t("pie.prefs.PSESet")}</button></div></div>`,
                             "</div>",
                         ].join(" ")
                     );

@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
-        "target": "es2017"
+        "target": "es2017",
+        "checkJs": true,
+        "typeRoots": ["@turf", "@types", "wme-sdk-typings"]
     },
-    "typeAcquisition": {"include": ["jquery", "turf", "proj4"]},
     "exclude": ["node_modules"]
 }
