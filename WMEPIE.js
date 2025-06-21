@@ -4249,7 +4249,7 @@ function pie(tries = 1) {
                 if (venue?.categories.includes("PARKING_LOT")) {
                     // let $ParkingSpotEstimatorButton;
                     const $ParkingSpotEstimatorButton = $(
-                        `<div style="font-size:18px; float:right; z-index:100; cursor:pointer; top:0; right:0; margin-left:1px; margin-right:1px;" class="PIEParkingSpotEstimatorButton" title="${I18n.t(
+                        `<div style="font-size:18px; float:right; z-index:100; cursor: pointer; top:0; right:0; margin-left:1px; margin-right:1px;" class="PIEParkingSpotEstimatorButton" title="${I18n.t(
                             "pie.prefs.PSEDisplayButtonTitle"
                         )}">#</div>`
                     );
