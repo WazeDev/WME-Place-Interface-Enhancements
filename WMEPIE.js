@@ -96,6 +96,7 @@ function pie(tries = 1) {
     let closestSegmentLayer;
     let drawPoly, PLSpotEstimatordrawControl, PLSpotEstimatorCalibrationdrawControl;
     let isDrawing;
+    let savedSelectedVenue;
     // let pointStyle = {
     //     pointRadius: 6,
     //     fillOpacity: 0,
@@ -4265,7 +4266,12 @@ function pie(tries = 1) {
                     totalSpots = 0;
                 }
             }
-        } else $("#PIEParkingSpotEstimator").remove(); //if they de-select the Place, remove the tool from the screen
+        } else 
+        {
+            if(savedSelectedVenue === null) {
+                $("#PIEParkingSpotEstimator").remove(); //if they de-select the Place, remove the tool from the screen
+            }
+        }
     }
 
     function startPLSpotEstimatorDrawMode() {
@@ -4279,9 +4285,13 @@ function pie(tries = 1) {
         // );
         // W.map.addControl(PLSpotEstimatordrawControl);
         // PLSpotEstimatordrawControl.activate();
-        sdk.Map.drawLine().then((ls) => {PLSpotEstimatorDoneHandler(ls)});
+        sdk.Map.drawLine().then((ls) => {
+            sdk.Editing.setSelection({selection: {ids: [savedSelectedVenue.id], objectType: "venue"}});
+            PLSpotEstimatorDoneHandler(ls);
+            savedSelectedVenue = null;
+        });
 
-        $("div#WazeMap.view-area.olMap").keydown(PLSpotEstimatorkeyUpHandler);
+        $("div#WazeMap.view-area.olMap").on("keydown", PLSpotEstimatorkeyUpHandler);
     }
 
     function startPLSpotEstimatorCalibrationMode() {
@@ -4292,7 +4302,11 @@ function pie(tries = 1) {
         // PLSpotEstimatorCalibrationLayer.setZIndex(1005);
         // sdk.Map.addLayer({layerName: layerConfig.PIEPLSpotEstimatorCalibrationLayer.layerName, styleContext: styleConfig.styleContext, styleRules: styleConfig.styleRules, zIndex: 3005});
         sdk.Map.setLayerZIndex({layerName: layerConfig.PIEPLSpotEstimatorCalibrationLayer.layerName, zIndex: 3005});
-        sdk.Map.drawLine().then((ls) => {PLSpotEstimatorCalibrationdoneHandler(ls)});
+        sdk.Map.drawLine().then((ls) => {
+                sdk.Editing.setSelection({selection: {ids: [savedSelectedVenue.id], objectType: "venue"}});
+                PLSpotEstimatorCalibrationdoneHandler(ls)
+                savedSelectedVenue = null;
+            });
         // PLSpotEstimatorCalibrationdrawControl = new OpenLayers.Control.DrawFeature(
         //     PLSpotEstimatorCalibrationLayer,
         //     OpenLayers.Handler.Path,
@@ -4531,6 +4545,7 @@ function pie(tries = 1) {
                             $("#PIE90DegreeSpotWidthCalibration").removeClass("PSESelected");
                             $("#PIEAngledSpotWidthCalibration").removeClass("PSESelected");
                             $("#PIE90DegreeSpotWidthDraw").addClass("PSESelected");
+                            savedSelectedVenue = venue;
                             startPLSpotEstimatorDrawMode();
                         }
                     });
@@ -4547,6 +4562,7 @@ function pie(tries = 1) {
                             $("#PIE90DegreeSpotWidthCalibration").removeClass("PSESelected");
                             $("#PIEAngledSpotWidthCalibration").removeClass("PSESelected");
                             $("#PIEAngledSpotWidthDraw").addClass("PSESelected");
+                            savedSelectedVenue = venue;
                             startPLSpotEstimatorDrawMode();
                         }
                     });
@@ -4566,6 +4582,7 @@ function pie(tries = 1) {
                         }
                         $("#PIE90DegreeSpotWidthCalibration").addClass("PSESelected");
                         calibratingAngledWidth = false;
+                        savedSelectedVenue = venue;
                         startPLSpotEstimatorCalibrationMode();
                     });
 
