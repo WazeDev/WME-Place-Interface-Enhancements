@@ -78,7 +78,7 @@ function pie(tries = 1) {
     const placeMenuSelector = "#primary-toolbar > div > div.toolbar-group.toolbar-group-venues > wz-menu"; //"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
     //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
     const placementMode = false;
-    const resCategory = "RESIDENCE_HOME";
+    const resCategory = "RESIDENCE";
     let wazePL;
     let hoursparser;
     let GLE;
@@ -4446,6 +4446,7 @@ function pie(tries = 1) {
                         ].join(" ")
                     );
 
+                    $PLSpotEstimator.draggable();
                     $("#WazeMap").append($PLSpotEstimator.html());
 
                     $("#PIECloseParkingSpotEstimator").on("click", () => {
@@ -4474,30 +4475,34 @@ function pie(tries = 1) {
                     $("#PIESetParkingSpacesToPlace").on("click", () => {
                         let spotCount = $("#PIEPLSpotEstimatorTotal")[0].innerText;
                         if (spotCount != "0") {
-                            const myPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-                            const existingAttr = myPlace.attributes.categoryAttributes.PARKING_LOT;
-                            const newAttr = {};
-                            if (existingAttr) {
-                                for (const prop in existingAttr) {
-                                    let value = existingAttr[prop];
-                                    if (Array.isArray(value)) value = [].concat(value);
-                                    newAttr[prop] = value;
-                                }
-                            }
-                            let spotPropValue;
-                            spotCount = Number.parseInt(spotCount);
-                            if (spotCount < 11) spotPropValue = "R_1_TO_10";
-                            else if (spotCount < 31) spotPropValue = "R_11_TO_30";
-                            else if (spotCount < 61) spotPropValue = "R_31_TO_60";
-                            else if (spotCount < 101) spotPropValue = "R_61_TO_100";
-                            else if (spotCount < 301) spotPropValue = "R_101_TO_300";
-                            else if (spotCount < 601) spotPropValue = "R_301_TO_600";
-                            else if (spotCount >= 601) spotPropValue = "R_600_PLUS";
+                            const selection = sdk.Editing.getSelection();
+                            if(selection?.objectType === "venue") {
+                                const myPlace = sdk.DataModel.Venues.getById({venueId: selection.ids[0]});
+                                // const myPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+                                // const existingAttr = myPlace.attributes.categoryAttributes.PARKING_LOT;
+                                // const newAttr = {};
+                                // if (existingAttr) {
+                                //     for (const prop in existingAttr) {
+                                //         let value = existingAttr[prop];
+                                //         if (Array.isArray(value)) value = [].concat(value);
+                                //         newAttr[prop] = value;
+                                //     }
+                                // }
+                                // let spotPropValue;
+                                spotCount = Number.parseInt(spotCount);
+                                if (spotCount < 11) spotPropValue = "R_1_TO_10";
+                                else if (spotCount < 31) spotPropValue = "R_11_TO_30";
+                                else if (spotCount < 61) spotPropValue = "R_31_TO_60";
+                                else if (spotCount < 101) spotPropValue = "R_61_TO_100";
+                                else if (spotCount < 301) spotPropValue = "R_101_TO_300";
+                                else if (spotCount < 601) spotPropValue = "R_301_TO_600";
+                                else if (spotCount >= 601) spotPropValue = "R_600_PLUS";
 
-                            newAttr.estimatedNumberOfSpots = spotPropValue;
-                            W.model.actionManager.add(
-                                new UpdateObject(myPlace, { categoryAttributes: { PARKING_LOT: newAttr } })
-                            );
+                                newAttr.estimatedNumberOfSpots = spotPropValue;
+                                W.model.actionManager.add(
+                                    new UpdateObject(myPlace, { categoryAttributes: { PARKING_LOT: newAttr } })
+                                );
+                            }
                         }
                     });
                     $("#PIE90DegreeSpotWidth").on("focusout", function () {
@@ -4619,16 +4624,19 @@ function pie(tries = 1) {
     function ShowCopyPlaceButton() {
         $("#pieCopyPlaceButton").remove();
 
-        if (WazeWrap.getSelectedFeatures().length > 0) {
+        const selected = sdk.Editing.getSelection();
+        if (selected?.objectType === "venue") {
             //WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.id.match(/(\d+\.){2}\d+/)
-            if (WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue") {
+            // if (WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue") {
                 // && (typeof WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.id === "string")){ //id is only a string if the Place has been saved - don't allow copying unsaved Places
                 let $PlaceCopyButton;
+                const venue = sdk.DataModel.getById({venueId: selected.ids[0]});
                 if (
-                    !_.includes(
-                        WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,
-                        "RESIDENCE_HOME"
-                    )
+                    !venue.categories.includes("RESIDENCE")
+                    // !_.includes(
+                    //     WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,
+                    //     "RESIDENCE_HOME"
+                    // )
                 ) {
                     $PlaceCopyButton = $(
                         '<div style="float:right; z-index:100; cursor:pointer; position: absolute; top:0; right:0; margin-left:1px; margin-right:1px;" id="pieCopyPlaceButton" title="Creates a copy of this Place"><i class="fa fa-files-o fa-lg" aria-hidden="true"></i></div>'
@@ -4636,10 +4644,11 @@ function pie(tries = 1) {
                     $('#venue-edit-general wz-text-input[name="name"]').before($PlaceCopyButton);
 
                     $("#pieCopyPlaceButton").on("click", () => {
-                        const PlaceObject = require("Waze/Feature/Vector/Landmark");
-                        const AddPlace = require("Waze/Action/AddLandmark");
+                        // const PlaceObject = require("Waze/Feature/Vector/Landmark");
+                        // const AddPlace = require("Waze/Action/AddLandmark");
 
-                        const oldPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+                        // const oldPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+                        const oldPlace = venue;
                         const NewPlace = new PlaceObject({
                             geoJSONGeometry: W.userscripts.toGeoJSONGeometry(oldPlace.getOLGeometry().clone()),
                         });
@@ -4654,12 +4663,7 @@ function pie(tries = 1) {
                         NewPlace.attributes.lockRank = oldPlace.attributes.lockRank;
 
                         let convertedCoords;
-                        if (
-                            oldPlace
-                                .getOLGeometry()
-                                .toString()
-                                .match(/^POLYGON/)
-                        ) {
+                        if (oldPlace.getOLGeometry().toString().match(/^POLYGON/)) {
                             for (let i = 0; i < NewPlace.getOLGeometry().components[0].components.length - 1; i++) {
                                 convertedCoords = WazeWrap.Geometry.ConvertTo4326(
                                     NewPlace.getOLGeometry().components[0].components[i].x,
@@ -4755,7 +4759,6 @@ function pie(tries = 1) {
                         W.selectionManager.setSelectedModels([NewPlace]);
                     });
                 }
-            }
         }
     }
 
@@ -4785,7 +4788,7 @@ function pie(tries = 1) {
                 '<i class="fa fa-times-circle clearButton" style="position:absolute; top:0; right:0;"></i>'
             );
             $("div.description-control").css("position", "relative");
-            $(".clearButton").click(() => {
+            $(".clearButton").on("click", () => {
                 W.model.actionManager.add(
                     new UpdateObject(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), { description: "" })
                 );
@@ -4828,10 +4831,11 @@ function pie(tries = 1) {
 
     async function AddPlaceCategoriesButtons() {
         $("#piePlaceCategoriesButtonsContainer").remove();
-        if (WazeWrap.getSelectedFeatures().length > 0) {
+        const selected = sdk.Editing.getSelection();
+        if (selected !== null) {
             await new Promise((r) => setTimeout(r, 150));
             const $container = $("<div>", { id: "piePlaceCategoriesButtonsContainer", style: "white-space: nowrap;" });
-            if (WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue") {
+            if (selected.objectType === "venue") {
                 const categoryOptions = $("[id^=pieItem]");
 
                 let $button = $("<div>", {
@@ -4857,7 +4861,7 @@ function pie(tries = 1) {
                             title: name.replace("&amp;", "&"),
                             style: "display:inline-block; cursor:pointer",
                             "data-category": categoryOptions[i].value,
-                        }).click(function () {
+                        }).on("click", function () {
                             onPlaceCategoriesButtonsClick(this.id);
                         });
                         $button.append('<span style="font-size:20px;"></span>');
@@ -4912,22 +4916,23 @@ function pie(tries = 1) {
     }
 
     function updatePlaceSizeDisplay() {
-        const count = WazeWrap.getSelectedFeatures().length;
+        const selected = sdk.Editing.getSelection();
+        // const count = WazeWrap.getSelectedFeatures().length;
         let metersArea = 0;
         const bold = false;
-        if (count === 1) {
-            const venue = WazeWrap.getSelectedFeatures()[0];
-            const isArea = venue.geometry.toString().match(/^POLYGON/);
+        if (selected?.venue === "venue") {
+            // const venue = WazeWrap.getSelectedFeatures()[0];
+            const venue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+            // const isArea = venue.geometry.toString().match(/^POLYGON/);
             //var isPoint = venue.geometry.toString().match(/^POINT/);
+            const isArea = venue.geometry.type === "Polygon";
 
-            if (venue.WW.getType() === "venue" && isArea) {
+            if (isArea) {
                 if ($("#AreaSize")) $("#AreaSize").remove();
-                metersArea = WazeWrap.getSelectedFeatures()[0]
-                    .WW.getObjectModel()
-                    .getOLGeometry()
-                    .getGeodesicArea(W.map.getProjectionObject());
+                metersArea = turf.area(venue.geometry);
+                // WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().getOLGeometry().getGeodesicArea(W.map.getProjectionObject());
 
-                if (metersArea > 0 && isArea) {
+                if (metersArea > 0) {
                     const ftArea = Math.round(metersArea * 10.76391 * 100) / 100;
 
                     const list = $("#venue-edit-general > ul")[0];
@@ -5006,9 +5011,7 @@ function pie(tries = 1) {
                 if (mc !== null) {
                     if (!mc.processed) {
                         res.push(
-                            `<option value="${vsc.categoryId}" data-icon="${vsc.categoryId
-                                .toLowerCase()
-                                .replace("_", "-")}" style="font-weight:bold;">${mc.localizedName}</option>`
+                            `<option value="${vsc.categoryId}" data-icon="${vsc.categoryId.toLowerCase().replace("_", "-")}" style="font-weight:bold;">${mc.localizedName}</option>`
                         );
                         mc.processed = true;
                     }

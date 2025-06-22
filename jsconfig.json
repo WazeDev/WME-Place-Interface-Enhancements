@@ -1,8 +1,0 @@
-{
-    "compilerOptions": {
-        "target": "es2017",
-        "checkJs": true,
-        "typeRoots": ["@turf", "@types", "wme-sdk-typings"]
-    },
-    "exclude": ["node_modules"]
-}
