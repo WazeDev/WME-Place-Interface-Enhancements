@@ -304,34 +304,18 @@ function pie(tries = 1) {
                 `<h4 style="margin-bottom:0px;"><b>${I18n.t("pie.prefs.title")}</b></h4>`,
                 `<h6 style="margin-top:0px;">${curr_ver}</h6>`,
                 '<fieldset id="fieldPlaceFilter" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t(
-                    "pie.filter.PlaceFilterPanel"
-                )}</h4></legend>`,
-                `<div class="controls-container pie-controls-container" id="divPlaceFilter">${I18n.t(
-                    "pie.filter.filter"
-                )} <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>`,
+                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t("pie.filter.PlaceFilterPanel")}</h4></legend>`,
+                `<div class="controls-container pie-controls-container" id="divPlaceFilter">${I18n.t("pie.filter.filter")} <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>`,
                 "</br>",
-                `<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">${I18n.t(
-                    "pie.filter.Hide"
-                )}</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">${I18n.t(
-                    "pie.filter.Show"
-                )}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">${I18n.t("pie.filter.Hide")}</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">${I18n.t("pie.filter.Show")}</label></div>`,
                 "</fieldset>",
 
                 '<fieldset id="fieldPlacePanel" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t(
-                    "pie.prefs.PropertiesPanel"
-                )}</h4></legend>`,
+                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t("pie.prefs.PropertiesPanel")}</h4></legend>`,
                 '<div class="controls-container pie-controls-container" id="divAreaPlaceSizeControls">',
-                `<div id="divShowAreaPlaceSize" class="controls-container pie-controls-container"><input type="checkbox" id="_cbShowAreaPlaceSize" class="pieSettingsCheckbox" /><label for="_cbShowAreaPlaceSize">${I18n.t(
-                    "pie.prefs.ShowAreaPlaceSize"
-                )}</label></div>`,
-                `<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">${I18n.t(
-                    "pie.prefs.ShowImperial"
-                )}</label></div>`,
-                `<div id="divShowAreaPlaceSizeMetric" class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeMetric" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeMetric">${I18n.t(
-                    "pie.prefs.ShowMetric"
-                )}</label></div>`,
+                `<div id="divShowAreaPlaceSize" class="controls-container pie-controls-container"><input type="checkbox" id="_cbShowAreaPlaceSize" class="pieSettingsCheckbox" /><label for="_cbShowAreaPlaceSize">${I18n.t("pie.prefs.ShowAreaPlaceSize")}</label></div>`,
+                `<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">${I18n.t("pie.prefs.ShowImperial")}</label></div>`,
+                `<div id="divShowAreaPlaceSizeMetric" class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeMetric" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeMetric">${I18n.t("pie.prefs.ShowMetric")}</label></div>`,
                 "</div>",
                 //!WazeWrap.isBetaEditor ? '<div class="controls-container pie-controls-container" id="divShowLockButtonsRPP" title="' + I18n.t('pie.prefs.ShowRPPLockButtonsTitle') + '"><input type="checkbox" id="_cbShowLockButtonsRPP" class="pieSettingsCheckbox" /><label for="_cbShowLockButtonsRPP" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowRPPLockButtons') + '</label></div>' : '',
                 `<div class="controls-container pie-controls-container" id="divShowPlaceLocatorCrosshair" title="${I18n.t(
@@ -342,11 +326,7 @@ function pie(tries = 1) {
                 `<span class="controls-container pie-controls-container" style="padding-left:30px;" title=""><input type="checkbox" id="_cbPlaceLocatorCrosshairProdPL" class="pieSettingsCheckbox" /><label for="_cbPlaceLocatorCrosshairProdPL" style="white-space:pre-line;">${I18n.t(
                     "pie.prefs.ProdPL"
                 )}</label></span></br>`,
-                `<span class="controls-container pie-controls-container" style="padding-left:30px;" title="${I18n.t(
-                    "pie.prefs.ZoomTitle"
-                )}">${I18n.t(
-                    "pie.prefs.Zoom"
-                )} <select id="piePlaceZoom"><option value="22">22</option><option value="21">21</option><option value="20">20</option><option value="19">19</option><option value="18">18</option><option value="17">17</option><option value="16">16</option><option value="15">15</option><option value="14">14</option><option value="13">13</option><option value="12">12</option></select></span></div>`,
+                `<span class="controls-container pie-controls-container" style="padding-left:30px;" title="${I18n.t("pie.prefs.ZoomTitle")}">${I18n.t("pie.prefs.Zoom")} <select id="piePlaceZoom"><option value="22">22</option><option value="21">21</option><option value="20">20</option><option value="19">19</option><option value="18">18</option><option value="17">17</option><option value="16">16</option><option value="15">15</option><option value="14">14</option><option value="13">13</option><option value="12">12</option></select></span></div>`,
                 `<div class="controls-container pie-controls-container" id="divShowSearchButton" title="${I18n.t(
                     "pie.prefs.ShowAddressSearchTitle"
                 )}"><input type="checkbox" id="_cbShowSearchButton" class="pieSettingsCheckbox"/><label for="_cbShowSearchButton" style="white-space:pre-line;">${I18n.t(
@@ -472,22 +452,12 @@ function pie(tries = 1) {
                 )}</label></div>`,
                 '<div id="divPlaceNamesFontCustomization" class="controls-container pie-controls-container" style="padding-left:20px;">',
                 `${I18n.t("pie.prefs.FontSize")} <input type="text" size="1" id="piePlaceNameFontSize"/>px</br>`,
-                `${I18n.t(
-                    "pie.prefs.FontColor"
-                )} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFont"></button></br>`,
-                `<input type="checkbox" id="_cbPlaceNameFontBold" class="pieSettingsCheckbox"/><label for ="_cbPlaceNameFontBold">${I18n.t(
-                    "pie.prefs.Bold"
-                )}</label></br>`,
-                `${I18n.t(
-                    "pie.prefs.FontOutlineColor"
-                )} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFontOutline"></button></br>`,
-                `${I18n.t(
-                    "pie.prefs.FontOutlineWidth"
-                )} <input type="text" size="1" id="piePlaceNameFontOutlineWidth"/>`,
+                `${I18n.t("pie.prefs.FontColor")} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFont"></button></br>`,
+                `<input type="checkbox" id="_cbPlaceNameFontBold" class="pieSettingsCheckbox"/><label for ="_cbPlaceNameFontBold">${I18n.t("pie.prefs.Bold")}</label></br>`,
+                `${I18n.t("pie.prefs.FontOutlineColor")} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFontOutline"></button></br>`,
+                `${I18n.t("pie.prefs.FontOutlineWidth")} <input type="text" size="1" id="piePlaceNameFontOutlineWidth"/>`,
                 "</div>",
-                `<div id="divShowPLSpotEstimatorButton" class="controls-container pie-controls-container" title="${I18n.t(
-                    "pie.prefs.PSEShowPSEButtonTitle"
-                )}"><input type="checkbox" id="_cbShowPLSpotEstimatorButton" class="pieSettingsCheckbox" /><label for="_cbShowPLSpotEstimatorButton" style="white-space:pre-line;">${I18n.t(
+                `<div id="divShowPLSpotEstimatorButton" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.PSEShowPSEButtonTitle")}"><input type="checkbox" id="_cbShowPLSpotEstimatorButton" class="pieSettingsCheckbox" /><label for="_cbShowPLSpotEstimatorButton" style="white-space:pre-line;">${I18n.t(
                     "pie.prefs.PSEShowPSEButton"
                 )}</label></div>`,
                 `<div id="divShowNavPointClosestSegmentOnHover" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowNavPointClosestSegmentOnHover" class="pieSettingsCheckbox" /><label for="_cbShowNavPointClosestSegmentOnHover" style="white-space:pre-line;">${I18n.t(
@@ -4393,7 +4363,7 @@ function pie(tries = 1) {
 
         const spots = Math.round(
             // WazeWrap.Geometry.calculateDistance(geom.components) /
-                turf.length(geom) /
+                turf.length(geom) * 1000 /
                 ($("#PIE90DegreeSpotWidthDraw").hasClass("PSESelected")
                     ? $("#PIE90DegreeSpotWidth")[0].value
                     : $("#PIEAngledSpotWidth")[0].value)
@@ -4512,10 +4482,11 @@ function pie(tries = 1) {
                                 else if (spotCount < 601) spotPropValue = "R_301_TO_600";
                                 else if (spotCount >= 601) spotPropValue = "R_600_PLUS";
 
-                                newAttr.estimatedNumberOfSpots = spotPropValue;
-                                W.model.actionManager.add(
-                                    new UpdateObject(myPlace, { categoryAttributes: { PARKING_LOT: newAttr } })
-                                );
+                                // newAttr.estimatedNumberOfSpots = spotPropValue;
+                                // W.model.actionManager.add(
+                                //     new UpdateObject(myPlace, { categoryAttributes: { PARKING_LOT: newAttr } })
+                                // );
+                                $("#PIEParkingSpotEstimator").remove();
                             }
                         }
                     });
@@ -4645,19 +4616,20 @@ function pie(tries = 1) {
         if (selected?.objectType === "venue") {
             //WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.id.match(/(\d+\.){2}\d+/)
             // if (WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue") {
-                // && (typeof WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.id === "string")){ //id is only a string if the Place has been saved - don't allow copying unsaved Places
-                let $PlaceCopyButton;
-                const venue = sdk.DataModel.getById({venueId: selected.ids[0]});
-                if (
-                    !venue.categories.includes("RESIDENCE")
-                    // !_.includes(
-                    //     WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,
-                    //     "RESIDENCE_HOME"
-                    // )
-                ) {
-                    $PlaceCopyButton = $(
-                        '<div style="float:right; z-index:100; cursor:pointer; position: absolute; top:0; right:0; margin-left:1px; margin-right:1px;" id="pieCopyPlaceButton" title="Creates a copy of this Place"><i class="fa fa-files-o fa-lg" aria-hidden="true"></i></div>'
-                    );
+            // && (typeof WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.id === "string")){ //id is only a string if the Place has been saved - don't allow copying unsaved Places
+            let $PlaceCopyButton;
+            const venue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+            if (
+                !venue.categories.includes("RESIDENCE")
+                // !_.includes(
+                //     WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,
+                //     "RESIDENCE_HOME"
+                // )
+            ) {
+                $PlaceCopyButton = $(
+                    '<div style="float:right; z-index:100; cursor:pointer; position: absolute; top:0; right:0; margin-left:1px; margin-right:1px;" id="pieCopyPlaceButton" title="Creates a copy of this Place"><i class="fa fa-files-o fa-lg" aria-hidden="true"></i></div>'
+                );
+                waitForElementLoaded('#venue-edit-general wz-text-input[name="name"]').then(() => {
                     $('#venue-edit-general wz-text-input[name="name"]').before($PlaceCopyButton);
 
                     $("#pieCopyPlaceButton").on("click", () => {
@@ -4666,58 +4638,70 @@ function pie(tries = 1) {
 
                         // const oldPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
                         const oldPlace = venue;
-                        const NewPlace = new PlaceObject({
-                            geoJSONGeometry: W.userscripts.toGeoJSONGeometry(oldPlace.getOLGeometry().clone()),
-                        });
 
-                        NewPlace.attributes.name = `${oldPlace.attributes.name} (copy)`;
-                        NewPlace.attributes.phone = oldPlace.attributes.phone;
-                        NewPlace.attributes.url = oldPlace.attributes.url;
-                        NewPlace.attributes.categories = [].concat(oldPlace.attributes.categories);
-                        NewPlace.attributes.aliases = [].concat(oldPlace.attributes.aliases);
-                        NewPlace.attributes.description = oldPlace.attributes.description;
-                        NewPlace.attributes.houseNumber = oldPlace.attributes.houseNumber;
-                        NewPlace.attributes.lockRank = oldPlace.attributes.lockRank;
+                        let newVenue = {
+                            aliases: structuredClone(oldPlace.aliases),
+                            name: `${oldPlace.name} copy`,
+                            categories: structuredClone(oldPlace.categories),
+                            openingHours: oldPlace.openingHours,
+                            phone: oldPlace.phone,
+                            services: oldPlace.services,
+                            url: oldPlace.url,
+                            venueId: null
+                        };
+                        const oldAddress = sdk.DataModel.Venues.getAddress({venueId: oldPlace.id});
+                        let newVenueAddress = {
+                            houseNumber: oldAddress.houseNumber,
+                            streetId: oldAddress.street?.id,
+                            venueId: null 
+                        }
+                        // NewPlace.attributes.name = `${oldPlace.attributes.name} (copy)`;
+                        // NewPlace.attributes.phone = oldPlace.attributes.phone;
+                        // NewPlace.attributes.url = oldPlace.attributes.url;
+                        // NewPlace.attributes.categories = [].concat(oldPlace.attributes.categories);
+                        // NewPlace.attributes.aliases = [].concat(oldPlace.attributes.aliases);
+                        // NewPlace.attributes.description = oldPlace.attributes.description;
+                        // NewPlace.attributes.houseNumber = oldPlace.attributes.houseNumber;
+                        // NewPlace.attributes.lockRank = oldPlace.attributes.lockRank;
 
-                        let convertedCoords;
-                        if (oldPlace.getOLGeometry().toString().match(/^POLYGON/)) {
-                            for (let i = 0; i < NewPlace.getOLGeometry().components[0].components.length - 1; i++) {
-                                convertedCoords = WazeWrap.Geometry.ConvertTo4326(
-                                    NewPlace.getOLGeometry().components[0].components[i].x,
-                                    NewPlace.getOLGeometry().components[0].components[i].y
-                                );
-                                convertedCoords.lon += WazeWrap.Geometry.CalculateLongOffsetGPS(
+
+                        let newPlace;
+                        if (oldPlace.geometry.type === "Polygon") {
+                            let newCoordinates = structuredClone(oldPlace.geometry.coordinates).map((pos) => {return structuredClone(pos);});
+                            newCoordinates = newCoordinates.map((outerPos) => { return outerPos.map((pos) => {return [pos[0] + WazeWrap.Geometry.CalculateLongOffsetGPS(
                                     5,
-                                    convertedCoords.long,
-                                    convertedCoords.lat
-                                );
-                                NewPlace.getOLGeometry().components[0].components[i].x =
-                                    WazeWrap.Geometry.ConvertTo900913(convertedCoords.lon, convertedCoords.lat).lon;
-                            }
+                                    pos[0],
+                                    pos[1]
+                                ), pos[1]]; }) } );
+                            newPlace = sdk.DataModel.Venues.addVenue({category: oldPlace.categories[0],geometry: turf.polygon(newCoordinates).geometry});
                         } else {
-                            convertedCoords = WazeWrap.Geometry.ConvertTo4326(
-                                oldPlace.getOLGeometry().x,
-                                oldPlace.getOLGeometry().y
-                            );
-                            convertedCoords.lon += WazeWrap.Geometry.CalculateLongOffsetGPS(
+                            // convertedCoords = WazeWrap.Geometry.ConvertTo4326(
+                            //     oldPlace.getOLGeometry().x,
+                            //     oldPlace.getOLGeometry().y
+                            // );
+                            let newCoordinates = structuredClone(oldPlace.geometry.coordinates);
+                            newCoordinates[0] += WazeWrap.Geometry.CalculateLongOffsetGPS(
                                 5,
-                                convertedCoords.long,
-                                convertedCoords.lat
-                            );
-                            NewPlace.attributes.geometry.x = WazeWrap.Geometry.ConvertTo900913(
-                                convertedCoords.lon,
-                                convertedCoords.lat
-                            ).lon;
+                                newCoordinates[0],
+                                newCoordinates[1]
+                            )
+                            newPlace = sdk.DataModel.Venues.addVenue({category: oldPlace.categories[0],geometry: turf.point(newCoordinates).geometry});
                         }
 
-                        NewPlace.attributes.services = [].concat(oldPlace.attributes.services);
-                        NewPlace.attributes.openingHours = [].concat(oldPlace.attributes.openingHours);
-                        NewPlace.attributes.streetID = oldPlace.attributes.streetID;
+                        newVenueAddress.venueId = newPlace.toString();
+                        newVenue.venueId = newPlace.toString();
+                        sdk.DataModel.Venues.updateAddress(newVenueAddress);
+                        sdk.DataModel.Venues.updateVenue(newVenue);
 
-                        if (_.includes(NewPlace.attributes.categories, "GAS_STATION"))
+                        // NewPlace.attributes.services = [].concat(oldPlace.attributes.services);
+                        // NewPlace.attributes.openingHours = [].concat(oldPlace.attributes.openingHours);
+                        // NewPlace.attributes.streetID = oldPlace.attributes.streetID;
+
+                        const newlyAddedVenue = sdk.DataModel.Venues.getById({venueId: newPlace.toString()});
+                        if (newlyAddedVenue.categories.includes("GAS_STATION"))
                             NewPlace.attributes.brand = oldPlace.attributes.brand;
 
-                        if (_.includes(NewPlace.attributes.categories, "PARKING_LOT")) {
+                        if (newlyAddedVenue.categories.includes("PARKING_LOT")) {
                             NewPlace.attributes.categoryAttributes.PARKING_LOT = {};
                             const PLAttribute = oldPlace.attributes.categoryAttributes.PARKING_LOT;
                             if (PLAttribute.lotType != null)
@@ -4749,33 +4733,34 @@ function pie(tries = 1) {
                                 );
                         }
 
-                        W.model.actionManager.add(new AddPlace(NewPlace));
+                        // W.model.actionManager.add(new AddPlace(NewPlace));
 
-                        let newAttributes,
-                            UpdateFeatureAddress = require("Waze/Action/UpdateFeatureAddress"),
-                            address = oldPlace.getAddress();
-                        const multiaction = new MultiAction();
+                        // let newAttributes,
+                        //     UpdateFeatureAddress = require("Waze/Action/UpdateFeatureAddress"),
+                        //     address = oldPlace.getAddress();
+                        // const multiaction = new MultiAction();
 
-                        newAttributes = {
-                            countryID: address.attributes.country.id,
-                            stateID: address.attributes.state.id,
-                            emptyCity: address.attributes.city.attributes.name ? null : true,
-                            emptyStreet: address.attributes.street.name ? null : true,
-                        };
+                        // newAttributes = {
+                        //     countryID: address.attributes.country.id,
+                        //     stateID: address.attributes.state.id,
+                        //     emptyCity: address.attributes.city.attributes.name ? null : true,
+                        //     emptyStreet: address.attributes.street.name ? null : true,
+                        // };
 
-                        newAttributes.streetName = address.attributes.street.name;
-                        const cityName = address.attributes.city.attributes.name;
+                        // newAttributes.streetName = address.attributes.street.name;
+                        // const cityName = address.attributes.city.attributes.name;
 
-                        if (cityName !== "") newAttributes.emptyCity = null;
-                        newAttributes.cityName = cityName;
+                        // if (cityName !== "") newAttributes.emptyCity = null;
+                        // newAttributes.cityName = cityName;
 
-                        const UFA = new UpdateFeatureAddress(NewPlace, newAttributes);
-                        UFA.options.updateHouseNumber = true;
-                        multiaction.doSubAction(W.model, UFA);
-                        W.model.actionManager.add(multiaction);
-                        W.selectionManager.setSelectedModels([NewPlace]);
+                        // const UFA = new UpdateFeatureAddress(NewPlace, newAttributes);
+                        // UFA.options.updateHouseNumber = true;
+                        // multiaction.doSubAction(W.model, UFA);
+                        // W.model.actionManager.add(multiaction);
+                        // W.selectionManager.setSelectedModels([NewPlace]);
                     });
-                }
+                });
+            }
         }
     }
 
