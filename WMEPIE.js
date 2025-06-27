@@ -4791,9 +4791,10 @@ function pie(tries = 1) {
             );
             $("div.description-control").css("position", "relative");
             $(".clearButton").on("click", () => {
-                W.model.actionManager.add(
-                    new UpdateObject(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), { description: "" })
-                );
+                const selected = sdk.Editing.getSelection();
+                if(selected?.objectType === "venue") {
+                    sdk.DataModel.Venues.updateVenue({description: ""});
+                }
             });
         }, 0);
     }
