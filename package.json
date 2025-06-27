@@ -1,13 +1,13 @@
 {
     "devDependencies": {
-        "@biomejs/biome": "2.0.4",
+        "@biomejs/biome": "2.0.5",
         "@turf/turf": "^7.2.0",
         "@types/jquery": "^3.5.32",
         "@types/tampermonkey": "^5.0.4"
     },
     "dependencies": {
         "jquery": "^3.7.1",
-        "proj4": "^2.19.3",
+        "proj4": "^2.19.4",
         "typescript": "^5.8.3",
         "wme-sdk-typings": "https://web-assets.waze.com/wme_sdk_docs/beta/latest/wme-sdk-typings.tgz"
     }
