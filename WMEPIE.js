@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2025.04.10.00
+// @version      2024.06.28.001
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -877,6 +877,47 @@ var UpdateObject, MultiAction;
     function handleEventModeChange(){
 
     }
+
+        // Function used in LaneTools.
+    // Waiting for Element to Be Loaded, which is necessary due to shadowRoot delayed rendering.
+    function waitForElementLoaded(selector, root = undefined) {
+        return new Promise((resolve) => {
+            if (!root) {
+                if (document.querySelector(selector)) {
+                    return resolve(document.querySelector(selector));
+                }
+
+                const observer = new MutationObserver((mutations) => {
+                    if (document.querySelector(selector)) {
+                        observer.disconnect();
+                        resolve(document.querySelector(selector));
+                    }
+                });
+
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true,
+                });
+            } else {
+                if (root.querySelector(selector)) {
+                    return resolve(root.querySelector(selector));
+                }
+
+                const observer = new MutationObserver((mutations) => {
+                    if (root.querySelector(selector)) {
+                        observer.disconnect();
+                        resolve(root.querySelector(selector));
+                    }
+                });
+
+                observer.observe(root, {
+                    childList: true,
+                    subtree: true,
+                });
+            }
+        });
+    }
+
 
     function SetupPhotoViewer(){
         //Black background
@@ -3010,90 +3051,92 @@ var UpdateObject, MultiAction;
                 var $PlaceCopyButton;
                 if(!_.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,"RESIDENCE_HOME")){
                     $PlaceCopyButton = $('<div style="float:right; z-index:100; cursor:pointer; position: absolute; top:0; right:0; margin-left:1px; margin-right:1px;" id="pieCopyPlaceButton" title="Creates a copy of this Place"><i class="fa fa-files-o fa-lg" aria-hidden="true"></i></div>');
-                    $('#venue-edit-general wz-text-input[name="name"]').before($PlaceCopyButton);
+                    waitForElementLoaded('#venue-edit-general wz-text-input[name="name"]').then(()=>{
+                        $('#venue-edit-general wz-text-input[name="name"]').before($PlaceCopyButton);
 
-                    $('#pieCopyPlaceButton').click(function(){
-                        var PlaceObject = require("Waze/Feature/Vector/Landmark");
-                        var AddPlace = require("Waze/Action/AddLandmark");
+                        $('#pieCopyPlaceButton').click(function(){
+                            var PlaceObject = require("Waze/Feature/Vector/Landmark");
+                            var AddPlace = require("Waze/Action/AddLandmark");
 
-                        var oldPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-                        var NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(oldPlace.getOLGeometry().clone()) });
+                            var oldPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+                            var NewPlace = new PlaceObject({ geoJSONGeometry: W.userscripts.toGeoJSONGeometry(oldPlace.getOLGeometry().clone()) });
 
-                        NewPlace.attributes.name = oldPlace.attributes.name + " (copy)";
-                        NewPlace.attributes.phone = oldPlace.attributes.phone;
-                        NewPlace.attributes.url = oldPlace.attributes.url;
-                        NewPlace.attributes.categories = [].concat(oldPlace.attributes.categories);
-                        NewPlace.attributes.aliases = [].concat(oldPlace.attributes.aliases);
-                        NewPlace.attributes.description = oldPlace.attributes.description;
-                        NewPlace.attributes.houseNumber = oldPlace.attributes.houseNumber;
-                        NewPlace.attributes.lockRank = oldPlace.attributes.lockRank;
+                            NewPlace.attributes.name = oldPlace.attributes.name + " (copy)";
+                            NewPlace.attributes.phone = oldPlace.attributes.phone;
+                            NewPlace.attributes.url = oldPlace.attributes.url;
+                            NewPlace.attributes.categories = [].concat(oldPlace.attributes.categories);
+                            NewPlace.attributes.aliases = [].concat(oldPlace.attributes.aliases);
+                            NewPlace.attributes.description = oldPlace.attributes.description;
+                            NewPlace.attributes.houseNumber = oldPlace.attributes.houseNumber;
+                            NewPlace.attributes.lockRank = oldPlace.attributes.lockRank;
 
-                        let convertedCoords;
-                        if(oldPlace.getOLGeometry().toString().match(/^POLYGON/)){
-                            for(var i=0; i<NewPlace.getOLGeometry().components[0].components.length - 1; i++){
-                                convertedCoords = WazeWrap.Geometry.ConvertTo4326(NewPlace.getOLGeometry().components[0].components[i].x, NewPlace.getOLGeometry().components[0].components[i].y);
-                                convertedCoords.lon += WazeWrap.Geometry.CalculateLongOffsetGPS(5, convertedCoords.long, convertedCoords.lat);
-                                NewPlace.getOLGeometry().components[0].components[i].x = WazeWrap.Geometry.ConvertTo900913(convertedCoords.lon, convertedCoords.lat).lon;
+                            let convertedCoords;
+                            if(oldPlace.getOLGeometry().toString().match(/^POLYGON/)){
+                                for(var i=0; i<NewPlace.getOLGeometry().components[0].components.length - 1; i++){
+                                    convertedCoords = WazeWrap.Geometry.ConvertTo4326(NewPlace.getOLGeometry().components[0].components[i].x, NewPlace.getOLGeometry().components[0].components[i].y);
+                                    convertedCoords.lon += WazeWrap.Geometry.CalculateLongOffsetGPS(5, convertedCoords.long, convertedCoords.lat);
+                                    NewPlace.getOLGeometry().components[0].components[i].x = WazeWrap.Geometry.ConvertTo900913(convertedCoords.lon, convertedCoords.lat).lon;
+                                }
                             }
-                        }
-                        else{
-                            convertedCoords = WazeWrap.Geometry.ConvertTo4326(oldPlace.getOLGeometry().x, oldPlace.getOLGeometry().y);
-                            convertedCoords.lon += WazeWrap.Geometry.CalculateLongOffsetGPS(5, convertedCoords.long, convertedCoords.lat);
-                            NewPlace.attributes.geometry.x = WazeWrap.Geometry.ConvertTo900913(convertedCoords.lon, convertedCoords.lat).lon;
-                        }
+                            else{
+                                convertedCoords = WazeWrap.Geometry.ConvertTo4326(oldPlace.getOLGeometry().x, oldPlace.getOLGeometry().y);
+                                convertedCoords.lon += WazeWrap.Geometry.CalculateLongOffsetGPS(5, convertedCoords.long, convertedCoords.lat);
+                                NewPlace.attributes.geometry.x = WazeWrap.Geometry.ConvertTo900913(convertedCoords.lon, convertedCoords.lat).lon;
+                            }
 
-                        NewPlace.attributes.services = [].concat(oldPlace.attributes.services);
-                        NewPlace.attributes.openingHours = [].concat(oldPlace.attributes.openingHours);
-                        NewPlace.attributes.streetID = oldPlace.attributes.streetID;
+                            NewPlace.attributes.services = [].concat(oldPlace.attributes.services);
+                            NewPlace.attributes.openingHours = [].concat(oldPlace.attributes.openingHours);
+                            NewPlace.attributes.streetID = oldPlace.attributes.streetID;
 
-                        if(_.includes(NewPlace.attributes.categories,"GAS_STATION"))
-                            NewPlace.attributes.brand = oldPlace.attributes.brand;
+                            if(_.includes(NewPlace.attributes.categories,"GAS_STATION"))
+                                NewPlace.attributes.brand = oldPlace.attributes.brand;
 
-                        if(_.includes(NewPlace.attributes.categories,"PARKING_LOT")){
-                            NewPlace.attributes.categoryAttributes.PARKING_LOT = {};
-                            var PLAttribute = oldPlace.attributes.categoryAttributes.PARKING_LOT;
-                            if((PLAttribute.lotType != null))
-                                NewPlace.attributes.categoryAttributes.PARKING_LOT.lotType = [].concat(oldPlace.attributes.categoryAttributes.PARKING_LOT.lotType);
-                            if((PLAttribute.canExitWhileClosed != null))
-                                NewPlace.attributes.categoryAttributes.PARKING_LOT.canExitWhileClosed = oldPlace.attributes.categoryAttributes.PARKING_LOT.canExitWhileClosed;
-                            if((PLAttribute.costType != null))
-                                NewPlace.attributes.categoryAttributes.PARKING_LOT.costType = oldPlace.attributes.categoryAttributes.PARKING_LOT.costType;
-                            if((PLAttribute.estimatedNumberOfSpots != null))
-                                NewPlace.attributes.categoryAttributes.PARKING_LOT.estimatedNumberOfSpots = oldPlace.attributes.categoryAttributes.PARKING_LOT.estimatedNumberOfSpots;
-                            if((PLAttribute.hasTBR != null))
-                                NewPlace.attributes.categoryAttributes.PARKING_LOT.hasTBR = oldPlace.attributes.categoryAttributes.PARKING_LOT.hasTBR;
-                            if((PLAttribute.lotType != null))
-                                NewPlace.attributes.categoryAttributes.PARKING_LOT.lotType = [].concat(oldPlace.attributes.categoryAttributes.PARKING_LOT.lotType);
-                            if((PLAttribute.parkingType != null))
-                                NewPlace.attributes.categoryAttributes.PARKING_LOT.parkingType = oldPlace.attributes.categoryAttributes.PARKING_LOT.parkingType;
-                            if((PLAttribute.paymentType != null))
-                                NewPlace.attributes.categoryAttributes.PARKING_LOT.paymentType = [].concat(oldPlace.attributes.categoryAttributes.PARKING_LOT.paymentType);
-                        }
+                            if(_.includes(NewPlace.attributes.categories,"PARKING_LOT")){
+                                NewPlace.attributes.categoryAttributes.PARKING_LOT = {};
+                                var PLAttribute = oldPlace.attributes.categoryAttributes.PARKING_LOT;
+                                if((PLAttribute.lotType != null))
+                                    NewPlace.attributes.categoryAttributes.PARKING_LOT.lotType = [].concat(oldPlace.attributes.categoryAttributes.PARKING_LOT.lotType);
+                                if((PLAttribute.canExitWhileClosed != null))
+                                    NewPlace.attributes.categoryAttributes.PARKING_LOT.canExitWhileClosed = oldPlace.attributes.categoryAttributes.PARKING_LOT.canExitWhileClosed;
+                                if((PLAttribute.costType != null))
+                                    NewPlace.attributes.categoryAttributes.PARKING_LOT.costType = oldPlace.attributes.categoryAttributes.PARKING_LOT.costType;
+                                if((PLAttribute.estimatedNumberOfSpots != null))
+                                    NewPlace.attributes.categoryAttributes.PARKING_LOT.estimatedNumberOfSpots = oldPlace.attributes.categoryAttributes.PARKING_LOT.estimatedNumberOfSpots;
+                                if((PLAttribute.hasTBR != null))
+                                    NewPlace.attributes.categoryAttributes.PARKING_LOT.hasTBR = oldPlace.attributes.categoryAttributes.PARKING_LOT.hasTBR;
+                                if((PLAttribute.lotType != null))
+                                    NewPlace.attributes.categoryAttributes.PARKING_LOT.lotType = [].concat(oldPlace.attributes.categoryAttributes.PARKING_LOT.lotType);
+                                if((PLAttribute.parkingType != null))
+                                    NewPlace.attributes.categoryAttributes.PARKING_LOT.parkingType = oldPlace.attributes.categoryAttributes.PARKING_LOT.parkingType;
+                                if((PLAttribute.paymentType != null))
+                                    NewPlace.attributes.categoryAttributes.PARKING_LOT.paymentType = [].concat(oldPlace.attributes.categoryAttributes.PARKING_LOT.paymentType);
+                            }
 
-                        W.model.actionManager.add(new AddPlace(NewPlace));
+                            W.model.actionManager.add(new AddPlace(NewPlace));
 
-                        var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = oldPlace.getAddress();
-                        var multiaction = new MultiAction();
+                            var newAttributes, UpdateFeatureAddress = require('Waze/Action/UpdateFeatureAddress'), address = oldPlace.getAddress();
+                            var multiaction = new MultiAction();
 
-                        newAttributes = {
-                            countryID: address.attributes.country.id,
-                            stateID: address.attributes.state.id,
-                            emptyCity: address.attributes.city.attributes.name ? null : true,
-                            emptyStreet: address.attributes.street.name ? null : true
-                        };
+                            newAttributes = {
+                                countryID: address.attributes.country.id,
+                                stateID: address.attributes.state.id,
+                                emptyCity: address.attributes.city.attributes.name ? null : true,
+                                emptyStreet: address.attributes.street.name ? null : true
+                            };
 
-                        newAttributes.streetName = address.attributes.street.name;
-                        var cityName = address.attributes.city.attributes.name;
+                            newAttributes.streetName = address.attributes.street.name;
+                            var cityName = address.attributes.city.attributes.name;
 
-                        if(cityName !== "")
-                            newAttributes.emptyCity = null;
-                        newAttributes.cityName = cityName;
+                            if(cityName !== "")
+                                newAttributes.emptyCity = null;
+                            newAttributes.cityName = cityName;
 
-                        var UFA = new UpdateFeatureAddress(NewPlace, newAttributes);
-                        UFA.options.updateHouseNumber = true;
-                        multiaction.doSubAction(W.model, UFA);
-                        W.model.actionManager.add(multiaction);
-                        W.selectionManager.setSelectedModels([NewPlace]);
+                            var UFA = new UpdateFeatureAddress(NewPlace, newAttributes);
+                            UFA.options.updateHouseNumber = true;
+                            multiaction.doSubAction(W.model, UFA);
+                            W.model.actionManager.add(multiaction);
+                            W.selectionManager.setSelectedModels([NewPlace]);
+                        });
                     });
                 }
             }
@@ -3142,27 +3185,28 @@ var UpdateObject, MultiAction;
 //         }
 //     }
 
-function AddMakePrimaryButtons(){
-	if(!WazeWrap.hasPlaceSelected() || ($('.alias-item-content').length = 0)){
-	    return;
-	}
-	$('.alias-item').each(function(){
-	    let altItem = $(this);
-	    if($(altItem).find('.makePrimary').length == 0){
-		let $button = $('<div>', {class:'makePrimary alias-item-action'}).text("To Name").click(function(){
-		    let obj = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-		    let toPrimary = $(altItem).find('.alias-item-content').text();
-		    let aliases = obj.attributes.aliases.filter(a => a != toPrimary);
-		    aliases.push(obj.attributes.name);
-
-		    let multiaction = new MultiAction();
-		    multiaction.doSubAction(W.model, new UpdateObject(obj, {aliases}));
-		    multiaction.doSubAction(W.model, new UpdateObject(obj, {name: toPrimary}));
-		    W.model.actionManager.add(multiaction);
-		});
-		$(altItem).find('.alias-item-actions').append($button);
-	    }
-	});
+    function AddMakePrimaryButtons(){
+        if(WazeWrap.hasPlaceSelected()){
+            waitForElementLoaded(".alias-item").then(() => {
+                $('.alias-item').each(function(){
+                    let altItem = $(this);
+                    if($(altItem).find('.makePrimary').length == 0){
+                        let $button = $('<div>', {class:'makePrimary alias-item-action'}).text("To Name").on("click", function(){
+                            let obj = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+                            let toPrimary = $(altItem).find('.alias-item-content').text();
+                            let aliases = obj.attributes.aliases.filter(a => a != toPrimary);
+                            aliases.push(obj.attributes.name);
+                
+                            let multiaction = new MultiAction();
+                            multiaction.doSubAction(W.model, new UpdateObject(obj, {aliases}));
+                            multiaction.doSubAction(W.model, new UpdateObject(obj, {name: toPrimary}));
+                            W.model.actionManager.add(multiaction);
+                        });
+                        $(altItem).find('.alias-item-actions').append($button);
+                    }
+                });
+            });
+        }
     }
 
     async function AddPlaceCategoriesButtons(){
