@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2025.04.10.00
+// @version      2024.06.28.001
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -877,6 +877,47 @@ var UpdateObject, MultiAction;
     function handleEventModeChange(){
 
     }
+
+        // Function used in LaneTools.
+    // Waiting for Element to Be Loaded, which is necessary due to shadowRoot delayed rendering.
+    function waitForElementLoaded(selector, root = undefined) {
+        return new Promise((resolve) => {
+            if (!root) {
+                if (document.querySelector(selector)) {
+                    return resolve(document.querySelector(selector));
+                }
+
+                const observer = new MutationObserver((mutations) => {
+                    if (document.querySelector(selector)) {
+                        observer.disconnect();
+                        resolve(document.querySelector(selector));
+                    }
+                });
+
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true,
+                });
+            } else {
+                if (root.querySelector(selector)) {
+                    return resolve(root.querySelector(selector));
+                }
+
+                const observer = new MutationObserver((mutations) => {
+                    if (root.querySelector(selector)) {
+                        observer.disconnect();
+                        resolve(root.querySelector(selector));
+                    }
+                });
+
+                observer.observe(root, {
+                    childList: true,
+                    subtree: true,
+                });
+            }
+        });
+    }
+
 
     function SetupPhotoViewer(){
         //Black background
@@ -3142,27 +3183,28 @@ var UpdateObject, MultiAction;
 //         }
 //     }
 
-function AddMakePrimaryButtons(){
-	if(!WazeWrap.hasPlaceSelected() || ($('.alias-item-content').length = 0)){
-	    return;
-	}
-	$('.alias-item').each(function(){
-	    let altItem = $(this);
-	    if($(altItem).find('.makePrimary').length == 0){
-		let $button = $('<div>', {class:'makePrimary alias-item-action'}).text("To Name").click(function(){
-		    let obj = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-		    let toPrimary = $(altItem).find('.alias-item-content').text();
-		    let aliases = obj.attributes.aliases.filter(a => a != toPrimary);
-		    aliases.push(obj.attributes.name);
-
-		    let multiaction = new MultiAction();
-		    multiaction.doSubAction(W.model, new UpdateObject(obj, {aliases}));
-		    multiaction.doSubAction(W.model, new UpdateObject(obj, {name: toPrimary}));
-		    W.model.actionManager.add(multiaction);
-		});
-		$(altItem).find('.alias-item-actions').append($button);
-	    }
-	});
+    function AddMakePrimaryButtons(){
+        if(WazeWrap.hasPlaceSelected()){
+            waitForElementLoaded(".alias-item").then(() => {
+                $('.alias-item').each(function(){
+                    let altItem = $(this);
+                    if($(altItem).find('.makePrimary').length == 0){
+                        let $button = $('<div>', {class:'makePrimary alias-item-action'}).text("To Name").on("click", function(){
+                            let obj = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+                            let toPrimary = $(altItem).find('.alias-item-content').text();
+                            let aliases = obj.attributes.aliases.filter(a => a != toPrimary);
+                            aliases.push(obj.attributes.name);
+                
+                            let multiaction = new MultiAction();
+                            multiaction.doSubAction(W.model, new UpdateObject(obj, {aliases}));
+                            multiaction.doSubAction(W.model, new UpdateObject(obj, {name: toPrimary}));
+                            W.model.actionManager.add(multiaction);
+                        });
+                        $(altItem).find('.alias-item-actions').append($button);
+                    }
+                });
+            });
+        }
     }
 
     async function AddPlaceCategoriesButtons(){
