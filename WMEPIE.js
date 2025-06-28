@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2024.04.22.01
+// @version      2025.04.10.00
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -54,11 +54,12 @@ var UpdateObject, MultiAction;
     let hoursparser;
     let GLE;
     var catalog = [];
-    const updateMessage = "Fixing the place copy functionality.  Until they change the geometry access again, at least.";
+    const updateMessage = "Fixed the Google Link Enhancer feature to show the Google place location when hovering over an External Provider.";
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
     const DOWNLOAD_URL = GM_info.script.fileURL;
+    var nativeolControlMoveCallback;
 
     //Layer definitions
     {
@@ -159,7 +160,7 @@ var UpdateObject, MultiAction;
             '<span class="controls-container pie-controls-container" style="padding-left:30px;" title="' + I18n.t('pie.prefs.ZoomTitle') + '">' + I18n.t('pie.prefs.Zoom') + ' <select id="piePlaceZoom"><option value="22">22</option><option value="21">21</option><option value="20">20</option><option value="19">19</option><option value="18">18</option><option value="17">17</option><option value="16">16</option><option value="15">15</option><option value="14">14</option><option value="13">13</option><option value="12">12</option></select></span></div>',
             '<div class="controls-container pie-controls-container" id="divShowSearchButton" title="' + I18n.t('pie.prefs.ShowAddressSearchTitle') + '"><input type="checkbox" id="_cbShowSearchButton" class="pieSettingsCheckbox"/><label for="_cbShowSearchButton" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowAddressSearch') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divAddPlaceCategoriesButtons"><input type="checkbox" id="_cbAddPlaceCategoriesButtons" class="pieSettingsCheckbox"/><label for="_cbAddPlaceCategoriesButtons" style="white-space:pre-line;" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowPlaceCategoryButtons') + '</label></div>',
-            '<div class="controls-container pie-controls-container" id="divShowParkingLotButton" title="' + I18n.t('pie.prefs.ShowPLAButtonTitle') + '" ><input type="checkbox" id="_cbShowParkingLotButton" class="pieSettingsCheckbox" /><label for="_cbShowParkingLotButton" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowPLAButton') + '</label></div>',
+            //'<div class="controls-container pie-controls-container" id="divShowParkingLotButton" title="' + I18n.t('pie.prefs.ShowPLAButtonTitle') + '" ><input type="checkbox" id="_cbShowParkingLotButton" class="pieSettingsCheckbox" /><label for="_cbShowParkingLotButton" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowPLAButton') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divShowCopyPlaceButton" title="' + I18n.t('pie.prefs.ShowCopyPlaceButtonTitle') + '" ><input type="checkbox" id="_cbShowCopyPlaceButton" class="pieSettingsCheckbox" /><label for="_cbShowCopyPlaceButton" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowCopyPlaceButton') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divShowExternalProviderTooltip" title="' + I18n.t('pie.prefs.ShowGPIDTooltipTitle') + '" ><input type="checkbox" id="_cbShowExternalProviderTooltip" class="pieSettingsCheckbox" /><label for="_cbShowExternalProviderTooltip" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowGPIDTooltip') + '</label></div>',
             '<div class="controls-container pie-controls-container" id="divClearDescription" title="' + I18n.t('pie.prefs.ClearDescriptionTitle') + '" ><input type="checkbox" id="_cbClearDescription" class="pieSettingsCheckbox" /><label for="_cbClearDescription" style="white-space:pre-line;">' + I18n.t('pie.prefs.ClearDescription') + '</label></div>',
@@ -197,7 +198,7 @@ var UpdateObject, MultiAction;
             I18n.t('pie.prefs.FontOutlineColor') + ' <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFontOutline"></button></br>',
             I18n.t('pie.prefs.FontOutlineWidth') + ' <input type="text" size="1" id="piePlaceNameFontOutlineWidth"/>',
             '</div>',
-            '<div id="divShowPLSpotEstimatorButton" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.PSEShowPSEButtonTitle') + '"><input type="checkbox" id="_cbShowPLSpotEstimatorButton" class="pieSettingsCheckbox" /><label for="_cbShowPLSpotEstimatorButton" style="white-space:pre-line;">' + I18n.t('pie.prefs.PSEShowPSEButton') + '</label></div>',
+            //'<div id="divShowPLSpotEstimatorButton" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.PSEShowPSEButtonTitle') + '"><input type="checkbox" id="_cbShowPLSpotEstimatorButton" class="pieSettingsCheckbox" /><label for="_cbShowPLSpotEstimatorButton" style="white-space:pre-line;">' + I18n.t('pie.prefs.PSEShowPSEButton') + '</label></div>',
             '<div id="divShowNavPointClosestSegmentOnHover" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowNavPointClosestSegmentOnHover" class="pieSettingsCheckbox" /><label for="_cbShowNavPointClosestSegmentOnHover" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowNavPointClosestSegmentOnHover') + '</label></div>',
             '<div id="divShowClosestSegmentSelected" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowClosestSegmentSelected" class="pieSettingsCheckbox" /><label for="_cbShowClosestSegmentSelected" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowClosestSegmentSelected') + '</label></div>',
             '<div id="divEnableGLE" class="controls-container pie-controls-container" title="' + I18n.t('pie.prefs.EnableGLETitle') + '"><input type="checkbox" id="_cbEnableGLE" class="pieSettingsCheckbox"/><label for="_cbEnableGLE" style="white-space:pre-line;">' + I18n.t('pie.prefs.EnableGLE') + '</label></div>',
@@ -839,32 +840,6 @@ var UpdateObject, MultiAction;
             }
         });
 
-        //No one really uses this and it is causing issues due to the rotate handle persisting after de-selecting a MC
-        /*W.selectionManager.events.register("selectionchanged", null, function(){
-            let selectedItems = WazeWrap.getSelectedFeatures();
-            if(selectedItems.length > 0 && selectedItems[0].attributes.repositoryObject.type === "mapComment")
-                getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.ROTATE) == 0){
-                        val.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
-                        val.resetVertices();
-                    }
-                });
-        });*/
-
-        //Obsoleted by WME update released 2017-10-24
-        /*var observer = new MutationObserver(function(mutations) {
-               mutations.forEach(function(mutation) {
-                   if ($('#dialog-region').find('.venue-image-dialog').length > 0 && $('#detailsWrap').length == 0) ImageDialogEnhancement();
-               });
-           });*/
-
-        //observer.observe(document.getElementById('dialog-region'), { childList: true, subtree: true });
-
-        //Highlight the categories box when the old hospital category is present
-        /*W.selectionManager.events.register("selectionchanged", null, highlightObsoleteHospitalCategory);
-        W.model.actionManager.events.register("afterundoaction",null, highlightObsoleteHospitalCategory);
-        W.model.actionManager.events.register("afterclearactions",null, highlightObsoleteHospitalCategory);
-        W.model.actionManager.events.register("afteraction",null, highlightObsoleteHospitalCategory);*/
 
         WazeWrap.Events.register("zoomend", null, DisplayPlaceNames);
         WazeWrap.Events.register("changelayer", null, DisplayPlaceNames);
@@ -896,7 +871,7 @@ var UpdateObject, MultiAction;
             }
         });
 
-        WazeWrap.Interface.ShowScriptUpdate("WME Place Interface Enhancements", GM_info.script.version, updateMessage, "", "https://www.waze.com/forum/viewtopic.php?f=819&t=215990");
+        WazeWrap.Interface.ShowScriptUpdate("WME Place Interface Enhancements", GM_info.script.version, updateMessage, "", "https://www.waze.com/discuss/t/217315");
     }
 
     function handleEventModeChange(){
@@ -980,7 +955,7 @@ var UpdateObject, MultiAction;
         //Icon near chat
         let launchDiv=document.createElement('div');
         launchDiv.id='launchDiv';
-        $(launchDiv).css({'z-index':'10000 !important', 'title':'test','bottom':'20px','left':'70px','position':'absolute','font-weight':'400', 'display': (settings.EnablePhotoViewer ? 'block' : 'none')});
+        $(launchDiv).css({'z-index':'10000 !important', 'title':'test','bottom':'20px','left':'190px','position':'absolute','font-weight':'400', 'display': (settings.EnablePhotoViewer ? 'block' : 'none')});
         let tmpdiv=document.createElement('div');
         $(tmpdiv).css({'height':'40px','position':'absolute','bottom':'0px','transition':'all 0.3s'});
         tmpdiv.onmouseenter=togglePhotoViewerMouseEvent;
@@ -1206,7 +1181,6 @@ var UpdateObject, MultiAction;
             venuePos.addEventListener("click", function (geo, id) {
                 return function () {
                     hide_visio();
-                    debugger;
                     let venueList = [];
                     venueList.push(W.model.venues.objects[id]);
 
@@ -1686,7 +1660,7 @@ var UpdateObject, MultiAction;
     function ObjectsChanged(){
         if(W.map.getLayerByUniqueName('venues').selectedFeatures.length >0)
             getActiveEditor().then(val => {
-                if(placeIsPoint && val.vertices.length > 0){
+                if(placeIsPoint && val.olControl.vertices.length > 0){
                     removeDragCallbacks();
                     checkSelection();
                 }
@@ -1756,24 +1730,33 @@ var UpdateObject, MultiAction;
                         placeIsPoint = selectedItem.WW.getObjectModel().isPoint();
                         if (placeIsPoint) {
                             //Event when the Place is moved
-                            /*
-                            val.dragControl.onDrag = function (e, t) {
-                                val.dragVertex.apply(val, [e, t]);
-                                let entryExitPoint = selectedItem.model.geometry.clone();
-                                if(selectedItem.model.getNavigationPoints().length > 0)
-                                    entryExitPoint = selectedItem.model.attributes.entryExitPoints[0]._point;
+                            if(nativeolControlMoveCallback == null)
+                                nativeolControlMoveCallback = val.olControl.handlers.drag.callbacks.move;
+
+                            val.olControl.handlers.drag.callbacks.move = function(e){
+                                nativeolControlMoveCallback.call(val.olControl, e);
+                                let screenCoord = W.map.getLonLatFromViewPortPx(e);
+                                let geom = WazeWrap.Geometry.ConvertTo900913(screenCoord.lon, screenCoord.lat);
+                                if(selectedItem.WW.getObjectModel().getNavigationPoints().length > 0)
+                                    geom = WazeWrap.Geometry.ConvertTo900913(selectedItem.WW.getObjectModel().attributes.entryExitPoints[0]._point.coordinates[0], selectedItem.WW.getObjectModel().attributes.entryExitPoints[0]._point.coordinates[1]);
+                                let entryExitPoint = new OpenLayers.Geometry.Point(geom.lon, geom.lat);
                                 findNearestSegment(entryExitPoint);
-                            };*/
+                            }
+  
                             let entryExitPoint = selectedItem.WW.getObjectModel().getOLGeometry().clone();
-                            if(selectedItem.WW.getObjectModel().getNavigationPoints().length > 0)
-                                entryExitPoint = selectedItem.WW.getObjectModel().attributes.entryExitPoints[0]._point;
+                            if(selectedItem.WW.getObjectModel().getNavigationPoints().length > 0){
+                                let geom = WazeWrap.Geometry.ConvertTo900913(selectedItem.WW.getObjectModel().getNavigationPoints()[0]._point.coordinates[0], selectedItem.WW.getObjectModel().getNavigationPoints()[0]._point.coordinates[1]);
+                                entryExitPoint = new OpenLayers.Geometry.Point(geom.lon, geom.lat);
+                            }
                             findNearestSegment(entryExitPoint);
                         } else {
                             if(selectedItem.WW.getObjectModel().getNavigationPoints().length === 0)
                                 findNearestSegment(selectedItem.WW.getObjectModel().getOLGeometry().getCentroid());
                             else{
-                                for(let i=0;i<selectedItem.WW.getObjectModel().getNavigationPoints().length;i++)
-                                    findNearestSegment(selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point);
+                                for(let i=0;i<selectedItem.WW.getObjectModel().getNavigationPoints().length;i++){
+                                    let geom = WazeWrap.Geometry.ConvertTo900913(selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point.coordinates[0], selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point.coordinates[1]);
+                                    findNearestSegment(new OpenLayers.Geometry.Point(geom.lon, geom.lat)); //selectedItem.WW.getObjectModel().getNavigationPoints()[i]._point);
+                                }
                             }
                         }
                     }
@@ -1787,9 +1770,7 @@ var UpdateObject, MultiAction;
 
     function removeDragCallbacks() {
         if(!W.geometryEditing.activeEditor == null){
-            W.geometryEditing.activeEditor.dragControl.onDrag = function (e, t) {
-                W.geometryEditing.activeEditor.dragVertex.apply(W.geometryEditing.activeEditor, [e, t]);
-            };
+             W.geometryEditing.activeEditor.olControl.handlers.drag.callbacks.move = nativeolControlMoveCallback;
             if (null !== typeof ClosestSegmentNavPoint) {
                 try {
                     ClosestSegmentNavPoint.events.unregister('drag', W.geometryEditing.activeEditor, findNearestSegment);
@@ -2257,7 +2238,7 @@ var UpdateObject, MultiAction;
         if ($('.address-edit-view').length > 0) {
             $('.full-address').trigger("click");
             await new Promise(r => setTimeout(r, 150));
-            $('#id', $('.house-number')[0].shadowRoot).focus();
+            $('input', $('.house-number')[0].shadowRoot).focus();
 
         } else if (rppTries < 1000) {
             console.log("not found");
@@ -2477,7 +2458,6 @@ var UpdateObject, MultiAction;
         let newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
 
         let UFG = require("Waze/Action/UpdateFeatureGeometry");
-        debugger;
         W.model.actionManager.add(new UFG(selected, W.model.venues, W.userscripts.toGeoJSONGeometry(originalGeometry), W.userscripts.toGeoJSONGeometry(newGeometry)));
     }
 
@@ -2554,11 +2534,11 @@ var UpdateObject, MultiAction;
                 $('#pierotate').css('color', settings.Rotate ? 'rgb(0,180,0)': 'black');
                 saveSettings();
                 getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.ROTATE) == 0)
-                        val.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
+                    if((val.olControl.mode & OpenLayers.Control.ModifyFeature.ROTATE) == 0)
+                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
                     else
-                        val.mode &= ~OpenLayers.Control.ModifyFeature.ROTATE;
-                    val.resetVertices();
+                        val.olControl.mode &= ~OpenLayers.Control.ModifyFeature.ROTATE;
+                    val.olControl.resetVertices();
                 });
             });
 
@@ -2567,28 +2547,28 @@ var UpdateObject, MultiAction;
                 $('#pieresize').css('color', settings.Resize ? 'rgb(0,180,0)': 'black');
                 saveSettings();
                 getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.RESIZE) == 0)
-                        val.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
+                    if((val.olControl.mode & OpenLayers.Control.ModifyFeature.RESIZE) == 0)
+                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
                     else
-                        val.mode &= ~OpenLayers.Control.ModifyFeature.RESIZE;
-                    val.resetVertices();
+                        val.olControl.mode &= ~OpenLayers.Control.ModifyFeature.RESIZE;
+                    val.olControl.resetVertices();
                 });
             });
 
             //activate the changes when a Place is selected
             if(settings.Rotate){
                 getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.ROTATE) == 0)
-                        val.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
-                    val.resetVertices();
+                    if((val.olControl.mode & OpenLayers.Control.ModifyFeature.ROTATE) == 0)
+                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
+                    val.olControl.resetVertices();
                 });
             }
 
             if(settings.Resize){
                 getActiveEditor().then(val => {
-                    if((val.mode & OpenLayers.Control.ModifyFeature.RESIZE) == 0)
-                        val.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
-                    val.resetVertices();
+                    if((val.olControl.mode & OpenLayers.Control.ModifyFeature.RESIZE) == 0)
+                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
+                    val.olControl.resetVertices();
                 });
             }
         }
@@ -3162,24 +3142,27 @@ var UpdateObject, MultiAction;
 //         }
 //     }
 
-    function AddMakePrimaryButtons(){
-        if(WazeWrap.hasPlaceSelected()){
-            if($('.aliases-view > div > ul > div > li').length > 0){
-                var $button = $('<div>', {class:'makePrimary'}).text("Make primary").click(function(){
-                    let obj = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-                    let toPrimary = $(this).prev().prev().val();
-                    let aliases = obj.attributes.aliases.filter(function(i) {
-                        return i != toPrimary;
-                    });
-                    aliases.push(obj.attributes.name);
-                    var multiaction = new MultiAction();
-                    multiaction.doSubAction(W.model, new UpdateObject(obj, {aliases: aliases}));
-                    multiaction.doSubAction(W.model, new UpdateObject(obj, {name: toPrimary}));
-                    W.model.actionManager.add(multiaction);
-                });
-                $('.aliases-view > div > ul > div > li').find('.delete').after($button);
-            }
-        }
+function AddMakePrimaryButtons(){
+	if(!WazeWrap.hasPlaceSelected() || ($('.alias-item-content').length = 0)){
+	    return;
+	}
+	$('.alias-item').each(function(){
+	    let altItem = $(this);
+	    if($(altItem).find('.makePrimary').length == 0){
+		let $button = $('<div>', {class:'makePrimary alias-item-action'}).text("To Name").click(function(){
+		    let obj = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+		    let toPrimary = $(altItem).find('.alias-item-content').text();
+		    let aliases = obj.attributes.aliases.filter(a => a != toPrimary);
+		    aliases.push(obj.attributes.name);
+
+		    let multiaction = new MultiAction();
+		    multiaction.doSubAction(W.model, new UpdateObject(obj, {aliases}));
+		    multiaction.doSubAction(W.model, new UpdateObject(obj, {name: toPrimary}));
+		    W.model.actionManager.add(multiaction);
+		});
+		$(altItem).find('.alias-item-actions').append($button);
+	    }
+	});
     }
 
     async function AddPlaceCategoriesButtons(){
@@ -3251,8 +3234,7 @@ var UpdateObject, MultiAction;
         var bold = false;
         if(count === 1){
            var venue = WazeWrap.getSelectedFeatures()[0];
-           var isArea = venue.geometry.toString().match(/^POLYGON/);
-           //var isPoint = venue.geometry.toString().match(/^POINT/);
+           var isArea = venue.geometry.type.match(/^Polygon/);
 
             if(venue.WW.getType() === "venue" && isArea){
                 if($('#AreaSize'))
@@ -3731,7 +3713,7 @@ var UpdateObject, MultiAction;
                 } else {
                     TempKeys = "-1";
                 }
-                if(settings[name] != Tempkeys){
+                if(settings[name] != TempKeys){
                     triggerSave = true;
                     break;
                 }
