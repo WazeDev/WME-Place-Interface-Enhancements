@@ -2540,23 +2540,27 @@ function pie(tries = 1) {
     }
 
     function PlaceMenuShortcut(itemNum) {
-        if (WazeWrap.hasPlaceSelected()) {
+        const selected = sdk.Editing.getSelection();
+        if (selected?.objectType === "venue") {
             //add the category to the Place
-            const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-            const newCategories = [].concat(selected.attributes.categories);
+            // const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+            // const newCategories = [].concat(selected.attributes.categories);
+            const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+            const newCategories = structuredClone(selectedVenue.categories);
             let catToAdd;
             if ($(`#piePlaceMainItem${itemNum}`).length > 0)
                 catToAdd = $(`#piePlaceMainItem${itemNum}`)[0].getAttribute("data-category");
             else catToAdd = $(`#piePlaceAreaItem${itemNum}`)[0].getAttribute("data-category");
-            if (selected.attributes.categories.indexOf(catToAdd) === -1) {
+            if (selected.categories.indexOf(catToAdd) === -1) {
                 //if the category isn't already on the Place, add it
                 newCategories.push(catToAdd);
-                W.model.actionManager.add(new UpdateObject(selected, { categories: newCategories }));
+                // W.model.actionManager.add(new UpdateObject(selected, { categories: newCategories }));
+                sdk.DataModel.Venues.updateVenue({categories: newCategories, venueId: selectedVenue.id});
             }
         } else {
             //start new Place placement mode
-            if ($(`#piePlaceMainItem${itemNum}`).length > 0) $(`#piePlaceMainItem${itemNum}`).click();
-            else if ($(`#piePlaceAreaItem${itemNum}`).length > 0) $(`#piePlaceAreaItem${itemNum}`).click();
+            if ($(`#piePlaceMainItem${itemNum}`).length > 0) $(`#piePlaceMainItem${itemNum}`).trigger("click");
+            else if ($(`#piePlaceAreaItem${itemNum}`).length > 0) $(`#piePlaceAreaItem${itemNum}`).trigger("click");
         }
     }
 
