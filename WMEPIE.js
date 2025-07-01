@@ -78,7 +78,7 @@ function pie(tries = 1) {
     const placeMenuSelector = "#primary-toolbar > div > div.toolbar-group.toolbar-group-venues > wz-menu"; //"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
     //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
     const placementMode = false;
-    const resCategory = "RESIDENCE";
+    const resCategory = "RESIDENTIAL";
     let wazePL;
     let hoursparser;
     let GLE;
@@ -363,19 +363,9 @@ function pie(tries = 1) {
                 )}"><input type="checkbox" id="_cbHidePaymentType" class="pieSettingsCheckbox" /><label for="_cbHidePaymentType" style="white-space:pre-line;">${I18n.t(
                     "pie.prefs.HidePaymentType"
                 )}</label></div>`,
-                `<div class="controls-container pie-controls-container" id="divGeometryMods" title="${I18n.t(
-                    "pie.prefs.GeometryModsTitle"
-                )}"><input type="checkbox" id="_cbGeometryMods" class="pieSettingsCheckbox" /><label for="_cbGeometryMods" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.GeometryMods"
-                )}</label></div>`,
-                `<div class="controls-container pie-controls-container" id="divSimplifyFactor" style="padding-left:20px;" title="${I18n.t(
-                    "pie.prefs.SimplifyFactorTitle"
-                )}"> ${I18n.t(
-                    "pie.prefs.SimplifyFactor"
-                )} <input type="number" min="0" max="10" step=".5" style="width:45px; height:20px;" id="pieSimplifyFactor"></div>`,
-                `<div class="controls-container pie-controls-container" id="divHideShopAndServices" title="${I18n.t(
-                    "pie.prefs.HideShoppingServicesTitle"
-                )}"><input type="checkbox" id="_cbHideShopAndServices" class="pieSettingsCheckbox" /><label for="_cbHideShopAndServices" style="white-space:pre-line;">${I18n.t(
+                `<div class="controls-container pie-controls-container" id="divGeometryMods" title="${I18n.t("pie.prefs.GeometryModsTitle")}"><input type="checkbox" id="_cbGeometryMods" class="pieSettingsCheckbox" /><label for="_cbGeometryMods" style="white-space:pre-line;">${I18n.t("pie.prefs.GeometryMods")}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divSimplifyFactor" style="padding-left:20px;" title="${I18n.t("pie.prefs.SimplifyFactorTitle")}"> ${I18n.t("pie.prefs.SimplifyFactor")} <input type="number" min="0" max="10" step=".5" style="width:45px; height:20px;" id="pieSimplifyFactor"></div>`,
+                `<div class="controls-container pie-controls-container" id="divHideShopAndServices" title="${I18n.t("pie.prefs.HideShoppingServicesTitle")}"><input type="checkbox" id="_cbHideShopAndServices" class="pieSettingsCheckbox" /><label for="_cbHideShopAndServices" style="white-space:pre-line;">${I18n.t(
                     "pie.prefs.HideShoppingServices"
                 )}</label></div>`,
                 "</fieldset>",
@@ -2625,6 +2615,10 @@ function pie(tries = 1) {
     }
 
     function addHours(replaceAll = false) {
+        const selection = sdk.Editing.getSelection();
+        if(selection === null || selection.objectType !== "venue") return;
+        const selectedVenue = sdk.DataModel.Venues.getById({venueId: selection.ids[0]});
+         
         let pasteHours = $("#PIE-hourspaste").val();
         if (pasteHours.trim() === "") return;
 
@@ -2645,10 +2639,7 @@ function pie(tries = 1) {
             pasteHours = pasteHours.replace(lngFullDate[i], englishNames[i]);
         }
 
-        if (!replaceAll)
-            pasteHours = `${pasteHours},${getOpeningHours(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel()).join(
-                ","
-            )}`;
+        if (!replaceAll) pasteHours = `${pasteHours},${getOpeningHours(selectedVenue).join(",")}`;
         const parserResult = hoursparser.parseHours(pasteHours);
         if (
             parserResult.hours &&
@@ -2656,12 +2647,13 @@ function pie(tries = 1) {
             parserResult.sameOpenAndCloseTimes === false &&
             parserResult.parseError === false
         ) {
-            W.model.actionManager.add(
-                new UpdateObject(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), {
-                    openingHours: parserResult.hours,
-                })
-            );
-            $("#PIEHoursParserError").empty();
+            // W.model.actionManager.add(
+            //     new UpdateObject(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), {
+            //         openingHours: parserResult.hours,
+            //     })
+            // );
+            sdk.DataModel.Venues.updateVenue()
+            $("#PIEHoursParserError").empty({openingHours: parserResult.hours, venueId: selectedVenue.id});
         } else {
             $("#PIE-hourspaste").css({ "background-color": "#FDD" }); //.attr({title:bannButt.noHours.getTitle(parserResult.hours)});
             if (parserResult.overlappingHours)
@@ -2682,7 +2674,7 @@ function pie(tries = 1) {
 
     // Pull natural text from opening hours
     function getOpeningHours(venue) {
-        return venue?.attributes.openingHours?.map(formatOpeningHour);
+        return venue?.openingHours?.map(formatOpeningHour);
     }
 
     function changeGeoHandleStyle(radius) {
@@ -2801,7 +2793,7 @@ function pie(tries = 1) {
             } else {
                 if (isArea) {
                     // navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().getCentroid();
-                    navPoint = turf.centroid(sdkVenue.geometry);
+                    navPoint = turf.centroid(sdkVenue.geometry).geometry;
                 } else {
                     // navPoint = WazeWrap.Model.getObjectModel(highlightedVenue).getOLGeometry().clone();
                     navPoint = sdkVenue.geometry;
@@ -2998,62 +2990,62 @@ function pie(tries = 1) {
         clearClosesetSegmentLayerFeatures();
     }
 
-    function buildNewPlaceList() {
-        //Clear out the Places menu
-        $(placeMenuSelector).empty();
-        let cat = "";
-        let icon = "";
-        let i;
-        for (i = 0; i < 12; i++) {
-            icon = "";
-            cat = $(`#pieItem${i + 1}`)[0].value;
-            icon = $(`#pieItem${i + 1}`)[0].options[$(`#pieItem${i + 1}`)[0].selectedIndex].getAttribute("data-icon");
-            if (cat !== "PARKING_LOT" && cat !== resCategory && cat !== "GAS_STATION")
-                $(placeMenuSelector).append(
-                    `<wz-menu-item class="toolbar-group-item WazeControlDrawFeature  ${icon}" id="piePlaceMainItem${
-                        i + 1
-                    }" data-category="${cat}"><div class="item-container"><div class="item-icon"></div><span class="menu-title">${
-                        $(`#pieItem${i + 1}`)[0].options[$(`#pieItem${i + 1}`)[0].selectedIndex].innerHTML
-                    }</span><div class="drawing-controls"><wz-basic-tooltip class="sc-wz-basic-tooltip-h sc-wz-basic-tooltip-s"><wz-tooltip class="sc-wz-basic-tooltip sc-wz-basic-tooltip-s"><wz-tooltip-source><wz-button color="clear-icon" size="sm" class="point"><wz-tooltip-target></wz-tooltip-target><i class="w-icon w-icon-node"></i></wz-button></wz-tooltip-source><wz-tooltip-content>Create Point</wz-tooltip-content></wz-tooltip></wz-basic-tooltip><wz-basic-tooltip class="sc-wz-basic-tooltip-h sc-wz-basic-tooltip-s"><wz-tooltip class="sc-wz-basic-tooltip sc-wz-basic-tooltip-s"><wz-tooltip-source><wz-button color="clear-icon" size="sm" class="polygon" id="piePlaceAreaItem${
-                        i + 1
-                    }" data-category="${cat}"><wz-tooltip-target></wz-tooltip-target><i class="w-icon w-icon-polygon"></i></wz-button></wz-tooltip-source><wz-tooltip-content>Create Area</wz-tooltip-content></wz-tooltip></wz-basic-tooltip></div></div></div></wz-menu-item>`
-                );
-            else {
-                //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive" style="' + (icon !== "" ? "padding-left:0px;" : "") + ' height:40px;" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><span class="menu-title ' + icon + '" style="font-size:26px;"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span><div class="drawing-controls"><span class="drawing-control polygon secondary-control" id="piePlaceAreaItem' + (i+1) + '" data-category="' + cat + '" title="Place (area)"></span><span class="drawing-control main-control point" id="piePlacePointItem' + (i+1) + '" data-category="' + cat + '" title="Place (point)"></span></div></div>');            else{
-                if (cat === resCategory)
-                    //force point
-                    //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
-                    $(placeMenuSelector).append(
-                        `<wz-menu-item class="toolbar-group-item WazeControlDrawFeature  ${icon}" id="piePlaceMainItem${
-                            i + 1
-                        }" data-category="${cat}"><div class="item-container"><div class="item-icon"></div><span class="menu-title">${
-                            $(`#pieItem${i + 1}`)[0].options[$(`#pieItem${i + 1}`)[0].selectedIndex].innerHTML
-                        }</span></div></wz-menu-item>`
-                    );
-                //Parking lot & gas station - force area
-                else
-                    $(placeMenuSelector).append(
-                        `<wz-menu-item class="toolbar-group-item WazeControlDrawFeature  ${icon}" id="piePlaceAreaItem${
-                            i + 1
-                        }" data-category="${cat}"><div class="item-container"><div class="item-icon"></div><span class="menu-title">${
-                            $(`#pieItem${i + 1}`)[0].options[$(`#pieItem${i + 1}`)[0].selectedIndex].innerHTML
-                        }</span></div></wz-menu-item>`
-                    );
-                //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive"             id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '">                             <span class="menu-title" style="flex-grow:1;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
-            }
-        }
+    // function buildNewPlaceList() {
+    //     //Clear out the Places menu
+    //     $(placeMenuSelector).empty();
+    //     let cat = "";
+    //     let icon = "";
+    //     let i;
+    //     for (i = 0; i < 12; i++) {
+    //         icon = "";
+    //         cat = $(`#pieItem${i + 1}`)[0].value;
+    //         icon = $(`#pieItem${i + 1}`)[0].options[$(`#pieItem${i + 1}`)[0].selectedIndex].getAttribute("data-icon");
+    //         if (cat !== "PARKING_LOT" && cat !== resCategory && cat !== "GAS_STATION")
+    //             $(placeMenuSelector).append(
+    //                 `<wz-menu-item class="toolbar-group-item WazeControlDrawFeature  ${icon}" id="piePlaceMainItem${
+    //                     i + 1
+    //                 }" data-category="${cat}"><div class="item-container"><div class="item-icon"></div><span class="menu-title">${
+    //                     $(`#pieItem${i + 1}`)[0].options[$(`#pieItem${i + 1}`)[0].selectedIndex].innerHTML
+    //                 }</span><div class="drawing-controls"><wz-basic-tooltip class="sc-wz-basic-tooltip-h sc-wz-basic-tooltip-s"><wz-tooltip class="sc-wz-basic-tooltip sc-wz-basic-tooltip-s"><wz-tooltip-source><wz-button color="clear-icon" size="sm" class="point"><wz-tooltip-target></wz-tooltip-target><i class="w-icon w-icon-node"></i></wz-button></wz-tooltip-source><wz-tooltip-content>Create Point</wz-tooltip-content></wz-tooltip></wz-basic-tooltip><wz-basic-tooltip class="sc-wz-basic-tooltip-h sc-wz-basic-tooltip-s"><wz-tooltip class="sc-wz-basic-tooltip sc-wz-basic-tooltip-s"><wz-tooltip-source><wz-button color="clear-icon" size="sm" class="polygon" id="piePlaceAreaItem${
+    //                     i + 1
+    //                 }" data-category="${cat}"><wz-tooltip-target></wz-tooltip-target><i class="w-icon w-icon-polygon"></i></wz-button></wz-tooltip-source><wz-tooltip-content>Create Area</wz-tooltip-content></wz-tooltip></wz-basic-tooltip></div></div></div></wz-menu-item>`
+    //             );
+    //         else {
+    //             //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive" style="' + (icon !== "" ? "padding-left:0px;" : "") + ' height:40px;" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><span class="menu-title ' + icon + '" style="font-size:26px;"><span style="font-size:12px;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></span><div class="drawing-controls"><span class="drawing-control polygon secondary-control" id="piePlaceAreaItem' + (i+1) + '" data-category="' + cat + '" title="Place (area)"></span><span class="drawing-control main-control point" id="piePlacePointItem' + (i+1) + '" data-category="' + cat + '" title="Place (point)"></span></div></div>');            else{
+    //             if (cat === resCategory)
+    //                 //force point
+    //                 //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive ' + icon +'" id="piePlaceMainItem' + (i+1) + '" data-category="'+ cat + '"><div class="item-icon"></div><span class="menu-title">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
+    //                 $(placeMenuSelector).append(
+    //                     `<wz-menu-item class="toolbar-group-item WazeControlDrawFeature  ${icon}" id="piePlaceMainItem${
+    //                         i + 1
+    //                     }" data-category="${cat}"><div class="item-container"><div class="item-icon"></div><span class="menu-title">${
+    //                         $(`#pieItem${i + 1}`)[0].options[$(`#pieItem${i + 1}`)[0].selectedIndex].innerHTML
+    //                     }</span></div></wz-menu-item>`
+    //                 );
+    //             //Parking lot & gas station - force area
+    //             else
+    //                 $(placeMenuSelector).append(
+    //                     `<wz-menu-item class="toolbar-group-item WazeControlDrawFeature  ${icon}" id="piePlaceAreaItem${
+    //                         i + 1
+    //                     }" data-category="${cat}"><div class="item-container"><div class="item-icon"></div><span class="menu-title">${
+    //                         $(`#pieItem${i + 1}`)[0].options[$(`#pieItem${i + 1}`)[0].selectedIndex].innerHTML
+    //                     }</span></div></wz-menu-item>`
+    //                 );
+    //             //$(placeMenuSelector).append('<div class="toolbar-group-item WazeControlDrawFeature ItemInactive"             id="piePlaceAreaItem' + (i+1) + '" data-category="'+ cat + '">                             <span class="menu-title" style="flex-grow:1;">' + $('#pieItem' + (i+1))[0].options[$('#pieItem' + (i+1))[0].selectedIndex].innerHTML + '</span></div>');
+    //         }
+    //     }
 
-        $('[id^="piePlaceMainItem"]').click(function (e) {
-            $(".toolbar-group-venues").removeClass("open");
-            startPlacementMode($(`#${this.id}`).data("category"), true);
-        });
+    //     $('[id^="piePlaceMainItem"]').on("click", function (e) {
+    //         $(".toolbar-group-venues").removeClass("open");
+    //         startPlacementMode($(`#${this.id}`).data("category"), true);
+    //     });
 
-        $('[id^="piePlaceAreaItem"]').click(function (e) {
-            e.stopPropagation();
-            $(".toolbar-group-venues").removeClass("open");
-            startPlacementMode($(`#${this.id}`).data("category"), false);
-        });
-    }
+    //     $('[id^="piePlaceAreaItem"]').on("click", function (e) {
+    //         e.stopPropagation();
+    //         $(".toolbar-group-venues").removeClass("open");
+    //         startPlacementMode($(`#${this.id}`).data("category"), false);
+    //     });
+    // }
 
     function initColorPicker(tries = 1) {
         tries = tries || 1;
@@ -3309,13 +3301,13 @@ function pie(tries = 1) {
 
         if (category === "PARKING_LOT") {
             if (!$("#layer-switcher-item_parking_places").prop("checked")) {
-                if (!$("#layer-switcher-group_places").prop("checked")) $("#layer-switcher-group_places").click();
-                $("#layer-switcher-item_parking_places").click();
+                if (!$("#layer-switcher-group_places").prop("checked")) $("#layer-switcher-group_places").trigger("click");
+                $("#layer-switcher-item_parking_places").trigger("click");
             }
         } else if (category === resCategory) {
             if (!$("#layer-switcher-item_residential_places").prop("checked")) {
-                if (!$("#layer-switcher-group_places").prop("checked")) $("#layer-switcher-group_places").click();
-                $("#layer-switcher-item_residential_places").click();
+                if (!$("#layer-switcher-group_places").prop("checked")) $("#layer-switcher-group_places").trigger("click");
+                $("#layer-switcher-item_residential_places").trigger("click");
             }
         }
         $(
@@ -3325,8 +3317,9 @@ function pie(tries = 1) {
         const polyDrawFeatureOptions = { callbacks: { done: doneHandler } };
         if (isPoint) {
             $(".olMapViewport").on("mousemove", MouseMoveHandler);
-            $(".olMapViewport").on("click", () => {
-                endPlacementMode(category, isPoint);
+            $(".olMapViewport").on("click", (event) => {
+                const lonLat = sdk.Map.getLonLatFromPixel({x:event.screenX, y:event.screenY});
+                endPlacementMode(lonLat, category, isPoint);
             });
             /*drawPoly = new OpenLayers.Control.DrawFeature(newPlaceLayer, OpenLayers.Handler.Polygon, polyDrawFeatureOptions);
             W.map.addControl(drawPoly);
@@ -3450,20 +3443,21 @@ function pie(tries = 1) {
         document.removeEventListener("keyup", keyUpHandler);
     }
 
-    function endPlacementMode(category, isPoint) {
+    function endPlacementMode(lonLat, category, isPoint) {
         disablePlacementMode();
-        createPlace(getMousePos900913(), category, isPoint);
+        createPlace(turf.point([lonLat.lon, lonLat.lat]), category, isPoint);
     }
 
-    function getMousePos900913() {
-        const mousePosition = $(".wz-map-ol-control-span-mouse-position").text().split(" ");
-        [mousePosition[0], mousePosition[1]] = [mousePosition[1], mousePosition[0]];
-        return WazeWrap.Geometry.ConvertTo900913(mousePosition[0], mousePosition[1]);
-    }
+    // function getMousePos900913() {
+    //     const mousePosition = $(".wz-map-ol-control-span-mouse-position").text().split(" ");
+    //     [mousePosition[0], mousePosition[1]] = [mousePosition[1], mousePosition[0]];
+    //     return WazeWrap.Geometry.ConvertTo900913(mousePosition[0], mousePosition[1]);
+    // }
 
     function MouseMoveHandler(e) {
         clearLayer();
-        drawCircle(getMousePos900913());
+        const lonLat = sdk.Map.getLonLatFromPixel({x: e.screenX, y: e.screenY});
+        drawCircle(lonLat);
     }
 
     function clearLayer() {
@@ -3472,16 +3466,16 @@ function pie(tries = 1) {
         sdk.Map.removeAllFeaturesFromLayer({ layerName: mainLayerName });
     }
 
-    function drawCircle(e) {
+    function drawCircle(lonLat) {
         // var pointFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(e.lon, e.lat), {}, pointStyle);
         // W.map.getLayersByName(mainLayerName)[0].addFeatures([pointFeature]);
-        const pointFeature = turf.point([e.lon, e.lat], {
+        const pointFeature = turf.point([lonLat.lon, lonLat.lat], {
             styleName: "pointStyle",
-        });
+        }, {id: "NewVenuePoint_" + lonLat.toString()});
         sdk.Map.addFeatureToLayer({ feature: pointFeature, layerName: mainLayerName });
     }
 
-    function createPlace(pos, category, isPoint) {
+    function createPlace(pos, category, _isPoint) {
         // const PlaceObject = require("Waze/Feature/Vector/Landmark");
         // const AddPlace = require("Waze/Action/AddLandmark");
         // const multiaction = new MultiAction();
@@ -4857,6 +4851,7 @@ function pie(tries = 1) {
                 $container.append($button);
 
                 for (let i = 0; i < categoryOptions.length; i++) {
+                    if(categoryOptions[i].selectedIndex === -1) continue;
                     const name = categoryOptions[i].options[categoryOptions[i].selectedIndex].innerHTML;
                     const icon = categoryOptions[i].options[categoryOptions[i].selectedIndex].getAttribute("data-icon");
 
@@ -5407,7 +5402,7 @@ function pie(tries = 1) {
                 settings[prop] = defaultSettings[prop];
         }*/
         settings = $.extend({}, defaultSettings, loadedSettings);
-        if (settings.NewPlacesList.length < 12) settings.NewPlacesList.push("RESIDENCE_HOME");
+        if (settings.NewPlacesList.length < 12) settings.NewPlacesList.push("RESIDENTIAL");
 
         const serverSettings = await WazeWrap.Remote.RetrieveSettings("WME_PIE");
         if (serverSettings && serverSettings.lastSaved > settings.lastSaved) $.extend(settings, serverSettings);
