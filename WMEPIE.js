@@ -51,7 +51,7 @@ let MultiAction;
  * @var sdk
  * @type WmeSDK
  */
-let sdk;
+var sdk;
 unsafeWindow.SDK_INITIALIZED.then(() => {
     if (!unsafeWindow.getWmeSdk) {
         throw new Error("SDK is not installed");
@@ -1765,7 +1765,7 @@ function pie(tries = 1) {
         //Shamelessly copied from URO+
         // const MO_MPLayer = new MutationObserver(MPLayerChanged);
         // MO_MPLayer.observe(W.map.getLayerByName("mapProblems").div, { childList: true });
-        function dataModelObjectUpdate(dataModelName, objectIds) {
+        function dataModelObjectUpdate({dataModelName, objectIds}) {
             if (dataModelName === "mapProblems") {
                 for (const objId of objectIds) {
                     MarkerClick(objId);
@@ -1792,6 +1792,8 @@ function pie(tries = 1) {
                 }
             }
         }
+        sdk.Events.trackDataModelEvents({dataModelName: "mapProblems"});
+        sdk.Events.trackDataModelEvents({dataModelName: "venues"});
         sdk.Events.on({ eventName: "wme-data-model-objects-changed", eventHandler: dataModelObjectUpdate });
         sdk.Events.on({ eventName: "wme-data-model-objects-added", eventHandler: dataModelObjectUpdate });
         sdk.Events.on({ eventName: "wme-data-model-objects-removed", eventHandler: dataModelObjectUpdate });
@@ -2145,7 +2147,7 @@ function pie(tries = 1) {
             const venueName = document.createElement("span");
             venueName.style.float = "left";
             venueName.innerHTML = venue.name; // + ` (${parseInt(vattr.lockRank) + 1})`;
-            if (venue.categories[0] === "RESIDENCE") {
+            if (venue.categories[0] === "RESIDENCE_HOME") {
                 const address = sdk.DataModel.Venues.getAddress({ venueId: venue.id });
                 if (address !== null) {
                     venueName.innerHTML = `${address?.houseNumber} ${address?.street.name}`;
@@ -2422,12 +2424,13 @@ function pie(tries = 1) {
      * @param {String} Image ID
      **/
     function DeleteImage(venue, imageID) {
-        const UpdateObject = require("Waze/Action/UpdateObject");
+        // const UpdateObject = require("Waze/Action/UpdateObject");
         const newimages = [].concat(venue.images);
         for (let i = newimages.length - 1; i >= 0; i--) {
             if (newimages[i].id === imageID) newimages.splice(i, 1);
         }
-        W.model.actionManager.add(new UpdateObject(venue, { images: newimages }));
+        // W.model.actionManager.add(new UpdateObject(venue, { images: newimages }));
+        sdk.DataModel.Venues.updateVenue({images: newimages, venueId: venue.id});
         if (newimages.length > 0) {
             if (settings.PhotoViewerPreserveLayout) $(`#${imageID}`).css("visibility", "hidden");
             else $(`#${imageID}`).remove();

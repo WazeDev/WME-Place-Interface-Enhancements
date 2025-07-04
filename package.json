@@ -1,6 +1,6 @@
 {
     "devDependencies": {
-        "@biomejs/biome": "2.0.5",
+        "@biomejs/biome": "2.0.6",
         "@turf/turf": "^7.2.0",
         "@types/jquery": "^3.5.32",
         "@types/tampermonkey": "^5.0.4"
