@@ -1766,21 +1766,19 @@ function pie(tries = 1) {
         // const MO_MPLayer = new MutationObserver(MPLayerChanged);
         // MO_MPLayer.observe(W.map.getLayerByName("mapProblems").div, { childList: true });
         function dataModelObjectUpdate({dataModelName, objectIds}) {
-            if (dataModelName === "mapProblems") {
-                for (const objId of objectIds) {
-                    MarkerClick(objId);
-                }
-            }
+            // if (dataModelName === "mapProblems") {
+            //     for (const objId of objectIds) {
+            //         MarkerClick(objId);
+            //     }
+            // }
             if (dataModelName === "venues") {
-                const selection = sdk.Editing.getSelection();
                 try {
-                    if (selection !== null) {
-                        for (const objId of objectIds) {
-                            for (const category of sdk.DataModel.Venues.getById({ venueId: objId }).categories) {
-                                if (settings.HideShopAndServices && category === "SHOPPING_AND_SERVICES") {
-                                    $("wz-card.categories-card:eq(1)").hide();
-                                    break;
-                                }
+                    for (const objId of objectIds) {
+                        MarkerClick(objId);
+                        for (const category of sdk.DataModel.Venues.getById({ venueId: objId }).categories) {
+                            if (settings.HideShopAndServices && category === "SHOPPING_AND_SERVICES") {
+                                $("wz-card.categories-card:eq(1)").hide();
+                                break;
                             }
                         }
                     }
@@ -1788,6 +1786,7 @@ function pie(tries = 1) {
                     console.error("PIE: ", ex);
                 }
                 if (settings.ShowClosestSegmentSelected) {
+                    const selection = sdk.Editing.getSelection();
                     ObjectsChanged(selection !== null);
                 }
             }
@@ -3224,35 +3223,33 @@ function pie(tries = 1) {
     // }
 
     function MarkerClick(objectId) {
-        const markerType = GetMarkerType(this.className);
-        if (markerType !== null) {
-            const markerID = this.attributes["data-id"].value;
-            if (W.map.getLayerByUniqueName("problems").markers[markerID].model.attributes.subType === 71) {
+        // const markerType = GetMarkerType(objectId);
+        const pur = sdk.DataModel.Venues.getById({venueId: objectId});
+        if (pur?.categories[0] === "PARKING_LOT") {
+            waitForElementLoaded("#panel-container > div > wz-card > div > div > div.actions > form").then(() => {
                 const $PIECreatePLA = $('<div id="PIECreatePLA">', { style: "min-height:20px" });
                 $PIECreatePLA.html(
                     [
                         '<div class="btn btn-block" id="PIECreatePLAButton" style="color: #fff; background-color: #92c2d1; border-color: #78b0bf; margin-top:5px; width:67%; margin: 0 auto;">Create Suggested PLA</div>',
                     ].join(" ")
                 );
-
-                setTimeout(() => {
-                    $("#panel-container > div > div > div.actions > div > div > form").append($PIECreatePLA);
-                    $("#PIECreatePLAButton").click(() => {
-                        createPLAFromMP(markerID);
-                    });
-                }, 150);
-            }
+                $("#panel-container > div > wz-card > div > div > div.actions > form").append($PIECreatePLA);
+                $("#PIECreatePLAButton").on("click", () => {
+                    createPLAFromMP(markerID);
+                });
+            }, 150);
         }
     }
 
     //Shamelessly copied from URO+
-    function GetMarkerType(className) {
-        let markerType = null;
-        if (className.indexOf("user-generated") !== -1) markerType = "ur";
-        else if (className.indexOf("map-problem") !== -1) markerType = "mp";
-        else if (className.indexOf("place-update") !== -1) markerType = "pur";
-        return markerType;
-    }
+    // Not Necessary with SDK
+    // function GetMarkerType(className) {
+    //     let markerType = null;
+    //     if (className.indexOf("user-generated") !== -1) markerType = "ur";
+    //     else if (className.indexOf("map-problem") !== -1) markerType = "mp";
+    //     else if (className.indexOf("place-update") !== -1) markerType = "pur";
+    //     return markerType;
+    // }
 
     function createPLAFromMP(MPID) {
         const pos = W.model.problemDetails.objects[MPID].venueGeom;
@@ -3278,23 +3275,24 @@ function pie(tries = 1) {
         W.selectionManager.setSelectedModels([NewPlace]);
     }
 
-    function highlightObsoleteHospitalCategory() {
-        if (WazeWrap.getSelectedFeatures().length > 0 && WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue") {
-            if (
-                _.includes(
-                    WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,
-                    "HOSPITAL_MEDICAL_CARE"
-                )
-            ) {
-                $(".select2-choices").css("animation-iteration-count", "infinite");
-                $(".select2-choices").attr(
-                    "title",
-                    'The "Hospital / Medical Care" category is no longer valid.\n\nPlease change it to "Hospital / Urgent Care" or "Doctor / Clinic", whichever is most appropriate'
-                );
-                $(".select2-choices").tooltip();
-            }
-        }
-    }
+    // Function use has been commented out.  - Karlsosha
+    // function highlightObsoleteHospitalCategory() {
+    //     if (WazeWrap.getSelectedFeatures().length > 0 && WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue") {
+    //         if (
+    //             _.includes(
+    //                 WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,
+    //                 "HOSPITAL_MEDICAL_CARE"
+    //             )
+    //         ) {
+    //             $(".select2-choices").css("animation-iteration-count", "infinite");
+    //             $(".select2-choices").attr(
+    //                 "title",
+    //                 'The "Hospital / Medical Care" category is no longer valid.\n\nPlease change it to "Hospital / Urgent Care" or "Doctor / Clinic", whichever is most appropriate'
+    //             );
+    //             $(".select2-choices").tooltip();
+    //         }
+    //     }
+    // }
 
     let newPlaceCategory = "";
     function startPlacementMode(category, isPoint) {
@@ -3317,7 +3315,7 @@ function pie(tries = 1) {
             "#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive"
         ).removeClass("open");
         newPlaceCategory = category;
-        const polyDrawFeatureOptions = { callbacks: { done: doneHandler } };
+        // const polyDrawFeatureOptions = { callbacks: { done: doneHandler } };
         if (isPoint) {
             $(".olMapViewport").on("mousemove", MouseMoveHandler);
             $(".olMapViewport").on("click", (event) => {
@@ -3345,7 +3343,7 @@ function pie(tries = 1) {
 
     let businessPLAPlaceName, businessPLAPlaceAddress; //, businessPLAPlacePhone, businessPLAPlaceURL;
     function startBusinessPLAPlacementMode() {
-        const polyDrawFeatureOptions = { callbacks: { done: doneHandlerBusinessPLAPlace } };
+        // const polyDrawFeatureOptions = { callbacks: { done: doneHandlerBusinessPLAPlace } };
         // drawPoly = new OpenLayers.Control.DrawFeature(
         //     newPlaceLayer,
         //     OpenLayers.Handler.Polygon,
@@ -3362,10 +3360,10 @@ function pie(tries = 1) {
     function doneHandlerBusinessPLAPlace(geom) {
         drawPoly.destroy();
         BusinessPLAMode = false;
-        CreateBusinesPLAPlace(geom, businessPLAPlaceName, businessPLAPlaceAddress); //, businessPLAPlacePhone, businessPLAPlaceURL);
+        CreateBusinessPLAPlace(geom, businessPLAPlaceName, businessPLAPlaceAddress); //, businessPLAPlacePhone, businessPLAPlaceURL);
     }
 
-    function CreateBusinesPLAPlace(geom, name, address) {
+    function CreateBusinessPLAPlace(geom, name, address) {
         //, phone, url){
         drawPoly.destroy();
 

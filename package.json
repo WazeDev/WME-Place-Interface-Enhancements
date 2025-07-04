@@ -7,7 +7,7 @@
     },
     "dependencies": {
         "jquery": "^3.7.1",
-        "proj4": "^2.19.4",
+        "proj4": "^2.19.5",
         "typescript": "^5.8.3",
         "wme-sdk-typings": "https://web-assets.waze.com/wme_sdk_docs/beta/latest/wme-sdk-typings.tgz"
     }
