@@ -3236,6 +3236,7 @@ function pie(tries = 1) {
                 $("#panel-container > div > wz-card > div > div > div.actions > form").append($PIECreatePLA);
                 $("#PIECreatePLAButton").on("click", () => {
                     createPLAFromMP(markerID);
+                    this.remove();
                 });
             }, 150);
         }
