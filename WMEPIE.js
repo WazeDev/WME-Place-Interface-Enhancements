@@ -90,10 +90,10 @@ function pie(tries = 1) {
     const SCRIPT_NAME = GM_info.script.name;
     const DOWNLOAD_URL = GM_info.script.fileURL;
     const mainLayerName = "WME PIE";
-    let PLSpotEstimatorLayer, PLSpotEstimatorCalibrationLayer;
+    // let PLSpotEstimatorLayer, PLSpotEstimatorCalibrationLayer;
     let PIEPlaceNameLayer;
     // let showStopPointsLayer;
-    let closestSegmentLayer;
+    // let closestSegmentLayer;
     let drawPoly, PLSpotEstimatordrawControl, PLSpotEstimatorCalibrationdrawControl;
     let isDrawing;
     let savedSelectedVenue;
@@ -304,18 +304,34 @@ function pie(tries = 1) {
                 `<h4 style="margin-bottom:0px;"><b>${I18n.t("pie.prefs.title")}</b></h4>`,
                 `<h6 style="margin-top:0px;">${curr_ver}</h6>`,
                 '<fieldset id="fieldPlaceFilter" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t("pie.filter.PlaceFilterPanel")}</h4></legend>`,
-                `<div class="controls-container pie-controls-container" id="divPlaceFilter">${I18n.t("pie.filter.filter")} <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>`,
+                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t(
+                    "pie.filter.PlaceFilterPanel"
+                )}</h4></legend>`,
+                `<div class="controls-container pie-controls-container" id="divPlaceFilter">${I18n.t(
+                    "pie.filter.filter"
+                )} <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>`,
                 "</br>",
-                `<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">${I18n.t("pie.filter.Hide")}</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">${I18n.t("pie.filter.Show")}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">${I18n.t(
+                    "pie.filter.Hide"
+                )}</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">${I18n.t(
+                    "pie.filter.Show"
+                )}</label></div>`,
                 "</fieldset>",
 
                 '<fieldset id="fieldPlacePanel" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t("pie.prefs.PropertiesPanel")}</h4></legend>`,
+                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t(
+                    "pie.prefs.PropertiesPanel"
+                )}</h4></legend>`,
                 '<div class="controls-container pie-controls-container" id="divAreaPlaceSizeControls">',
-                `<div id="divShowAreaPlaceSize" class="controls-container pie-controls-container"><input type="checkbox" id="_cbShowAreaPlaceSize" class="pieSettingsCheckbox" /><label for="_cbShowAreaPlaceSize">${I18n.t("pie.prefs.ShowAreaPlaceSize")}</label></div>`,
-                `<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">${I18n.t("pie.prefs.ShowImperial")}</label></div>`,
-                `<div id="divShowAreaPlaceSizeMetric" class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeMetric" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeMetric">${I18n.t("pie.prefs.ShowMetric")}</label></div>`,
+                `<div id="divShowAreaPlaceSize" class="controls-container pie-controls-container"><input type="checkbox" id="_cbShowAreaPlaceSize" class="pieSettingsCheckbox" /><label for="_cbShowAreaPlaceSize">${I18n.t(
+                    "pie.prefs.ShowAreaPlaceSize"
+                )}</label></div>`,
+                `<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">${I18n.t(
+                    "pie.prefs.ShowImperial"
+                )}</label></div>`,
+                `<div id="divShowAreaPlaceSizeMetric" class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeMetric" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeMetric">${I18n.t(
+                    "pie.prefs.ShowMetric"
+                )}</label></div>`,
                 "</div>",
                 //!WazeWrap.isBetaEditor ? '<div class="controls-container pie-controls-container" id="divShowLockButtonsRPP" title="' + I18n.t('pie.prefs.ShowRPPLockButtonsTitle') + '"><input type="checkbox" id="_cbShowLockButtonsRPP" class="pieSettingsCheckbox" /><label for="_cbShowLockButtonsRPP" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowRPPLockButtons') + '</label></div>' : '',
                 `<div class="controls-container pie-controls-container" id="divShowPlaceLocatorCrosshair" title="${I18n.t(
@@ -326,7 +342,11 @@ function pie(tries = 1) {
                 `<span class="controls-container pie-controls-container" style="padding-left:30px;" title=""><input type="checkbox" id="_cbPlaceLocatorCrosshairProdPL" class="pieSettingsCheckbox" /><label for="_cbPlaceLocatorCrosshairProdPL" style="white-space:pre-line;">${I18n.t(
                     "pie.prefs.ProdPL"
                 )}</label></span></br>`,
-                `<span class="controls-container pie-controls-container" style="padding-left:30px;" title="${I18n.t("pie.prefs.ZoomTitle")}">${I18n.t("pie.prefs.Zoom")} <select id="piePlaceZoom"><option value="22">22</option><option value="21">21</option><option value="20">20</option><option value="19">19</option><option value="18">18</option><option value="17">17</option><option value="16">16</option><option value="15">15</option><option value="14">14</option><option value="13">13</option><option value="12">12</option></select></span></div>`,
+                `<span class="controls-container pie-controls-container" style="padding-left:30px;" title="${I18n.t(
+                    "pie.prefs.ZoomTitle"
+                )}">${I18n.t(
+                    "pie.prefs.Zoom"
+                )} <select id="piePlaceZoom"><option value="22">22</option><option value="21">21</option><option value="20">20</option><option value="19">19</option><option value="18">18</option><option value="17">17</option><option value="16">16</option><option value="15">15</option><option value="14">14</option><option value="13">13</option><option value="12">12</option></select></span></div>`,
                 `<div class="controls-container pie-controls-container" id="divShowSearchButton" title="${I18n.t(
                     "pie.prefs.ShowAddressSearchTitle"
                 )}"><input type="checkbox" id="_cbShowSearchButton" class="pieSettingsCheckbox"/><label for="_cbShowSearchButton" style="white-space:pre-line;">${I18n.t(
@@ -363,9 +383,19 @@ function pie(tries = 1) {
                 )}"><input type="checkbox" id="_cbHidePaymentType" class="pieSettingsCheckbox" /><label for="_cbHidePaymentType" style="white-space:pre-line;">${I18n.t(
                     "pie.prefs.HidePaymentType"
                 )}</label></div>`,
-                `<div class="controls-container pie-controls-container" id="divGeometryMods" title="${I18n.t("pie.prefs.GeometryModsTitle")}"><input type="checkbox" id="_cbGeometryMods" class="pieSettingsCheckbox" /><label for="_cbGeometryMods" style="white-space:pre-line;">${I18n.t("pie.prefs.GeometryMods")}</label></div>`,
-                `<div class="controls-container pie-controls-container" id="divSimplifyFactor" style="padding-left:20px;" title="${I18n.t("pie.prefs.SimplifyFactorTitle")}"> ${I18n.t("pie.prefs.SimplifyFactor")} <input type="number" min="0" max="10" step=".5" style="width:45px; height:20px;" id="pieSimplifyFactor"></div>`,
-                `<div class="controls-container pie-controls-container" id="divHideShopAndServices" title="${I18n.t("pie.prefs.HideShoppingServicesTitle")}"><input type="checkbox" id="_cbHideShopAndServices" class="pieSettingsCheckbox" /><label for="_cbHideShopAndServices" style="white-space:pre-line;">${I18n.t(
+                `<div class="controls-container pie-controls-container" id="divGeometryMods" title="${I18n.t(
+                    "pie.prefs.GeometryModsTitle"
+                )}"><input type="checkbox" id="_cbGeometryMods" class="pieSettingsCheckbox" /><label for="_cbGeometryMods" style="white-space:pre-line;">${I18n.t(
+                    "pie.prefs.GeometryMods"
+                )}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divSimplifyFactor" style="padding-left:20px;" title="${I18n.t(
+                    "pie.prefs.SimplifyFactorTitle"
+                )}"> ${I18n.t(
+                    "pie.prefs.SimplifyFactor"
+                )} <input type="number" min="0" max="10" step=".5" style="width:45px; height:20px;" id="pieSimplifyFactor"></div>`,
+                `<div class="controls-container pie-controls-container" id="divHideShopAndServices" title="${I18n.t(
+                    "pie.prefs.HideShoppingServicesTitle"
+                )}"><input type="checkbox" id="_cbHideShopAndServices" class="pieSettingsCheckbox" /><label for="_cbHideShopAndServices" style="white-space:pre-line;">${I18n.t(
                     "pie.prefs.HideShoppingServices"
                 )}</label></div>`,
                 "</fieldset>",
@@ -442,12 +472,22 @@ function pie(tries = 1) {
                 )}</label></div>`,
                 '<div id="divPlaceNamesFontCustomization" class="controls-container pie-controls-container" style="padding-left:20px;">',
                 `${I18n.t("pie.prefs.FontSize")} <input type="text" size="1" id="piePlaceNameFontSize"/>px</br>`,
-                `${I18n.t("pie.prefs.FontColor")} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFont"></button></br>`,
-                `<input type="checkbox" id="_cbPlaceNameFontBold" class="pieSettingsCheckbox"/><label for ="_cbPlaceNameFontBold">${I18n.t("pie.prefs.Bold")}</label></br>`,
-                `${I18n.t("pie.prefs.FontOutlineColor")} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFontOutline"></button></br>`,
-                `${I18n.t("pie.prefs.FontOutlineWidth")} <input type="text" size="1" id="piePlaceNameFontOutlineWidth"/>`,
+                `${I18n.t(
+                    "pie.prefs.FontColor"
+                )} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFont"></button></br>`,
+                `<input type="checkbox" id="_cbPlaceNameFontBold" class="pieSettingsCheckbox"/><label for ="_cbPlaceNameFontBold">${I18n.t(
+                    "pie.prefs.Bold"
+                )}</label></br>`,
+                `${I18n.t(
+                    "pie.prefs.FontOutlineColor"
+                )} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFontOutline"></button></br>`,
+                `${I18n.t(
+                    "pie.prefs.FontOutlineWidth"
+                )} <input type="text" size="1" id="piePlaceNameFontOutlineWidth"/>`,
                 "</div>",
-                `<div id="divShowPLSpotEstimatorButton" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.PSEShowPSEButtonTitle")}"><input type="checkbox" id="_cbShowPLSpotEstimatorButton" class="pieSettingsCheckbox" /><label for="_cbShowPLSpotEstimatorButton" style="white-space:pre-line;">${I18n.t(
+                `<div id="divShowPLSpotEstimatorButton" class="controls-container pie-controls-container" title="${I18n.t(
+                    "pie.prefs.PSEShowPSEButtonTitle"
+                )}"><input type="checkbox" id="_cbShowPLSpotEstimatorButton" class="pieSettingsCheckbox" /><label for="_cbShowPLSpotEstimatorButton" style="white-space:pre-line;">${I18n.t(
                     "pie.prefs.PSEShowPSEButton"
                 )}</label></div>`,
                 `<div id="divShowNavPointClosestSegmentOnHover" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowNavPointClosestSegmentOnHover" class="pieSettingsCheckbox" /><label for="_cbShowNavPointClosestSegmentOnHover" style="white-space:pre-line;">${I18n.t(
@@ -1765,7 +1805,7 @@ function pie(tries = 1) {
         //Shamelessly copied from URO+
         // const MO_MPLayer = new MutationObserver(MPLayerChanged);
         // MO_MPLayer.observe(W.map.getLayerByName("mapProblems").div, { childList: true });
-        function dataModelObjectUpdate({dataModelName, objectIds}) {
+        function dataModelObjectUpdate({ dataModelName, objectIds }) {
             // if (dataModelName === "mapProblems") {
             //     for (const objId of objectIds) {
             //         MarkerClick(objId);
@@ -1775,7 +1815,9 @@ function pie(tries = 1) {
                 try {
                     for (const objId of objectIds) {
                         MarkerClick(objId);
-                        for (const category of sdk.DataModel.Venues.getById({ venueId: objId }).categories) {
+                        const processingVenue = sdk.DataModel.Venues.getById({ venueId: objId });
+                        if (processingVenue === null) continue;
+                        for (const category of processingVenue.categories) {
                             if (settings.HideShopAndServices && category === "SHOPPING_AND_SERVICES") {
                                 $("wz-card.categories-card:eq(1)").hide();
                                 break;
@@ -1791,8 +1833,8 @@ function pie(tries = 1) {
                 }
             }
         }
-        sdk.Events.trackDataModelEvents({dataModelName: "mapProblems"});
-        sdk.Events.trackDataModelEvents({dataModelName: "venues"});
+        sdk.Events.trackDataModelEvents({ dataModelName: "mapProblems" });
+        sdk.Events.trackDataModelEvents({ dataModelName: "venues" });
         sdk.Events.on({ eventName: "wme-data-model-objects-changed", eventHandler: dataModelObjectUpdate });
         sdk.Events.on({ eventName: "wme-data-model-objects-added", eventHandler: dataModelObjectUpdate });
         sdk.Events.on({ eventName: "wme-data-model-objects-removed", eventHandler: dataModelObjectUpdate });
@@ -2429,7 +2471,7 @@ function pie(tries = 1) {
             if (newimages[i].id === imageID) newimages.splice(i, 1);
         }
         // W.model.actionManager.add(new UpdateObject(venue, { images: newimages }));
-        sdk.DataModel.Venues.updateVenue({images: newimages, venueId: venue.id});
+        sdk.DataModel.Venues.updateVenue({ images: newimages, venueId: venue.id });
         if (newimages.length > 0) {
             if (settings.PhotoViewerPreserveLayout) $(`#${imageID}`).css("visibility", "hidden");
             else $(`#${imageID}`).remove();
@@ -2537,7 +2579,7 @@ function pie(tries = 1) {
             //add the category to the Place
             // const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
             // const newCategories = [].concat(selected.attributes.categories);
-            const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+            const selectedVenue = sdk.DataModel.Venues.getById({ venueId: selected.ids[0] });
             const newCategories = structuredClone(selectedVenue.categories);
             let catToAdd;
             if ($(`#piePlaceMainItem${itemNum}`).length > 0)
@@ -2547,7 +2589,7 @@ function pie(tries = 1) {
                 //if the category isn't already on the Place, add it
                 newCategories.push(catToAdd);
                 // W.model.actionManager.add(new UpdateObject(selected, { categories: newCategories }));
-                sdk.DataModel.Venues.updateVenue({categories: newCategories, venueId: selectedVenue.id});
+                sdk.DataModel.Venues.updateVenue({ categories: newCategories, venueId: selectedVenue.id });
             }
         } else {
             //start new Place placement mode
@@ -2618,9 +2660,9 @@ function pie(tries = 1) {
 
     function addHours(replaceAll = false) {
         const selection = sdk.Editing.getSelection();
-        if(selection === null || selection.objectType !== "venue") return;
-        const selectedVenue = sdk.DataModel.Venues.getById({venueId: selection.ids[0]});
-         
+        if (selection === null || selection.objectType !== "venue") return;
+        const selectedVenue = sdk.DataModel.Venues.getById({ venueId: selection.ids[0] });
+
         let pasteHours = $("#PIE-hourspaste").val();
         if (pasteHours.trim() === "") return;
 
@@ -2654,8 +2696,8 @@ function pie(tries = 1) {
             //         openingHours: parserResult.hours,
             //     })
             // );
-            sdk.DataModel.Venues.updateVenue()
-            $("#PIEHoursParserError").empty({openingHours: parserResult.hours, venueId: selectedVenue.id});
+            sdk.DataModel.Venues.updateVenue();
+            $("#PIEHoursParserError").empty({ openingHours: parserResult.hours, venueId: selectedVenue.id });
         } else {
             $("#PIE-hourspaste").css({ "background-color": "#FDD" }); //.attr({title:bannButt.noHours.getTitle(parserResult.hours)});
             if (parserResult.overlappingHours)
@@ -2935,7 +2977,7 @@ function pie(tries = 1) {
             return;
         }
 
-        getActiveEditor().then((val) => {
+        getActiveEditor().then((_val) => {
             const selected = sdk.Editing.getSelection();
             if (selected !== null) {
                 if ("venue" !== selected.objectType) {
@@ -2986,7 +3028,7 @@ function pie(tries = 1) {
                         W.geometryEditing.activeEditor,
                         drawNearestLanding
                     );
-                } catch (err) {}
+                } catch (_err) {}
             }
         }
         clearClosesetSegmentLayerFeatures();
@@ -3224,8 +3266,8 @@ function pie(tries = 1) {
 
     function MarkerClick(objectId) {
         // const markerType = GetMarkerType(objectId);
-        const pur = sdk.DataModel.Venues.getById({venueId: objectId});
-        if (pur?.categories[0] === "PARKING_LOT") {
+        const pur = sdk.DataModel.Venues.getById({ venueId: objectId });
+        if (pur?.venueUpdateRequests.length > 0 && pur?.categories[0] === "PARKING_LOT") {
             waitForElementLoaded("#panel-container > div > wz-card > div > div > div.actions > form").then(() => {
                 const $PIECreatePLA = $('<div id="PIECreatePLA">', { style: "min-height:20px" });
                 $PIECreatePLA.html(
@@ -3236,7 +3278,6 @@ function pie(tries = 1) {
                 $("#panel-container > div > wz-card > div > div > div.actions > form").append($PIECreatePLA);
                 $("#PIECreatePLAButton").on("click", () => {
                     createPLAFromMP(markerID);
-                    this.remove();
                 });
             }, 150);
         }
@@ -3303,12 +3344,14 @@ function pie(tries = 1) {
 
         if (category === "PARKING_LOT") {
             if (!$("#layer-switcher-item_parking_places").prop("checked")) {
-                if (!$("#layer-switcher-group_places").prop("checked")) $("#layer-switcher-group_places").trigger("click");
+                if (!$("#layer-switcher-group_places").prop("checked"))
+                    $("#layer-switcher-group_places").trigger("click");
                 $("#layer-switcher-item_parking_places").trigger("click");
             }
         } else if (category === resCategory) {
             if (!$("#layer-switcher-item_residential_places").prop("checked")) {
-                if (!$("#layer-switcher-group_places").prop("checked")) $("#layer-switcher-group_places").trigger("click");
+                if (!$("#layer-switcher-group_places").prop("checked"))
+                    $("#layer-switcher-group_places").trigger("click");
                 $("#layer-switcher-item_residential_places").trigger("click");
             }
         }
@@ -3320,7 +3363,7 @@ function pie(tries = 1) {
         if (isPoint) {
             $(".olMapViewport").on("mousemove", MouseMoveHandler);
             $(".olMapViewport").on("click", (event) => {
-                const lonLat = sdk.Map.getLonLatFromPixel({x:event.screenX, y:event.screenY});
+                const lonLat = sdk.Map.getLonLatFromPixel({ x: event.screenX, y: event.screenY });
                 endPlacementMode(lonLat, category, isPoint);
             });
             /*drawPoly = new OpenLayers.Control.DrawFeature(newPlaceLayer, OpenLayers.Handler.Polygon, polyDrawFeatureOptions);
@@ -3458,7 +3501,7 @@ function pie(tries = 1) {
 
     function MouseMoveHandler(e) {
         clearLayer();
-        const lonLat = sdk.Map.getLonLatFromPixel({x: e.screenX, y: e.screenY});
+        const lonLat = sdk.Map.getLonLatFromPixel({ x: e.screenX, y: e.screenY });
         drawCircle(lonLat);
     }
 
@@ -3471,9 +3514,13 @@ function pie(tries = 1) {
     function drawCircle(lonLat) {
         // var pointFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(e.lon, e.lat), {}, pointStyle);
         // W.map.getLayersByName(mainLayerName)[0].addFeatures([pointFeature]);
-        const pointFeature = turf.point([lonLat.lon, lonLat.lat], {
-            styleName: "pointStyle",
-        }, {id: "NewVenuePoint_" + lonLat.toString()});
+        const pointFeature = turf.point(
+            [lonLat.lon, lonLat.lat],
+            {
+                styleName: "pointStyle",
+            },
+            { id: `NewVenuePoint_${lonLat.toString()}` }
+        );
         sdk.Map.addFeatureToLayer({ feature: pointFeature, layerName: mainLayerName });
     }
 
@@ -3639,39 +3686,37 @@ function pie(tries = 1) {
     }
 
     function _hidePaymentType() {
-        if (
-            WazeWrap.hasSelectedFeatures() &&
-            _.includes(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories, "PARKING_LOT")
-        ) {
-            const attr = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes;
-            if (
-                attr.categoryAttributes.PARKING_LOT.costType &&
-                attr.categoryAttributes.PARKING_LOT.costType === "FREE"
-            ) {
-                if (
-                    !$("#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)").hasClass(
-                        "collapse"
+        const selected = sdk.Editing.getSelection();
+        if (selected?.objectType === "venue") {
+            const selectedVenue = sdk.DataModel.Venues.getById({ venueId: selected.ids[0] });
+            if (selectedVenue?.categories.includes("PARKING_LOT")) {
+                const costType = sdk.DataModel.Venues.ParkingLot.getCostType({ venueId: selectedVenue.id });
+                if (costType !== null && costType === "FREE") {
+                    if (
+                        !$(
+                            "#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)"
+                        ).hasClass("collapse")
                     )
-                )
-                    $("#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)").addClass(
-                        "collapse"
-                    );
-            } else {
-                if (
-                    $("#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)").hasClass(
-                        "collapse"
+                        $(
+                            "#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)"
+                        ).addClass("collapse");
+                } else {
+                    if (
+                        $(
+                            "#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)"
+                        ).hasClass("collapse")
                     )
-                )
-                    $(
-                        "#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)"
-                    ).removeClass("collapse");
+                        $(
+                            "#venue-edit-more-info > div > form > fieldset > div:nth-child(3) > div:nth-child(2)"
+                        ).removeClass("collapse");
+                }
             }
         }
     }
 
     function HidePaymentTypePlaceSelected() {
-        if (WazeWrap.hasSelectedFeatures() && WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue")
-            _hidePaymentType();
+        const selected = sdk.Editing.getSelection();
+        if (selected?.objectType === "venue") _hidePaymentType();
     }
 
     function OrthogonalizePlace() {
@@ -4067,40 +4112,35 @@ function pie(tries = 1) {
 
     function ShowPlaceLocatorCrosshair() {
         $("#pieCrosshairs").remove();
-        if (WazeWrap.getSelectedFeatures().length > 0) {
-            if (WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue") {
-                let $crosshairs;
-                if (
-                    _.includes(
-                        WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,
-                        "RESIDENCE_HOME"
-                    )
-                ) {
-                    $(".venue > .tab-content").css("position", "relative");
-                    $crosshairs = $(
-                        '<div style="position:absolute; z-index:100; cursor:pointer; top:0; right:0;" id="pieCrosshairs" title="Zoom and center on Place"><i class="fa fa-crosshairs fa-lg" id="placeCrosshair" aria-hidden="true"></i></div>'
-                    );
-                    //$('.address-edit.side-panel-section').before($crosshairs);
-                    $(".venue > .tab-content").append($crosshairs);
-                } else {
-                    $crosshairs = $(
-                        '<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="pieCrosshairs" title="Zoom and center on Place"><i class="fa fa-crosshairs fa-lg" id="placeCrosshair" aria-hidden="true"></i></div>'
-                    );
-                    $("#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label").after($crosshairs);
-                }
-                $("#pieCrosshairs").click(() => {
-                    CenterOnPlace(WazeWrap.getSelectedFeatures()[0].WW.getObjectModel(), settings.PlaceZoom);
-                });
-
-                $("#pieCrosshairs").mouseenter((e) => {
-                    //var changedThisPl = getKMLPermalink(wazePL.getAttribute('href'));
-                    window.addEventListener("keydown", copyPLHotkeyEvent, false);
-                });
-
-                $("#pieCrosshairs").mouseleave("mouseleave", () => {
-                    window.removeEventListener("keydown", copyPLHotkeyEvent);
-                });
+        const selected = sdk.Editing.getSelection();
+        if (selected?.objectType === "venue") {
+            const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+            let $crosshairs;
+            if (selectedVenue?.categories.includes("RESIDENCE_HOME")) {
+                $(".venue > .tab-content").css("position", "relative");
+                $crosshairs = $(
+                    '<div style="position:absolute; z-index:100; cursor:pointer; top:0; right:0;" id="pieCrosshairs" title="Zoom and center on Place"><i class="fa fa-crosshairs fa-lg" id="placeCrosshair" aria-hidden="true"></i></div>'
+                );
+                //$('.address-edit.side-panel-section').before($crosshairs);
+                $(".venue > .tab-content").append($crosshairs);
+            } else {
+                $crosshairs = $(
+                    '<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="pieCrosshairs" title="Zoom and center on Place"><i class="fa fa-crosshairs fa-lg" id="placeCrosshair" aria-hidden="true"></i></div>'
+                );
+                $("#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label").after($crosshairs);
             }
+            $("#pieCrosshairs").on("click", () => {
+                CenterOnPlace(settings.PlaceZoom);
+            });
+
+            $("#pieCrosshairs").on("mouseenter", () => {
+                //var changedThisPl = getKMLPermalink(wazePL.getAttribute('href'));
+                window.addEventListener("keydown", copyPLHotkeyEvent, false);
+            });
+
+            $("#pieCrosshairs").on("mouseleave", () => {
+                window.removeEventListener("keydown", copyPLHotkeyEvent);
+            });
         }
     }
 
@@ -4111,62 +4151,55 @@ function pie(tries = 1) {
     let BusinessPLAMode = false;
     function ShowParkingLotButton() {
         $("#piePLAButton").remove();
-        if (WazeWrap.getSelectedFeatures().length > 0) {
-            if (WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue") {
-                let $PLAButton;
-                if (
-                    !(
-                        _.includes(
-                            WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,
-                            "RESIDENCE_HOME"
-                        ) ||
-                        _.includes(
-                            WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.categories,
-                            "PARKING_LOT"
-                        )
-                    )
-                ) {
-                    $PLAButton = $(
-                        '<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="piePLAButton" title="Create a Parking Lot Area for this Place"><i class="fa fa-product-hunt fa-lg" aria-hidden="true"></i></div>'
-                    );
-                    $("#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label").after($PLAButton);
+        const selected = sdk.Editing.getSelection();
+        if (selected?.objectType === "venue") {
+            let $PLAButton;
+            const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+            if (selectedVenue !== null &&
+                !(selectedVenue.categories.includes("RESIDENCE_HOME") ||
+                  selectedVenue.categories.includes("PARKING_LOT"))
+            ) {
+                $PLAButton = $(
+                    '<div style="float:right; z-index:100; cursor:pointer; top:0; right:0;" id="piePLAButton" title="Create a Parking Lot Area for this Place"><i class="fa fa-product-hunt fa-lg" aria-hidden="true"></i></div>'
+                );
+                $("#venue-edit-general > form > div:nth-child(1) > div:nth-child(2) > label").after($PLAButton);
 
-                    $("#piePLAButton").click(() => {
-                        if (!BusinessPLAMode) {
-                            BusinessPLAMode = true;
-                            businessPLAPlaceName =
-                                WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.name;
-                            businessPLAPlaceAddress = WazeWrap.getSelectedFeatures()[0]
-                                .WW.getObjectModel()
-                                .getAddress().attributes;
+                $("#piePLAButton").on("click", () => {
+                    if (!BusinessPLAMode) {
+                        BusinessPLAMode = true;
+                        const selected = sdk.Editing.getSelection();
+                        if(selected?.objectType !== "venue") return;
+                        const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+                        if(selectedVenue !== null) {
+                            businessPLAPlaceName = selectedVenue.name;
+                            businessPLAPlaceAddress = selectedVenue.address;
                             //businessPLAPlacePhone = WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.phone;
                             //businessPLAPlaceURL = WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.url;
                             startBusinessPLAPlacementMode();
                             if (!$("#layer-switcher-item_parking_places").prop("checked")) {
                                 if (!$("#layer-switcher-group_places").prop("checked"))
-                                    $("#layer-switcher-group_places").click();
-                                $("#layer-switcher-item_parking_places").click();
+                                    $("#layer-switcher-group_places").trigger("click");
+                                $("#layer-switcher-item_parking_places").trigger("click");
                             }
                         }
-                    });
-                }
+                    }
+                });
             }
         }
     }
 
     let extProviderTries = 0;
     function ShowExternalProviderTooltip() {
-        if (isChecked("_cbShowExternalProviderTooltip"))
-            if (
-                WazeWrap.getSelectedFeatures().length > 0 &&
-                WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue"
-            ) {
+        if (isChecked("_cbShowExternalProviderTooltip")) {
+            const selected = sdk.Editing.getSelection();
+            if (selected?.objectType === "venue") {
                 if ($(".select2-container.uuid").length > 0)
                     for (let i = 0; i < $(".select2-container.uuid").find("span.select2-chosen").length; i++) {
                         extProviderTries = 0;
                         ReadExtProviderText(i, extProviderTries);
                     }
             }
+        }
     }
 
     let calibratingAngledWidth = false;
@@ -4179,7 +4212,7 @@ function pie(tries = 1) {
                     return resolve(document.querySelector(selector));
                 }
 
-                const observer = new MutationObserver((mutations) => {
+                const observer = new MutationObserver((_mutations) => {
                     if (document.querySelector(selector)) {
                         observer.disconnect();
                         resolve(document.querySelector(selector));
@@ -4195,7 +4228,7 @@ function pie(tries = 1) {
                     return resolve(root.querySelector(selector));
                 }
 
-                const observer = new MutationObserver((mutations) => {
+                const observer = new MutationObserver((_mutations) => {
                     if (root.querySelector(selector)) {
                         observer.disconnect();
                         resolve(root.querySelector(selector));
@@ -4236,9 +4269,8 @@ function pie(tries = 1) {
                     totalSpots = 0;
                 }
             }
-        } else 
-        {
-            if(savedSelectedVenue === null) {
+        } else {
+            if (savedSelectedVenue === null) {
                 $("#PIEParkingSpotEstimator").remove(); //if they de-select the Place, remove the tool from the screen
             }
         }
@@ -4246,7 +4278,7 @@ function pie(tries = 1) {
 
     function startPLSpotEstimatorDrawMode() {
         // const polyDrawFeatureOptions = { callbacks: { done: PLSpotEstimatorDoneHandler, point: pointHandler } };
-        sdk.Map.setLayerZIndex({layerName: layerConfig.PIEPLSpotEstimatorLayer.layerName, zIndex: 3001});
+        sdk.Map.setLayerZIndex({ layerName: layerConfig.PIEPLSpotEstimatorLayer.layerName, zIndex: 3001 });
         // PLSpotEstimatorLayer.setZIndex(1000);
         // PLSpotEstimatordrawControl = new OpenLayers.Control.DrawFeature(
         //     PLSpotEstimatorLayer,
@@ -4256,7 +4288,7 @@ function pie(tries = 1) {
         // W.map.addControl(PLSpotEstimatordrawControl);
         // PLSpotEstimatordrawControl.activate();
         sdk.Map.drawLine().then((ls) => {
-            sdk.Editing.setSelection({selection: {ids: [savedSelectedVenue.id], objectType: "venue"}});
+            sdk.Editing.setSelection({ selection: { ids: [savedSelectedVenue.id], objectType: "venue" } });
             PLSpotEstimatorDoneHandler(ls);
             savedSelectedVenue = null;
         });
@@ -4271,12 +4303,12 @@ function pie(tries = 1) {
         // W.map.addLayer(PLSpotEstimatorCalibrationLayer);
         // PLSpotEstimatorCalibrationLayer.setZIndex(1005);
         // sdk.Map.addLayer({layerName: layerConfig.PIEPLSpotEstimatorCalibrationLayer.layerName, styleContext: styleConfig.styleContext, styleRules: styleConfig.styleRules, zIndex: 3005});
-        sdk.Map.setLayerZIndex({layerName: layerConfig.PIEPLSpotEstimatorCalibrationLayer.layerName, zIndex: 3005});
+        sdk.Map.setLayerZIndex({ layerName: layerConfig.PIEPLSpotEstimatorCalibrationLayer.layerName, zIndex: 3005 });
         sdk.Map.drawLine().then((ls) => {
-                sdk.Editing.setSelection({selection: {ids: [savedSelectedVenue.id], objectType: "venue"}});
-                PLSpotEstimatorCalibrationdoneHandler(ls)
-                savedSelectedVenue = null;
-            });
+            sdk.Editing.setSelection({ selection: { ids: [savedSelectedVenue.id], objectType: "venue" } });
+            PLSpotEstimatorCalibrationdoneHandler(ls);
+            savedSelectedVenue = null;
+        });
         // PLSpotEstimatorCalibrationdrawControl = new OpenLayers.Control.DrawFeature(
         //     PLSpotEstimatorCalibrationLayer,
         //     OpenLayers.Handler.Path,
@@ -4288,9 +4320,9 @@ function pie(tries = 1) {
         $("div#WazeMap.view-area.olMap").keydown(PLSpotEstimatorCalibrationkeyUpHandler);
     }
 
-    function pointHandler() {
-        isDrawing = true;
-    }
+    // function pointHandler() {
+    //     isDrawing = true;
+    // }
 
     function PLSpotEstimatorkeyUpHandler(e) {
         if (e.keyCode === 27) {
@@ -4352,18 +4384,18 @@ function pie(tries = 1) {
             PLSpotEstimatorCalibrationdrawControl.deactivate();
             PLSpotEstimatorCalibrationdrawControl.destroy();
         }
-        PLSpotEstimatorCalibrationLayer.removeAllFeatures();
+        sdk.Map.removeAllFeaturesFromLayer({ layerName: layerConfig.PIEPLSpotEstimatorCalibrationLayer.layerName });
         $("div#WazeMap.view-area.olMap").off("keydown");
     }
 
     let totalSpots = 0;
     function PLSpotEstimatorDoneHandler(geom) {
-        const style = { strokeWidth: 3, strokeColor: "#ee9900" };
+        // const style = { strokeWidth: 3, strokeColor: "#ee9900" };
         // PLSpotEstimatorLayer.addFeatures(new OpenLayers.Feature.Vector(geom, {}, style));
 
         const spots = Math.round(
             // WazeWrap.Geometry.calculateDistance(geom.components) /
-                turf.length(geom) * 1000 /
+            (turf.length(geom) * 1000) /
                 ($("#PIE90DegreeSpotWidthDraw").hasClass("PSESelected")
                     ? $("#PIE90DegreeSpotWidth")[0].value
                     : $("#PIEAngledSpotWidth")[0].value)
@@ -4377,8 +4409,11 @@ function pie(tries = 1) {
     }
 
     function PLSpotEstimatorCalibrationdoneHandler(geom) {
-        const style = { strokeWidth: 3, strokeColor: "#00ee00" };
-        sdk.Map.addFeaturesToLayer({ layername: layerConfig.PIEPLSpotEstimatorCalibrationLayer.layerName, features: geom }); //.addFeatures(new OpenLayers.Feature.Vector(geom,{}, style));
+        // const style = { strokeWidth: 3, strokeColor: "#00ee00" };
+        sdk.Map.addFeaturesToLayer({
+            layername: layerConfig.PIEPLSpotEstimatorCalibrationLayer.layerName,
+            features: geom,
+        }); //.addFeatures(new OpenLayers.Feature.Vector(geom,{}, style));
         let totalLength = 0;
 
         // PLSpotEstimatorCalibrationLayer.features.forEach((f) => {
@@ -4412,20 +4447,40 @@ function pie(tries = 1) {
                 if (venue.categories.includes("PARKING_LOT")) {
                     // W.map.addLayer(PLSpotEstimatorLayer);
                     // PLSpotEstimatorLayer.setZIndex(1000);
-                    sdk.Map.setLayerZIndex({layerName: layerConfig.PIEPLSpotEstimatorLayer.layerName, zIndex: 3000});
-                    const $PLSpotEstimator = $('<div>');
+                    sdk.Map.setLayerZIndex({ layerName: layerConfig.PIEPLSpotEstimatorLayer.layerName, zIndex: 3000 });
+                    const $PLSpotEstimator = $("<div>");
                     $PLSpotEstimator.html(
                         [
                             '<div style="position: absolute; text-align:center; z-index:1010; background-color:white; top:30px; left:300px; border-radius:20px; border: 2px solid; width: 300px; padding-left:10px; padding-right:10px; padding-bottom:5px; " draggable="true" id="PIEParkingSpotEstimator">',
-                            `<span style="font-weight:bold;">${I18n.t("pie.prefs.PSEParkingSpaceEstimator")}</span><i class="fa fa-window-close-o" aria-hidden="true" style="float:right; cursor:pointer;" id="PIECloseParkingSpotEstimator"></i>`,
+                            `<span style="font-weight:bold;">${I18n.t(
+                                "pie.prefs.PSEParkingSpaceEstimator"
+                            )}</span><i class="fa fa-window-close-o" aria-hidden="true" style="float:right; cursor:pointer;" id="PIECloseParkingSpotEstimator"></i>`,
                             "<hr>",
                             '<div style=" display:flex; justify-content:space-between;">',
-                            `<div style="display: inline;">${I18n.t("pie.prefs.PSELayoutType")}<br/><br/>${I18n.t("pie.prefs.PSESpotWidth")}</div>`,
-                            `<div style="display: inline;">${I18n.t("pie.prefs.PSE90degree")}<br/><br/><input type="text" size=2 id="PIE90DegreeSpotWidth"><button id="PIE90DegreeSpotWidthCalibration" title="Measure the width of a single 90 degree parking spot">${I18n.t("pie.prefs.PSECal")}</button><br/><button id="PIE90DegreeSpotWidthDraw" class="fa fa-pencil" title="${I18n.t("pie.prefs.PSEDraw90DegreeTitle")}"></button></div>`,
-                            `<div style="display: inline;">${I18n.t("pie.prefs.PSEAngled")}<br/><br/><input type="text" size=2 id="PIEAngledSpotWidth"><button id="PIEAngledSpotWidthCalibration" title="Measure the width of a single angled degree parking spot">${I18n.t("pie.prefs.PSECal")}</button><br/><button id="PIEAngledSpotWidthDraw" class="fa fa-pencil" title="${I18n.t("pie.prefs.PSEDrawAngledTitle")}"></button></div>`,
+                            `<div style="display: inline;">${I18n.t("pie.prefs.PSELayoutType")}<br/><br/>${I18n.t(
+                                "pie.prefs.PSESpotWidth"
+                            )}</div>`,
+                            `<div style="display: inline;">${I18n.t(
+                                "pie.prefs.PSE90degree"
+                            )}<br/><br/><input type="text" size=2 id="PIE90DegreeSpotWidth"><button id="PIE90DegreeSpotWidthCalibration" title="Measure the width of a single 90 degree parking spot">${I18n.t(
+                                "pie.prefs.PSECal"
+                            )}</button><br/><button id="PIE90DegreeSpotWidthDraw" class="fa fa-pencil" title="${I18n.t(
+                                "pie.prefs.PSEDraw90DegreeTitle"
+                            )}"></button></div>`,
+                            `<div style="display: inline;">${I18n.t(
+                                "pie.prefs.PSEAngled"
+                            )}<br/><br/><input type="text" size=2 id="PIEAngledSpotWidth"><button id="PIEAngledSpotWidthCalibration" title="Measure the width of a single angled degree parking spot">${I18n.t(
+                                "pie.prefs.PSECal"
+                            )}</button><br/><button id="PIEAngledSpotWidthDraw" class="fa fa-pencil" title="${I18n.t(
+                                "pie.prefs.PSEDrawAngledTitle"
+                            )}"></button></div>`,
                             "</div>",
                             "<hr>",
-                            `<div>${I18n.t("pie.prefs.PSEEstimatedNumOfSpots")}<span id="PIEPLSpotEstimatorTotal" style="color:blue; padding:0px 3px; font-weight:900; font-size:1.2em;" >0</span>&emsp;<div style="display:inline-block;"><button id="PIESetParkingSpacesToPlace" disabled>${I18n.t("pie.prefs.PSESet")}</button></div></div>`,
+                            `<div>${I18n.t(
+                                "pie.prefs.PSEEstimatedNumOfSpots"
+                            )}<span id="PIEPLSpotEstimatorTotal" style="color:blue; padding:0px 3px; font-weight:900; font-size:1.2em;" >0</span>&emsp;<div style="display:inline-block;"><button id="PIESetParkingSpacesToPlace" disabled>${I18n.t(
+                                "pie.prefs.PSESet"
+                            )}</button></div></div>`,
                             "</div>",
                         ].join(" ")
                     );
@@ -4460,8 +4515,8 @@ function pie(tries = 1) {
                         let spotCount = $("#PIEPLSpotEstimatorTotal")[0].innerText;
                         if (spotCount != "0") {
                             const selection = sdk.Editing.getSelection();
-                            if(selection?.objectType === "venue") {
-                                const myPlace = sdk.DataModel.Venues.getById({venueId: selection.ids[0]});
+                            if (selection?.objectType === "venue") {
+                                const myPlace = sdk.DataModel.Venues.getById({ venueId: selection.ids[0] });
                                 // const myPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
                                 // const existingAttr = myPlace.attributes.categoryAttributes.PARKING_LOT;
                                 // const newAttr = {};
@@ -4618,7 +4673,7 @@ function pie(tries = 1) {
             // if (WazeWrap.getSelectedFeatures()[0].WW.getType() === "venue") {
             // && (typeof WazeWrap.getSelectedFeatures()[0].attributes.repositoryObject.attributes.id === "string")){ //id is only a string if the Place has been saved - don't allow copying unsaved Places
             let $PlaceCopyButton;
-            const venue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+            const venue = sdk.DataModel.Venues.getById({ venueId: selected.ids[0] });
             if (
                 !venue.categories.includes("RESIDENCE")
                 // !_.includes(
@@ -4647,14 +4702,14 @@ function pie(tries = 1) {
                             phone: oldPlace.phone,
                             services: oldPlace.services,
                             url: oldPlace.url,
-                            venueId: null
+                            venueId: null,
                         };
-                        const oldAddress = sdk.DataModel.Venues.getAddress({venueId: oldPlace.id});
+                        const oldAddress = sdk.DataModel.Venues.getAddress({ venueId: oldPlace.id });
                         let newVenueAddress = {
                             houseNumber: oldAddress.houseNumber,
                             streetId: oldAddress.street?.id,
-                            venueId: null 
-                        }
+                            venueId: null,
+                        };
                         // NewPlace.attributes.name = `${oldPlace.attributes.name} (copy)`;
                         // NewPlace.attributes.phone = oldPlace.attributes.phone;
                         // NewPlace.attributes.url = oldPlace.attributes.url;
@@ -4664,16 +4719,23 @@ function pie(tries = 1) {
                         // NewPlace.attributes.houseNumber = oldPlace.attributes.houseNumber;
                         // NewPlace.attributes.lockRank = oldPlace.attributes.lockRank;
 
-
                         let newPlace;
                         if (oldPlace.geometry.type === "Polygon") {
-                            let newCoordinates = structuredClone(oldPlace.geometry.coordinates).map((pos) => {return structuredClone(pos);});
-                            newCoordinates = newCoordinates.map((outerPos) => { return outerPos.map((pos) => {return [pos[0] + WazeWrap.Geometry.CalculateLongOffsetGPS(
-                                    5,
-                                    pos[0],
-                                    pos[1]
-                                ), pos[1]]; }) } );
-                            newPlace = sdk.DataModel.Venues.addVenue({category: oldPlace.categories[0],geometry: turf.polygon(newCoordinates).geometry});
+                            let newCoordinates = structuredClone(oldPlace.geometry.coordinates).map((pos) => {
+                                return structuredClone(pos);
+                            });
+                            newCoordinates = newCoordinates.map((outerPos) => {
+                                return outerPos.map((pos) => {
+                                    return [
+                                        pos[0] + WazeWrap.Geometry.CalculateLongOffsetGPS(5, pos[0], pos[1]),
+                                        pos[1],
+                                    ];
+                                });
+                            });
+                            newPlace = sdk.DataModel.Venues.addVenue({
+                                category: oldPlace.categories[0],
+                                geometry: turf.polygon(newCoordinates).geometry,
+                            });
                         } else {
                             // convertedCoords = WazeWrap.Geometry.ConvertTo4326(
                             //     oldPlace.getOLGeometry().x,
@@ -4684,8 +4746,11 @@ function pie(tries = 1) {
                                 5,
                                 newCoordinates[0],
                                 newCoordinates[1]
-                            )
-                            newPlace = sdk.DataModel.Venues.addVenue({category: oldPlace.categories[0],geometry: turf.point(newCoordinates).geometry});
+                            );
+                            newPlace = sdk.DataModel.Venues.addVenue({
+                                category: oldPlace.categories[0],
+                                geometry: turf.point(newCoordinates).geometry,
+                            });
                         }
 
                         newVenueAddress.venueId = newPlace.toString();
@@ -4697,7 +4762,7 @@ function pie(tries = 1) {
                         // NewPlace.attributes.openingHours = [].concat(oldPlace.attributes.openingHours);
                         // NewPlace.attributes.streetID = oldPlace.attributes.streetID;
 
-                        const newlyAddedVenue = sdk.DataModel.Venues.getById({venueId: newPlace.toString()});
+                        const newlyAddedVenue = sdk.DataModel.Venues.getById({ venueId: newPlace.toString() });
                         if (newlyAddedVenue.categories.includes("GAS_STATION"))
                             NewPlace.attributes.brand = oldPlace.attributes.brand;
 
@@ -4792,8 +4857,8 @@ function pie(tries = 1) {
             $("div.description-control").css("position", "relative");
             $(".clearButton").on("click", () => {
                 const selected = sdk.Editing.getSelection();
-                if(selected?.objectType === "venue") {
-                    sdk.DataModel.Venues.updateVenue({description: ""});
+                if (selected?.objectType === "venue") {
+                    sdk.DataModel.Venues.updateVenue({ description: "" });
                 }
             });
         }, 0);
@@ -4853,7 +4918,7 @@ function pie(tries = 1) {
                 $container.append($button);
 
                 for (let i = 0; i < categoryOptions.length; i++) {
-                    if(categoryOptions[i].selectedIndex === -1) continue;
+                    if (categoryOptions[i].selectedIndex === -1) continue;
                     const name = categoryOptions[i].options[categoryOptions[i].selectedIndex].innerHTML;
                     const icon = categoryOptions[i].options[categoryOptions[i].selectedIndex].getAttribute("data-icon");
 
@@ -4900,11 +4965,16 @@ function pie(tries = 1) {
         }
     }
 
-    function CenterOnPlace(venue, zoom) {
+    function CenterOnPlace(zoom) {
+        const selected = sdk.Editing.getSelection();
+        if(selected?.objectType !== "venue") return;
+        const venue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+        if(venue === null) return;
         // var centroid = venue.getOLGeometry().getCentroid();
-        const centroid = turf.centroid(venue.geometry);
+        const centroid = venue.geometry.type === "Point" ? venue.geometry : turf.centroid(venue.geometry);
         // W.map.setCenter([centroid.x, centroid.y], zoom);
         sdk.Map.centerMapOnGeometry({ geometry: centroid.geometry });
+        sdk.Map.setZoomLevel({zoomLevel: zoom});
     }
 
     function isChecked(checkboxId) {
@@ -4926,7 +4996,7 @@ function pie(tries = 1) {
         const bold = false;
         if (selected?.venue === "venue") {
             // const venue = WazeWrap.getSelectedFeatures()[0];
-            const venue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+            const venue = sdk.DataModel.Venues.getById({ venueId: selected.ids[0] });
             // const isArea = venue.geometry.toString().match(/^POLYGON/);
             //var isPoint = venue.geometry.toString().match(/^POINT/);
             const isArea = venue.geometry.type === "Polygon";
@@ -5015,7 +5085,9 @@ function pie(tries = 1) {
                 if (mc !== null) {
                     if (!mc.processed) {
                         res.push(
-                            `<option value="${vsc.categoryId}" data-icon="${vsc.categoryId.toLowerCase().replace("_", "-")}" style="font-weight:bold;">${mc.localizedName}</option>`
+                            `<option value="${vsc.categoryId}" data-icon="${vsc.categoryId
+                                .toLowerCase()
+                                .replace("_", "-")}" style="font-weight:bold;">${mc.localizedName}</option>`
                         );
                         mc.processed = true;
                     }
