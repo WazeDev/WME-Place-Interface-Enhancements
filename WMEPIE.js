@@ -75,9 +75,9 @@ function pie(tries = 1) {
 
     const curr_ver = GM_info.script.version;
     let settings = {};
-    const placeMenuSelector = "#primary-toolbar > div > div.toolbar-group.toolbar-group-venues > wz-menu"; //"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
+    // const placeMenuSelector = "#primary-toolbar > div > div.toolbar-group.toolbar-group-venues > wz-menu"; //"#edit-buttons > div > div.toolbar-button.waze-icon-place.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
     //"#edit-buttons > div > div.toolbar-submenu.toolbar-group.toolbar-group-venues.ItemInactive > menu";
-    const placementMode = false;
+    // const placementMode = false;
     const resCategory = "RESIDENTIAL";
     let wazePL;
     let hoursparser;
@@ -2780,7 +2780,7 @@ function pie(tries = 1) {
                 },
                 name: "PIEPlaceFilter",
             });
-            W.map.venueLayer.styleMap.styles["default"].rules.push(myRule);
+            W.map.venueLayer.styleMap.styles.default.rules.push(myRule);
             W.map.venueLayer.redraw();
         }
         DisplayPlaceNames();
@@ -3766,11 +3766,11 @@ function pie(tries = 1) {
         return false;
     }
 
-    function round(val, decimals) {
-        let multiplier = 1;
-        for (let i = 0; i < decimals; i++) multiplier *= 10;
-        return Math.round(val * multiplier) / multiplier;
-    }
+    // function round(val, decimals) {
+    //     let multiplier = 1;
+    //     for (let i = 0; i < decimals; i++) multiplier *= 10;
+    //     return Math.round(val * multiplier) / multiplier;
+    // }
 
     function SimplifyPlace() {
         const selected = sdk.Editing.getSelection();
@@ -4453,35 +4453,15 @@ function pie(tries = 1) {
                     $PLSpotEstimator.html(
                         [
                             '<div style="position: absolute; text-align:center; z-index:1010; background-color:white; top:30px; left:300px; border-radius:20px; border: 2px solid; width: 300px; padding-left:10px; padding-right:10px; padding-bottom:5px; " draggable="true" id="PIEParkingSpotEstimator">',
-                            `<span style="font-weight:bold;">${I18n.t(
-                                "pie.prefs.PSEParkingSpaceEstimator"
-                            )}</span><i class="fa fa-window-close-o" aria-hidden="true" style="float:right; cursor:pointer;" id="PIECloseParkingSpotEstimator"></i>`,
+                            `<span style="font-weight:bold;">${I18n.t("pie.prefs.PSEParkingSpaceEstimator")}</span><i class="fa fa-window-close-o" aria-hidden="true" style="float:right; cursor:pointer;" id="PIECloseParkingSpotEstimator"></i>`,
                             "<hr>",
                             '<div style=" display:flex; justify-content:space-between;">',
-                            `<div style="display: inline;">${I18n.t("pie.prefs.PSELayoutType")}<br/><br/>${I18n.t(
-                                "pie.prefs.PSESpotWidth"
-                            )}</div>`,
-                            `<div style="display: inline;">${I18n.t(
-                                "pie.prefs.PSE90degree"
-                            )}<br/><br/><input type="text" size=2 id="PIE90DegreeSpotWidth"><button id="PIE90DegreeSpotWidthCalibration" title="Measure the width of a single 90 degree parking spot">${I18n.t(
-                                "pie.prefs.PSECal"
-                            )}</button><br/><button id="PIE90DegreeSpotWidthDraw" class="fa fa-pencil" title="${I18n.t(
-                                "pie.prefs.PSEDraw90DegreeTitle"
-                            )}"></button></div>`,
-                            `<div style="display: inline;">${I18n.t(
-                                "pie.prefs.PSEAngled"
-                            )}<br/><br/><input type="text" size=2 id="PIEAngledSpotWidth"><button id="PIEAngledSpotWidthCalibration" title="Measure the width of a single angled degree parking spot">${I18n.t(
-                                "pie.prefs.PSECal"
-                            )}</button><br/><button id="PIEAngledSpotWidthDraw" class="fa fa-pencil" title="${I18n.t(
-                                "pie.prefs.PSEDrawAngledTitle"
-                            )}"></button></div>`,
+                            `<div style="display: inline;">${I18n.t("pie.prefs.PSELayoutType")}<br/><br/>${I18n.t("pie.prefs.PSESpotWidth")}</div>`,
+                            `<div style="display: inline;">${I18n.t("pie.prefs.PSE90degree")}<br/><br/><input type="text" size=2 id="PIE90DegreeSpotWidth"><button id="PIE90DegreeSpotWidthCalibration" title="Measure the width of a single 90 degree parking spot">${I18n.t("pie.prefs.PSECal")}</button><br/><button id="PIE90DegreeSpotWidthDraw" class="fa fa-pencil" title="${I18n.t("pie.prefs.PSEDraw90DegreeTitle")}"></button></div>`,
+                            `<div style="display: inline;">${I18n.t("pie.prefs.PSEAngled")}<br/><br/><input type="text" size=2 id="PIEAngledSpotWidth"><button id="PIEAngledSpotWidthCalibration" title="Measure the width of a single angled degree parking spot">${I18n.t("pie.prefs.PSECal")}</button><br/><button id="PIEAngledSpotWidthDraw" class="fa fa-pencil" title="${I18n.t("pie.prefs.PSEDrawAngledTitle")}"></button></div>`,
                             "</div>",
                             "<hr>",
-                            `<div>${I18n.t(
-                                "pie.prefs.PSEEstimatedNumOfSpots"
-                            )}<span id="PIEPLSpotEstimatorTotal" style="color:blue; padding:0px 3px; font-weight:900; font-size:1.2em;" >0</span>&emsp;<div style="display:inline-block;"><button id="PIESetParkingSpacesToPlace" disabled>${I18n.t(
-                                "pie.prefs.PSESet"
-                            )}</button></div></div>`,
+                            `<div>${I18n.t("pie.prefs.PSEEstimatedNumOfSpots")}<span id="PIEPLSpotEstimatorTotal" style="color:blue; padding:0px 3px; font-weight:900; font-size:1.2em;" >0</span>&emsp;<div style="display:inline-block;"><button id="PIESetParkingSpacesToPlace" disabled>${I18n.t("pie.prefs.PSESet")}</button></div></div>`,
                             "</div>",
                         ].join(" ")
                     );
@@ -5001,7 +4981,7 @@ function pie(tries = 1) {
         const selected = sdk.Editing.getSelection();
         // const count = WazeWrap.getSelectedFeatures().length;
         let metersArea = 0;
-        const bold = false;
+        // const bold = false;
         if (selected?.venue === "venue") {
             // const venue = WazeWrap.getSelectedFeatures()[0];
             const venue = sdk.DataModel.Venues.getById({ venueId: selected.ids[0] });
