@@ -3675,9 +3675,10 @@ function pie(tries = 1) {
     }
 
     function openPUR() {
-        if (sdk.Editing.getSelection() !== null && $(".pending-changes-alert").length > 0) {
-            if (
-                WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().attributes.venueUpdateRequests.length > 0 &&
+        const selection = sdk.Editing.getSelection();
+        if (selection?.objectType === "venue" && $(".pending-changes-alert").length > 0) {
+            const selectedVenue = sdk.DataModel.Venues.getById({venueId: selection.ids[0]});
+            if (selectedVenue.venueUpdateRequests.length > 0 &&
                 (typeof WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().state === "undefined" ||
                     WazeWrap.getSelectedFeatures()[0].WW.getObjectModel().state === null)
             )
@@ -3842,7 +3843,7 @@ function pie(tries = 1) {
 
         updateGeometryInputs();
 
-        $("#pieBtnApplyStandardGeom").click(() => {
+        $("#pieBtnApplyStandardGeom").on("click", () => {
             const lines = $("#piePlaceGeomStandard").val().split("\n");
 
             for (let i = 0; i < lines.length; i++) {
@@ -4513,7 +4514,7 @@ function pie(tries = 1) {
 
                     $("#PIESetParkingSpacesToPlace").on("click", () => {
                         let spotCount = $("#PIEPLSpotEstimatorTotal")[0].innerText;
-                        if (spotCount != "0") {
+                        if (spotCount !== "0") {
                             const selection = sdk.Editing.getSelection();
                             if (selection?.objectType === "venue") {
                                 const myPlace = sdk.DataModel.Venues.getById({ venueId: selection.ids[0] });
@@ -4694,7 +4695,7 @@ function pie(tries = 1) {
                         // const oldPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
                         const oldPlace = venue;
 
-                        let newVenue = {
+                        const newVenue = {
                             aliases: structuredClone(oldPlace.aliases),
                             name: `${oldPlace.name} copy`,
                             categories: structuredClone(oldPlace.categories),
@@ -4705,7 +4706,7 @@ function pie(tries = 1) {
                             venueId: null,
                         };
                         const oldAddress = sdk.DataModel.Venues.getAddress({ venueId: oldPlace.id });
-                        let newVenueAddress = {
+                        const newVenueAddress = {
                             houseNumber: oldAddress.houseNumber,
                             streetId: oldAddress.street?.id,
                             venueId: null,
@@ -4741,7 +4742,7 @@ function pie(tries = 1) {
                             //     oldPlace.getOLGeometry().x,
                             //     oldPlace.getOLGeometry().y
                             // );
-                            let newCoordinates = structuredClone(oldPlace.geometry.coordinates);
+                            const newCoordinates = structuredClone(oldPlace.geometry.coordinates);
                             newCoordinates[0] += WazeWrap.Geometry.CalculateLongOffsetGPS(
                                 5,
                                 newCoordinates[0],
@@ -4878,22 +4879,29 @@ function pie(tries = 1) {
     //     }
 
     function AddMakePrimaryButtons() {
-        if (WazeWrap.hasPlaceSelected()) {
-            if ($(".aliases-view > div > ul > div > li").length > 0) {
+        const selected = sdk.Editing.getSelection();
+        if (selected?.objectType === "venue") {
+            waitForElementLoaded("div.alias-item-content").then(() => {
                 const $button = $("<div>", { class: "makePrimary" })
                     .text("Make primary")
                     .on("click", function () {
-                        const obj = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-                        const toPrimary = $(this).prev().prev().val();
-                        const aliases = obj.attributes.aliases.filter((i) => i !== toPrimary);
-                        aliases.push(obj.attributes.name);
-                        const multiaction = new MultiAction();
-                        multiaction.doSubAction(W.model, new UpdateObject(obj, { aliases: aliases }));
-                        multiaction.doSubAction(W.model, new UpdateObject(obj, { name: toPrimary }));
-                        W.model.actionManager.add(multiaction);
+                        const selected = sdk.Editing.getSelection();
+                        if(selected?.objectType !== "venue") return;
+                        const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+                        if(selectedVenue === null) return;
+                        const toPrimary = $(this).parent().parent().find(".alias-item-content").text();
+                        const aliases = selectedVenue.aliases.filter((i) => i !== toPrimary);
+                        aliases.push(selectedVenue.name);
+                        // const multiaction = new MultiAction();
+                        // multiaction.doSubAction(W.model, new UpdateObject(obj, { aliases: aliases }));
+                        // multiaction.doSubAction(W.model, new UpdateObject(obj, { name: toPrimary }));
+                        // W.model.actionManager.add(multiaction);
+                        sdk.DataModel.Venues.updateVenue({aliases: aliases, name: toPrimary, venueId: selectedVenue.id});
                     });
-                $(".aliases-view > div > ul > div > li").find(".delete").after($button);
-            }
+                for (const aliasContent of $("div.alias-item-content")) {
+                    $(aliasContent).parent().find("wz-button.alias-item-action-delete").after($button);
+                }
+            });
         }
     }
 
