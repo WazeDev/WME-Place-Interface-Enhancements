@@ -6,6 +6,7 @@
         "@types/tampermonkey": "^5.0.4"
     },
     "dependencies": {
+        "@terraformer/wkt": "^2.2.1",
         "jquery": "^3.7.1",
         "proj4": "^2.19.5",
         "typescript": "^5.8.3",

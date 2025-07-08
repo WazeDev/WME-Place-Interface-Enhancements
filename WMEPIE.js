@@ -13,7 +13,8 @@
 // @author       JustinS83
 // @grant        GM_xmlhttpRequest
 // @require      https://cdn.jsdelivr.net/npm/@turf/turf@7.2.0/turf.min.js
-// @require      https://cdn.jsdelivr.net/npm/proj4@2.16.2/dist/proj4.min.js
+// @require      https://cdn.jsdelivr.net/npm/proj4@2.19.5/dist/proj4.min.js
+// @require      https://cdn.jsdelivr.net/npm/@terraformer/wkt@2.2.1/dist/t-wkt.umd.min.js
 // @require      https://greasyfork.org/scripts/24851-wazewrap/code/WazeWrap.js
 // @require      https://greasyfork.org/scripts/27023-jscolor/code/JSColor.js
 // @require      https://update.greasyfork.org/scripts/37486/1158035/WME%20Utils%20-%20HoursParser.js
@@ -3845,6 +3846,7 @@ function pie(tries = 1) {
 
         $("#pieBtnApplyStandardGeom").on("click", () => {
             const lines = $("#piePlaceGeomStandard").val().split("\n");
+            const polygonGeometry = [];
 
             for (let i = 0; i < lines.length; i++) {
                 if (!/^(-?\d*(?:\.\d*)?),\s?(-?\d*(?:\.\d*))$/.test(lines[i])) {
@@ -3852,16 +3854,29 @@ function pie(tries = 1) {
                     return;
                 }
                 const coords = lines[i].match(/^(-?\d*(?:\.\d*)?),\s?(-?\d*(?:\.\d*))$/);
-                const pt = WazeWrap.Geometry.ConvertTo900913(coords[2], coords[1]);
-                lines[i] = new OpenLayers.Geometry.Point(pt.lon, pt.lat);
+                // const pt = WazeWrap.Geometry.ConvertTo900913(coords[2], coords[1]);
+                // lines[i] = new OpenLayers.Geometry.Point(pt.lon, pt.lat);
+                polygonGeometry.push([coords[2], coords[1]]);
             }
-
-            saveNewPlaceGeometry(lines);
+            if(polygonGeometry.length < 1) {
+                WazeWrap.Alerts.error(GM_info.script.name, "Unable to Parse Coordinates");
+                return;
+            }
+            if(polygonGeometry.length === 1) saveNewPlaceGeometry(turf.point(polygonGeometry).geometry); 
+            else if(polygonGeometry.length < 4) {
+                WazeWrap.Alerts.error(GM_info.script.name, "Malformed Polygon Supplied.");
+                return;
+            }
+            else {
+                polygonGeometry.push(structuredClone(polygonGeometry[0]));
+                saveNewPlaceGeometry(turf.polygon([polygonGeometry]).geometry);
+            }
             updateGeometryInputs();
         });
 
         $("#pieBtnApplyWazeGeom").on("click", () => {
             const lines = $("#piePlaceGeomWaze").val().split("\n");
+            const polygonGeometry = [];
 
             for (let i = 0; i < lines.length; i++) {
                 if (lines[i].length > 0) {
@@ -3871,12 +3886,25 @@ function pie(tries = 1) {
                         return;
                     }
                     const coords = lines[i].match(/^(-?\d*(?:\.\d*)?)\s+(-?\d*(?:\.\d*))$/);
-                    const pt = WazeWrap.Geometry.ConvertTo900913(coords[1], coords[2]);
-                    lines[i] = new OpenLayers.Geometry.Point(pt.lon, pt.lat);
+                    // const pt = WazeWrap.Geometry.ConvertTo900913(coords[1], coords[2]);
+                    // lines[i] = new OpenLayers.Geometry.Point(pt.lon, pt.lat);
+                    polygonGeometry.push([coords[1], coords[2]]);
                 }
             }
 
-            saveNewPlaceGeometry(lines);
+            if(polygonGeometry.length < 1) {
+                WazeWrap.Alerts.error(GM_info.script.name, "Unable to Parse Coordinates");
+                return;
+            }
+            if(polygonGeometry.length === 1) saveNewPlaceGeometry(turf.point(polygonGeometry).geometry); 
+            else if(polygonGeometry.length < 4) {
+                WazeWrap.Alerts.error(GM_info.script.name, "Malformed Polygon Supplied.");
+                return;
+            }
+            else {
+                polygonGeometry.push(structuredClone(polygonGeometry[0]));
+                saveNewPlaceGeometry(turf.polygon([polygonGeometry]).geometry);
+            }
             updateGeometryInputs();
         });
 
@@ -3885,6 +3913,7 @@ function pie(tries = 1) {
                 .val()
                 .match(/POLYGON\((.*)\)/)[1]
                 .split(",");
+            const polygonGeometry = [];
 
             for (let i = 0; i < lines.length; i++) {
                 if (!/^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/.test(lines[i].trim())) {
@@ -3892,11 +3921,24 @@ function pie(tries = 1) {
                     return;
                 }
                 const coords = lines[i].trim().match(/^(-?\d*(?:\.\d*)?)\s(-?\d*(?:\.\d*))$/);
-                const pt = WazeWrap.Geometry.ConvertTo900913(coords[1], coords[2]);
-                lines[i] = new OpenLayers.Geometry.Point(pt.lon, pt.lat);
+                // const pt = WazeWrap.Geometry.ConvertTo900913(coords[1], coords[2]);
+                // lines[i] = new OpenLayers.Geometry.Point(pt.lon, pt.lat);
+                polygonGeometry.push([coords[1], coords[2]]);
             }
 
-            saveNewPlaceGeometry(lines);
+            if(polygonGeometry.length < 1) {
+                WazeWrap.Alerts.error(GM_info.script.name, "Unable to Parse Coordinates");
+                return;
+            }
+            if(polygonGeometry.length === 1) saveNewPlaceGeometry(turf.point(polygonGeometry).geometry); 
+            else if(polygonGeometry.length < 4) {
+                WazeWrap.Alerts.error(GM_info.script.name, "Malformed Polygon Supplied.");
+                return;
+            }
+            else {
+                polygonGeometry.push(structuredClone(polygonGeometry[0]));
+                saveNewPlaceGeometry(turf.polygon([polygonGeometry]).geometry);
+            }
             updateGeometryInputs();
         });
 
@@ -3906,21 +3948,26 @@ function pie(tries = 1) {
     }
 
     function saveNewPlaceGeometry(newGeom) {
-        const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
-        const originalGeometry = selected.getOLGeometry().clone();
-        const ls = new OpenLayers.Geometry.LineString(newGeom);
-        const newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
+        // const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
+        // const originalGeometry = selected.getOLGeometry().clone();
+        // const ls = new OpenLayers.Geometry.LineString(newGeom);
+        // const newGeometry = new OpenLayers.Geometry.Polygon(new OpenLayers.Geometry.LinearRing(ls.components));
 
-        const UFG = require("Waze/Action/UpdateFeatureGeometry");
-        // debugger;
-        W.model.actionManager.add(
-            new UFG(
-                selected,
-                W.model.venues,
-                W.userscripts.toGeoJSONGeometry(originalGeometry),
-                W.userscripts.toGeoJSONGeometry(newGeometry)
-            )
-        );
+        // const UFG = require("Waze/Action/UpdateFeatureGeometry");
+        // // debugger;
+        // W.model.actionManager.add(
+        //     new UFG(
+        //         selected,
+        //         W.model.venues,
+        //         W.userscripts.toGeoJSONGeometry(originalGeometry),
+        //         W.userscripts.toGeoJSONGeometry(newGeometry)
+        //     )
+        // );
+        const selected = sdk.Editing.getSelection();
+        if(selected?.objectType !== "venue") return;
+        const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+        if(selectedVenue === null) return;
+        sdk.DataModel.Venues.updateVenue({geometry: newGeom, venueId: selectedVenue.id});
     }
 
     function updateGeometryInputs() {
