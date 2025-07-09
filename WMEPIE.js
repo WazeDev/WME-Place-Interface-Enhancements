@@ -331,98 +331,30 @@ function pie(tries = 1) {
                 //'<div class="controls-container pie-controls-container" id="divMoveAddress" title="' + I18n.t('pie.prefs.MoveAddressTitle') + '"><input type="checkbox" id="_cbMoveAddress" class="pieSettingsCheckbox"/><label for="_cbMoveAddress" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveAddress') + '</label></div>',
                 //'<div class="controls-container pie-controls-container" id="divMoveHNEntry" title="' + I18n.t('pie.prefs.MoveHNEntryTitle') + '"><input type="checkbox" id="_cbMoveHNEntry" class="pieSettingsCheckbox"/><label for="_cbMoveHNEntry" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveHNEntry') + '</label></div>',
                 "<br>",
-                `<div class="controls-container pie-controls-container" id="divHidePaymentType" title="${I18n.t(
-                    "pie.prefs.HidePaymentTypeTitle"
-                )}"><input type="checkbox" id="_cbHidePaymentType" class="pieSettingsCheckbox" /><label for="_cbHidePaymentType" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.HidePaymentType"
-                )}</label></div>`,
-                `<div class="controls-container pie-controls-container" id="divGeometryMods" title="${I18n.t(
-                    "pie.prefs.GeometryModsTitle"
-                )}"><input type="checkbox" id="_cbGeometryMods" class="pieSettingsCheckbox" /><label for="_cbGeometryMods" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.GeometryMods"
-                )}</label></div>`,
-                `<div class="controls-container pie-controls-container" id="divSimplifyFactor" style="padding-left:20px;" title="${I18n.t(
-                    "pie.prefs.SimplifyFactorTitle"
-                )}"> ${I18n.t(
-                    "pie.prefs.SimplifyFactor"
-                )} <input type="number" min="0" max="10" step=".5" style="width:45px; height:20px;" id="pieSimplifyFactor"></div>`,
-                `<div class="controls-container pie-controls-container" id="divHideShopAndServices" title="${I18n.t(
-                    "pie.prefs.HideShoppingServicesTitle"
-                )}"><input type="checkbox" id="_cbHideShopAndServices" class="pieSettingsCheckbox" /><label for="_cbHideShopAndServices" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.HideShoppingServices"
-                )}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divHidePaymentType" title="${I18n.t("pie.prefs.HidePaymentTypeTitle")}"><input type="checkbox" id="_cbHidePaymentType" class="pieSettingsCheckbox" /><label for="_cbHidePaymentType" style="white-space:pre-line;">${I18n.t("pie.prefs.HidePaymentType")}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divGeometryMods" title="${I18n.t("pie.prefs.GeometryModsTitle")}"><input type="checkbox" id="_cbGeometryMods" class="pieSettingsCheckbox" /><label for="_cbGeometryMods" style="white-space:pre-line;">${I18n.t("pie.prefs.GeometryMods")}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divSimplifyFactor" style="padding-left:20px;" title="${I18n.t("pie.prefs.SimplifyFactorTitle")}"> ${I18n.t("pie.prefs.SimplifyFactor")} <input type="number" min="0" max="10" step=".5" style="width:45px; height:20px;" id="pieSimplifyFactor"></div>`,
+                `<div class="controls-container pie-controls-container" id="divHideShopAndServices" title="${I18n.t("pie.prefs.HideShoppingServicesTitle")}"><input type="checkbox" id="_cbHideShopAndServices" class="pieSettingsCheckbox" /><label for="_cbHideShopAndServices" style="white-space:pre-line;">${I18n.t("pie.prefs.HideShoppingServices")}</label></div>`,
                 "</fieldset>",
 
                 '<fieldset id="fieldNewPlaces" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t(
-                    "pie.prefs.NewPlaces"
-                )}</h4></legend>`,
-                `<div id="divEditRPPAfterCreated" class="controls-container pie-controls-container" title="${I18n.t(
-                    "pie.prefs.EditRPPAfterCreateTitle"
-                )}"><input type="checkbox" id="_cbEditRPPAfterCreated" class="pieSettingsCheckbox"><label for="_cbEditRPPAfterCreated" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.EditRPPAfterCreate"
-                )}</label></div>`,
-                `<div id="divUseStreetFromClosestSeg" class="controls-container pie-controls-container" title="${I18n.t(
-                    "pie.prefs.UseStreetFromClosestSegmentTitle"
-                )}"><input type="checkbox" id="_cbUseStreetFromClosestSeg" class="pieSettingsCheckbox"><label for="_cbUseStreetFromClosestSeg" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.UseStreetFromClosestSegment"
-                )}</label></div>`,
-                `<div id="divUseCityFromClosestSeg" class="controls-container pie-controls-container" title="${I18n.t(
-                    "pie.prefs.UseCityFromClosestSegmentTitle"
-                )}"><input type="checkbox" id="_cbUseCityFromClosestSeg" class="pieSettingsCheckbox"><label for="_cbUseCityFromClosestSeg" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.UseCityFromClosestSegment"
-                )}</label></div>`,
-                `<div id="divUseAltCity" class="controls-container pie-controls-container" title="${I18n.t(
-                    "pie.prefs.ClosestSegmentAltCityTitle"
-                )}" style="padding-left:20px; word-wrap: break-word;"><input type="checkbox" id="_cbUseAltCity" class="pieSettingsCheckbox"><label for="_cbUseAltCity" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.ClosestSegmentAltCity"
-                )}</label></div>`,
-                `<div id="divSkipPLR" class="controls-container pie-controls-container" title="${I18n.t(
-                    "pie.prefs.ClosestSegmentIgnorePLRUnnamedPRTitle"
-                )}"><input type="checkbox" id="_cbSkipPLR" class="pieSettingsCheckbox"/><label for="_cbSkipPLR" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.ClosestSegmentIgnorePLRUnnamedPR"
-                )}</label></div>`,
-                `<div id="divDefaultLockLevel" class="controls-container pie-controls-container" style="left:8px;" title="${I18n.t(
-                    "pie.prefs.LockLevelTitle"
-                )}">${I18n.t(
-                    "pie.prefs.LockLevel"
-                )}<select id="pieDefaultLockLevel">${buildLockLevelsList()}</select></div>`,
+                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t("pie.prefs.NewPlaces")}</h4></legend>`,
+                `<div id="divEditRPPAfterCreated" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.EditRPPAfterCreateTitle")}"><input type="checkbox" id="_cbEditRPPAfterCreated" class="pieSettingsCheckbox"><label for="_cbEditRPPAfterCreated" style="white-space:pre-line;">${I18n.t("pie.prefs.EditRPPAfterCreate")}</label></div>`,
+                `<div id="divUseStreetFromClosestSeg" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.UseStreetFromClosestSegmentTitle")}"><input type="checkbox" id="_cbUseStreetFromClosestSeg" class="pieSettingsCheckbox"><label for="_cbUseStreetFromClosestSeg" style="white-space:pre-line;">${I18n.t("pie.prefs.UseStreetFromClosestSegment")}</label></div>`,
+                `<div id="divUseCityFromClosestSeg" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.UseCityFromClosestSegmentTitle")}"><input type="checkbox" id="_cbUseCityFromClosestSeg" class="pieSettingsCheckbox"><label for="_cbUseCityFromClosestSeg" style="white-space:pre-line;">${I18n.t("pie.prefs.UseCityFromClosestSegment")}</label></div>`,
+                `<div id="divUseAltCity" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.ClosestSegmentAltCityTitle")}" style="padding-left:20px; word-wrap: break-word;"><input type="checkbox" id="_cbUseAltCity" class="pieSettingsCheckbox"><label for="_cbUseAltCity" style="white-space:pre-line;">${I18n.t("pie.prefs.ClosestSegmentAltCity")}</label></div>`,
+                `<div id="divSkipPLR" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.ClosestSegmentIgnorePLRUnnamedPRTitle")}"><input type="checkbox" id="_cbSkipPLR" class="pieSettingsCheckbox"/><label for="_cbSkipPLR" style="white-space:pre-line;">${I18n.t("pie.prefs.ClosestSegmentIgnorePLRUnnamedPR")}</label></div>`,
+                `<div id="divDefaultLockLevel" class="controls-container pie-controls-container" style="left:8px;" title="${I18n.t("pie.prefs.LockLevelTitle")}">${I18n.t("pie.prefs.LockLevel")}<select id="pieDefaultLockLevel">${buildLockLevelsList()}</select></div>`,
                 "</fieldset>",
 
                 '<fieldset id="fieldMapMods" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t(
-                    "pie.prefs.MapChanges"
-                )}</h4></legend>`,
-                `<div id="divShowNames" class="controls-container pie-controls-container" title="${I18n.t(
-                    "pie.prefs.ShowPlaceNames"
-                )}"><input type="checkbox" id="_cbShowPlaceNames" class="pieSettingsCheckbox" /><label for="_cbShowPlaceNames">${I18n.t(
-                    "pie.prefs.ShowPlaceNames"
-                )}</label></div>`,
-                `<br><div id="divShowNamesPoint"class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t(
-                    "pie.prefs.ShowPointNamesTitle"
-                )}"><input type="checkbox" id="_cbShowPlaceNamesPoint" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesPoint">${I18n.t(
-                    "pie.prefs.ShowPointNames"
-                )}</label></div>`,
-                `<div id="divShowNamesArea" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t(
-                    "pie.prefs.ShowAreaNamesTitle"
-                )}"><input type="checkbox" id="_cbShowPlaceNamesArea" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesArea">${I18n.t(
-                    "pie.prefs.ShowAreaNames"
-                )}</label></div>`,
-                `<br><div id="divShowNamesPLA" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t(
-                    "pie.prefs.ShowPLANameTitle"
-                )}"><input type="checkbox" id="_cbShowPlaceNamesPLA" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesPLA">${I18n.t(
-                    "pie.prefs.ShowPLAName"
-                )}</label></div>`,
-                `<br><div id="divShowNamesLock" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t(
-                    "pie.prefs.ShowLockLevelTitle"
-                )}"><input type="checkbox" id="_cbShowPlaceNamesLock" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesLock">${I18n.t(
-                    "pie.prefs.ShowLockLevel"
-                )}</label></div>`,
-                `<br><div id="divhidePlaceNamesWhenPlacesHidden" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t(
-                    "pie.prefs.hidePlaceNamesWhenPlacesHiddenTitle"
-                )}"><input type="checkbox" id="_cbhidePlaceNamesWhenPlacesHidden" class="pieSettingsCheckbox" disabled /><label for="_cbhidePlaceNamesWhenPlacesHidden">${I18n.t(
-                    "pie.prefs.hidePlaceNamesWhenPlacesHidden"
-                )}</label></div>`,
+                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t("pie.prefs.MapChanges")}</h4></legend>`,
+                `<div id="divShowNames" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.ShowPlaceNames")}"><input type="checkbox" id="_cbShowPlaceNames" class="pieSettingsCheckbox" /><label for="_cbShowPlaceNames">${I18n.t("pie.prefs.ShowPlaceNames")}</label></div>`,
+                `<br><div id="divShowNamesPoint"class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t("pie.prefs.ShowPointNamesTitle")}"><input type="checkbox" id="_cbShowPlaceNamesPoint" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesPoint">${I18n.t("pie.prefs.ShowPointNames")}</label></div>`,
+                `<div id="divShowNamesArea" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t("pie.prefs.ShowAreaNamesTitle")}"><input type="checkbox" id="_cbShowPlaceNamesArea" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesArea">${I18n.t("pie.prefs.ShowAreaNames")}</label></div>`,
+                `<br><div id="divShowNamesPLA" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t("pie.prefs.ShowPLANameTitle")}"><input type="checkbox" id="_cbShowPlaceNamesPLA" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesPLA">${I18n.t("pie.prefs.ShowPLAName")}</label></div>`,
+                `<br><div id="divShowNamesLock" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t("pie.prefs.ShowLockLevelTitle")}"><input type="checkbox" id="_cbShowPlaceNamesLock" class="pieSettingsCheckbox" disabled /><label for ="_cbShowPlaceNamesLock">${I18n.t("pie.prefs.ShowLockLevel")}</label></div>`,
+                `<br><div id="divhidePlaceNamesWhenPlacesHidden" class="controls-container pie-controls-container" style="padding-left:20px;" title="${I18n.t("pie.prefs.hidePlaceNamesWhenPlacesHiddenTitle")}"><input type="checkbox" id="_cbhidePlaceNamesWhenPlacesHidden" class="pieSettingsCheckbox" disabled /><label for="_cbhidePlaceNamesWhenPlacesHidden">${I18n.t("pie.prefs.hidePlaceNamesWhenPlacesHidden")}</label></div>`,
                 '<div id="divPlaceNamesFontCustomization" class="controls-container pie-controls-container" style="padding-left:20px;">',
                 `${I18n.t("pie.prefs.FontSize")} <input type="text" size="1" id="piePlaceNameFontSize"/>px</br>`,
                 `${I18n.t("pie.prefs.FontColor")} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFont"></button></br>`,
@@ -5389,18 +5321,15 @@ function pie(tries = 1) {
                     PSESet: "Set",
                     PSESpotWidth: "Spot width (m)",
                     PSECal: "Cal",
-                    PSEDraw90DegreeTitle:
-                        "Click to draw a line through an entire 90 degree parking space aisle.  Double click to finish drawing and measure the spaces.",
-                    PSEDrawAngledTitle:
-                        "Click to draw a line through an entire angled parking space aisle.  Double click to finish drawing and measure the spaces.",
+                    PSEDraw90DegreeTitle: "Click to draw a line through an entire 90 degree parking space aisle.  Double click to finish drawing and measure the spaces.",
+                    PSEDrawAngledTitle: "Click to draw a line through an entire angled parking space aisle.  Double click to finish drawing and measure the spaces.",
                     PSEShowPSEButton: "Show Parking Space Estimator tool button",
                     PSEShowPSEButtonTitle: "Shows the button to launch the Parking Space Estimator tool",
                     PSEDisplayButtonTitle: "Opens the Parking Space Estimator tool",
                     ShowNavPointClosestSegmentOnHover: "Display the nav point and closest segment line on hover",
                     ShowClosestSegmentSelected: "Display a line from the nav point to the point on the closest segment",
                     EnableGLE: "Enable Google Link Enhancer",
-                    EnableGLETitle:
-                        "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in orange, already linked POI in gray (autocomplete menu)",
+                    EnableGLETitle: "Highlights closed Google links in red, linked Google POIs > 400m from the Waze Place in teal, invalid Google links in magenta, Google POIs linked multiple times in orange, already linked POI in gray (autocomplete menu)",
                     OpenPUR: "Automatically open PUR",
                     OpenPURTitle: "Automatically opens the PUR associated with the selected Place",
                     HidePaymentType: "Hide payment type",
