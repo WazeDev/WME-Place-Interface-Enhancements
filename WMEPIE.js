@@ -305,77 +305,29 @@ function pie(tries = 1) {
                 `<h4 style="margin-bottom:0px;"><b>${I18n.t("pie.prefs.title")}</b></h4>`,
                 `<h6 style="margin-top:0px;">${curr_ver}</h6>`,
                 '<fieldset id="fieldPlaceFilter" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t(
-                    "pie.filter.PlaceFilterPanel"
-                )}</h4></legend>`,
-                `<div class="controls-container pie-controls-container" id="divPlaceFilter">${I18n.t(
-                    "pie.filter.filter"
-                )} <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>`,
+                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t("pie.filter.PlaceFilterPanel")}</h4></legend>`,
+                `<div class="controls-container pie-controls-container" id="divPlaceFilter">${I18n.t("pie.filter.filter")} <input type="text" name="txtPlaceFilter" id="piePlaceFilter" style="border: 1px solid #000000"/></div>`,
                 "</br>",
-                `<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">${I18n.t(
-                    "pie.filter.Hide"
-                )}</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">${I18n.t(
-                    "pie.filter.Show"
-                )}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divPlaceFilterOptions"><input type="radio" id="_rbHidePlaces" name="PlaceFilterToggle" checked><label for="_rbHidePlaces">${I18n.t("pie.filter.Hide")}</label><input type="radio" id="_rbOnlyShowPlaces" name="PlaceFilterToggle"><label for="_rbOnlyShowPlaces">${I18n.t("pie.filter.Show")}</label></div>`,
                 "</fieldset>",
 
                 '<fieldset id="fieldPlacePanel" style="border: 1px solid silver; padding: 8px; border-radius: 4px;">',
-                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t(
-                    "pie.prefs.PropertiesPanel"
-                )}</h4></legend>`,
+                `<legend style="margin-bottom:0px; border-bottom-style:none;width:auto;"><h4>${I18n.t("pie.prefs.PropertiesPanel")}</h4></legend>`,
                 '<div class="controls-container pie-controls-container" id="divAreaPlaceSizeControls">',
-                `<div id="divShowAreaPlaceSize" class="controls-container pie-controls-container"><input type="checkbox" id="_cbShowAreaPlaceSize" class="pieSettingsCheckbox" /><label for="_cbShowAreaPlaceSize">${I18n.t(
-                    "pie.prefs.ShowAreaPlaceSize"
-                )}</label></div>`,
-                `<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">${I18n.t(
-                    "pie.prefs.ShowImperial"
-                )}</label></div>`,
-                `<div id="divShowAreaPlaceSizeMetric" class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeMetric" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeMetric">${I18n.t(
-                    "pie.prefs.ShowMetric"
-                )}</label></div>`,
+                `<div id="divShowAreaPlaceSize" class="controls-container pie-controls-container"><input type="checkbox" id="_cbShowAreaPlaceSize" class="pieSettingsCheckbox" /><label for="_cbShowAreaPlaceSize">${I18n.t("pie.prefs.ShowAreaPlaceSize")}</label></div>`,
+                `<div id="divShowAreaPlaceSizeImperial"class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeImperial" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeImperial">${I18n.t("pie.prefs.ShowImperial")}</label></div>`,
+                `<div id="divShowAreaPlaceSizeMetric" class="controls-container pie-controls-container" style="padding-left:20px;"><input type="checkbox" id="_cbShowAreaPlaceSizeMetric" class="pieSettingsCheckbox" disabled /><label for ="_cbShowAreaPlaceSizeMetric">${I18n.t("pie.prefs.ShowMetric")}</label></div>`,
                 "</div>",
                 //!WazeWrap.isBetaEditor ? '<div class="controls-container pie-controls-container" id="divShowLockButtonsRPP" title="' + I18n.t('pie.prefs.ShowRPPLockButtonsTitle') + '"><input type="checkbox" id="_cbShowLockButtonsRPP" class="pieSettingsCheckbox" /><label for="_cbShowLockButtonsRPP" style="white-space:pre-line;">' + I18n.t('pie.prefs.ShowRPPLockButtons') + '</label></div>' : '',
-                `<div class="controls-container pie-controls-container" id="divShowPlaceLocatorCrosshair" title="${I18n.t(
-                    "pie.prefs.ShowPlaceLocatorCrosshairTitle"
-                )}" ><input type="checkbox" id="_cbShowPlaceLocatorCrosshair" class="pieSettingsCheckbox" /><label for="_cbShowPlaceLocatorCrosshair" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.ShowPlaceLocatorCrosshair"
-                )}</label></br>`,
-                `<span class="controls-container pie-controls-container" style="padding-left:30px;" title=""><input type="checkbox" id="_cbPlaceLocatorCrosshairProdPL" class="pieSettingsCheckbox" /><label for="_cbPlaceLocatorCrosshairProdPL" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.ProdPL"
-                )}</label></span></br>`,
-                `<span class="controls-container pie-controls-container" style="padding-left:30px;" title="${I18n.t(
-                    "pie.prefs.ZoomTitle"
-                )}">${I18n.t(
-                    "pie.prefs.Zoom"
-                )} <select id="piePlaceZoom"><option value="22">22</option><option value="21">21</option><option value="20">20</option><option value="19">19</option><option value="18">18</option><option value="17">17</option><option value="16">16</option><option value="15">15</option><option value="14">14</option><option value="13">13</option><option value="12">12</option></select></span></div>`,
-                `<div class="controls-container pie-controls-container" id="divShowSearchButton" title="${I18n.t(
-                    "pie.prefs.ShowAddressSearchTitle"
-                )}"><input type="checkbox" id="_cbShowSearchButton" class="pieSettingsCheckbox"/><label for="_cbShowSearchButton" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.ShowAddressSearch"
-                )}</label></div>`,
-                `<div class="controls-container pie-controls-container" id="divAddPlaceCategoriesButtons"><input type="checkbox" id="_cbAddPlaceCategoriesButtons" class="pieSettingsCheckbox"/><label for="_cbAddPlaceCategoriesButtons" style="white-space:pre-line;" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.ShowPlaceCategoryButtons"
-                )}</label></div>`,
-                `<div class="controls-container pie-controls-container" id="divShowParkingLotButton" title="${I18n.t(
-                    "pie.prefs.ShowPLAButtonTitle"
-                )}" ><input type="checkbox" id="_cbShowParkingLotButton" class="pieSettingsCheckbox" /><label for="_cbShowParkingLotButton" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.ShowPLAButton"
-                )}</label></div>`,
-                `<div class="controls-container pie-controls-container" id="divShowCopyPlaceButton" title="${I18n.t(
-                    "pie.prefs.ShowCopyPlaceButtonTitle"
-                )}" ><input type="checkbox" id="_cbShowCopyPlaceButton" class="pieSettingsCheckbox" /><label for="_cbShowCopyPlaceButton" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.ShowCopyPlaceButton"
-                )}</label></div>`,
-                `<div class="controls-container pie-controls-container" id="divShowExternalProviderTooltip" title="${I18n.t(
-                    "pie.prefs.ShowGPIDTooltipTitle"
-                )}" ><input type="checkbox" id="_cbShowExternalProviderTooltip" class="pieSettingsCheckbox" /><label for="_cbShowExternalProviderTooltip" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.ShowGPIDTooltip"
-                )}</label></div>`,
-                `<div class="controls-container pie-controls-container" id="divClearDescription" title="${I18n.t(
-                    "pie.prefs.ClearDescriptionTitle"
-                )}" ><input type="checkbox" id="_cbClearDescription" class="pieSettingsCheckbox" /><label for="_cbClearDescription" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.ClearDescription"
-                )}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divShowPlaceLocatorCrosshair" title="${I18n.t("pie.prefs.ShowPlaceLocatorCrosshairTitle")}" ><input type="checkbox" id="_cbShowPlaceLocatorCrosshair" class="pieSettingsCheckbox" /><label for="_cbShowPlaceLocatorCrosshair" style="white-space:pre-line;">${I18n.t("pie.prefs.ShowPlaceLocatorCrosshair")}</label></br>`,
+                `<span class="controls-container pie-controls-container" style="padding-left:30px;" title=""><input type="checkbox" id="_cbPlaceLocatorCrosshairProdPL" class="pieSettingsCheckbox" /><label for="_cbPlaceLocatorCrosshairProdPL" style="white-space:pre-line;">${I18n.t("pie.prefs.ProdPL")}</label></span></br>`,
+                `<span class="controls-container pie-controls-container" style="padding-left:30px;" title="${I18n.t("pie.prefs.ZoomTitle")}">${I18n.t("pie.prefs.Zoom")} <select id="piePlaceZoom"><option value="22">22</option><option value="21">21</option><option value="20">20</option><option value="19">19</option><option value="18">18</option><option value="17">17</option><option value="16">16</option><option value="15">15</option><option value="14">14</option><option value="13">13</option><option value="12">12</option></select></span></div>`,
+                `<div class="controls-container pie-controls-container" id="divShowSearchButton" title="${I18n.t("pie.prefs.ShowAddressSearchTitle")}"><input type="checkbox" id="_cbShowSearchButton" class="pieSettingsCheckbox"/><label for="_cbShowSearchButton" style="white-space:pre-line;">${I18n.t("pie.prefs.ShowAddressSearch")}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divAddPlaceCategoriesButtons"><input type="checkbox" id="_cbAddPlaceCategoriesButtons" class="pieSettingsCheckbox"/><label for="_cbAddPlaceCategoriesButtons" style="white-space:pre-line;" style="white-space:pre-line;">${I18n.t("pie.prefs.ShowPlaceCategoryButtons")}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divShowParkingLotButton" title="${I18n.t("pie.prefs.ShowPLAButtonTitle")}" ><input type="checkbox" id="_cbShowParkingLotButton" class="pieSettingsCheckbox" /><label for="_cbShowParkingLotButton" style="white-space:pre-line;">${I18n.t("pie.prefs.ShowPLAButton")}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divShowCopyPlaceButton" title="${I18n.t("pie.prefs.ShowCopyPlaceButtonTitle")}" ><input type="checkbox" id="_cbShowCopyPlaceButton" class="pieSettingsCheckbox" /><label for="_cbShowCopyPlaceButton" style="white-space:pre-line;">${I18n.t("pie.prefs.ShowCopyPlaceButton")}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divShowExternalProviderTooltip" title="${I18n.t("pie.prefs.ShowGPIDTooltipTitle")}" ><input type="checkbox" id="_cbShowExternalProviderTooltip" class="pieSettingsCheckbox" /><label for="_cbShowExternalProviderTooltip" style="white-space:pre-line;">${I18n.t("pie.prefs.ShowGPIDTooltip")}</label></div>`,
+                `<div class="controls-container pie-controls-container" id="divClearDescription" title="${I18n.t("pie.prefs.ClearDescriptionTitle")}" ><input type="checkbox" id="_cbClearDescription" class="pieSettingsCheckbox" /><label for="_cbClearDescription" style="white-space:pre-line;">${I18n.t("pie.prefs.ClearDescription")}</label></div>`,
                 //'<div class="controls-container pie-controls-container" id="divMoveAddress" title="' + I18n.t('pie.prefs.MoveAddressTitle') + '"><input type="checkbox" id="_cbMoveAddress" class="pieSettingsCheckbox"/><label for="_cbMoveAddress" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveAddress') + '</label></div>',
                 //'<div class="controls-container pie-controls-container" id="divMoveHNEntry" title="' + I18n.t('pie.prefs.MoveHNEntryTitle') + '"><input type="checkbox" id="_cbMoveHNEntry" class="pieSettingsCheckbox"/><label for="_cbMoveHNEntry" style="white-space:pre-line;">' + I18n.t('pie.prefs.MoveHNEntry') + '</label></div>',
                 "<br>",
@@ -473,53 +425,19 @@ function pie(tries = 1) {
                 )}</label></div>`,
                 '<div id="divPlaceNamesFontCustomization" class="controls-container pie-controls-container" style="padding-left:20px;">',
                 `${I18n.t("pie.prefs.FontSize")} <input type="text" size="1" id="piePlaceNameFontSize"/>px</br>`,
-                `${I18n.t(
-                    "pie.prefs.FontColor"
-                )} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFont"></button></br>`,
-                `<input type="checkbox" id="_cbPlaceNameFontBold" class="pieSettingsCheckbox"/><label for ="_cbPlaceNameFontBold">${I18n.t(
-                    "pie.prefs.Bold"
-                )}</label></br>`,
-                `${I18n.t(
-                    "pie.prefs.FontOutlineColor"
-                )} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFontOutline"></button></br>`,
-                `${I18n.t(
-                    "pie.prefs.FontOutlineWidth"
-                )} <input type="text" size="1" id="piePlaceNameFontOutlineWidth"/>`,
+                `${I18n.t("pie.prefs.FontColor")} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFont"></button></br>`,
+                `<input type="checkbox" id="_cbPlaceNameFontBold" class="pieSettingsCheckbox"/><label for ="_cbPlaceNameFontBold">${I18n.t("pie.prefs.Bold")}</label></br>`,
+                `${I18n.t("pie.prefs.FontOutlineColor")} <button class="jscolor {valueElement:null,hash:true,closable:true}" style="width:15px; height:15px;border:2px solid black" id="colorPickerFontOutline"></button></br>`,
+                `${I18n.t("pie.prefs.FontOutlineWidth")} <input type="text" size="1" id="piePlaceNameFontOutlineWidth"/>`,
                 "</div>",
-                `<div id="divShowPLSpotEstimatorButton" class="controls-container pie-controls-container" title="${I18n.t(
-                    "pie.prefs.PSEShowPSEButtonTitle"
-                )}"><input type="checkbox" id="_cbShowPLSpotEstimatorButton" class="pieSettingsCheckbox" /><label for="_cbShowPLSpotEstimatorButton" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.PSEShowPSEButton"
-                )}</label></div>`,
-                `<div id="divShowNavPointClosestSegmentOnHover" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowNavPointClosestSegmentOnHover" class="pieSettingsCheckbox" /><label for="_cbShowNavPointClosestSegmentOnHover" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.ShowNavPointClosestSegmentOnHover"
-                )}</label></div>`,
-                `<div id="divShowClosestSegmentSelected" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowClosestSegmentSelected" class="pieSettingsCheckbox" /><label for="_cbShowClosestSegmentSelected" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.ShowClosestSegmentSelected"
-                )}</label></div>`,
-                `<div id="divEnableGLE" class="controls-container pie-controls-container" title="${I18n.t(
-                    "pie.prefs.EnableGLETitle"
-                )}"><input type="checkbox" id="_cbEnableGLE" class="pieSettingsCheckbox"/><label for="_cbEnableGLE" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.EnableGLE"
-                )}</label></div>`,
-                `<div id="divGLEShowTempClosed" class="controls-container pie-controls-container" style="padding-left:20px;" title=""><input type="checkbox" id="_cbGLEShowTempClosed" class="pieSettingsCheckbox" disabled/><label for="_cbGLEShowTempClosed">${I18n.t(
-                    "pie.prefs.GLEShowTempClosed"
-                )}</label></div>`,
-                `<div id="divOpenPUR" class="controls-container pie-controls-container" title="${I18n.t(
-                    "pie.prefs.OpenPURTitle"
-                )}"><input type="checkbox" id="_cbOpenPUR" class="pieSettingsCheckbox"/><label for="_cbOpenPUR" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.OpenPUR"
-                )}</label></div>`,
-                `<div id="divEnablePhotoViewer" class="controls-container pie-controls-container" title="${I18n.t(
-                    "pie.prefs.PhotoViewerTitle"
-                )}"><input type="checkbox" id="_cbEnablePhotoViewer" class="pieSettingsCheckbox"/><label for="_cbEnablePhotoViewer" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.PhotoViewer"
-                )}</label></div>`,
-                `<div id="divEnlargeGeoHandles" class="controls-container pie-controls-container" title="${I18n.t(
-                    "pie.prefs.EnlargeGeoHandlesTitle"
-                )}"><input type="checkbox" id="_cbEnlargeGeoHandles" class="pieSettingsCheckbox"/><label for="_cbEnlargeGeoHandles" style="white-space:pre-line;">${I18n.t(
-                    "pie.prefs.EnlargeGeoHandles"
-                )}</label></div>`,
+                `<div id="divShowPLSpotEstimatorButton" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.PSEShowPSEButtonTitle")}"><input type="checkbox" id="_cbShowPLSpotEstimatorButton" class="pieSettingsCheckbox" /><label for="_cbShowPLSpotEstimatorButton" style="white-space:pre-line;">${I18n.t("pie.prefs.PSEShowPSEButton")}</label></div>`,
+                `<div id="divShowNavPointClosestSegmentOnHover" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowNavPointClosestSegmentOnHover" class="pieSettingsCheckbox" /><label for="_cbShowNavPointClosestSegmentOnHover" style="white-space:pre-line;">${I18n.t("pie.prefs.ShowNavPointClosestSegmentOnHover")}</label></div>`,
+                `<div id="divShowClosestSegmentSelected" class="controls-container pie-controls-container" title=""><input type="checkbox" id="_cbShowClosestSegmentSelected" class="pieSettingsCheckbox" /><label for="_cbShowClosestSegmentSelected" style="white-space:pre-line;">${I18n.t("pie.prefs.ShowClosestSegmentSelected")}</label></div>`,
+                `<div id="divEnableGLE" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.EnableGLETitle")}"><input type="checkbox" id="_cbEnableGLE" class="pieSettingsCheckbox"/><label for="_cbEnableGLE" style="white-space:pre-line;">${I18n.t("pie.prefs.EnableGLE")}</label></div>`,
+                `<div id="divGLEShowTempClosed" class="controls-container pie-controls-container" style="padding-left:20px;" title=""><input type="checkbox" id="_cbGLEShowTempClosed" class="pieSettingsCheckbox" disabled/><label for="_cbGLEShowTempClosed">${I18n.t("pie.prefs.GLEShowTempClosed")}</label></div>`,
+                `<div id="divOpenPUR" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.OpenPURTitle")}"><input type="checkbox" id="_cbOpenPUR" class="pieSettingsCheckbox"/><label for="_cbOpenPUR" style="white-space:pre-line;">${I18n.t("pie.prefs.OpenPUR")}</label></div>`,
+                `<div id="divEnablePhotoViewer" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.PhotoViewerTitle")}"><input type="checkbox" id="_cbEnablePhotoViewer" class="pieSettingsCheckbox"/><label for="_cbEnablePhotoViewer" style="white-space:pre-line;">${I18n.t("pie.prefs.PhotoViewer")}</label></div>`,
+                `<div id="divEnlargeGeoHandles" class="controls-container pie-controls-container" title="${I18n.t("pie.prefs.EnlargeGeoHandlesTitle")}"><input type="checkbox" id="_cbEnlargeGeoHandles" class="pieSettingsCheckbox"/><label for="_cbEnlargeGeoHandles" style="white-space:pre-line;">${I18n.t("pie.prefs.EnlargeGeoHandles")}</label></div>`,
                 "</fieldset>",
                 '<div class="controls-container" id="divPlaceMenuCustomization">',
                 `<b>${I18n.t("pie.prefs.PlaceMenuCustomization")}</b></br>`,
@@ -3280,7 +3198,7 @@ function pie(tries = 1) {
                 $("#PIECreatePLAButton").on("click", () => {
                     createPLAFromMP(markerID);
                 });
-            }, 150);
+            });
         }
     }
 
@@ -3858,19 +3776,7 @@ function pie(tries = 1) {
                 // lines[i] = new OpenLayers.Geometry.Point(pt.lon, pt.lat);
                 polygonGeometry.push([coords[2], coords[1]]);
             }
-            if(polygonGeometry.length < 1) {
-                WazeWrap.Alerts.error(GM_info.script.name, "Unable to Parse Coordinates");
-                return;
-            }
-            if(polygonGeometry.length === 1) saveNewPlaceGeometry(turf.point(polygonGeometry).geometry); 
-            else if(polygonGeometry.length < 4) {
-                WazeWrap.Alerts.error(GM_info.script.name, "Malformed Polygon Supplied.");
-                return;
-            }
-            else {
-                polygonGeometry.push(structuredClone(polygonGeometry[0]));
-                saveNewPlaceGeometry(turf.polygon([polygonGeometry]).geometry);
-            }
+            saveNewPlaceGeometry(polygonGeometry);
             updateGeometryInputs();
         });
 
@@ -3892,19 +3798,7 @@ function pie(tries = 1) {
                 }
             }
 
-            if(polygonGeometry.length < 1) {
-                WazeWrap.Alerts.error(GM_info.script.name, "Unable to Parse Coordinates");
-                return;
-            }
-            if(polygonGeometry.length === 1) saveNewPlaceGeometry(turf.point(polygonGeometry).geometry); 
-            else if(polygonGeometry.length < 4) {
-                WazeWrap.Alerts.error(GM_info.script.name, "Malformed Polygon Supplied.");
-                return;
-            }
-            else {
-                polygonGeometry.push(structuredClone(polygonGeometry[0]));
-                saveNewPlaceGeometry(turf.polygon([polygonGeometry]).geometry);
-            }
+            saveNewPlaceGeometry(polygonGeometry);
             updateGeometryInputs();
         });
 
@@ -3926,19 +3820,7 @@ function pie(tries = 1) {
                 polygonGeometry.push([coords[1], coords[2]]);
             }
 
-            if(polygonGeometry.length < 1) {
-                WazeWrap.Alerts.error(GM_info.script.name, "Unable to Parse Coordinates");
-                return;
-            }
-            if(polygonGeometry.length === 1) saveNewPlaceGeometry(turf.point(polygonGeometry).geometry); 
-            else if(polygonGeometry.length < 4) {
-                WazeWrap.Alerts.error(GM_info.script.name, "Malformed Polygon Supplied.");
-                return;
-            }
-            else {
-                polygonGeometry.push(structuredClone(polygonGeometry[0]));
-                saveNewPlaceGeometry(turf.polygon([polygonGeometry]).geometry);
-            }
+            saveNewPlaceGeometry(polygonGeometry);
             updateGeometryInputs();
         });
 
@@ -3947,7 +3829,7 @@ function pie(tries = 1) {
         });
     }
 
-    function saveNewPlaceGeometry(newGeom) {
+    function saveNewPlaceGeometry(polygonGeometry) {
         // const selected = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
         // const originalGeometry = selected.getOLGeometry().clone();
         // const ls = new OpenLayers.Geometry.LineString(newGeom);
@@ -3963,6 +3845,20 @@ function pie(tries = 1) {
         //         W.userscripts.toGeoJSONGeometry(newGeometry)
         //     )
         // );
+        if(polygonGeometry.length < 1) {
+            WazeWrap.Alerts.error(GM_info.script.name, "Unable to Parse Coordinates");
+            return;
+        }
+        let newGeom;
+        if(polygonGeometry.length === 1) newGeom = turf.point(polygonGeometry).geometry; 
+        else if(polygonGeometry.length < 4) {
+            WazeWrap.Alerts.error(GM_info.script.name, "Malformed Polygon Supplied.");
+            return;
+        }
+        else {
+            polygonGeometry.push(structuredClone(polygonGeometry[0]));
+            newGeom = turf.polygon([polygonGeometry]).geometry;
+        }
         const selected = sdk.Editing.getSelection();
         if(selected?.objectType !== "venue") return;
         const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
@@ -5139,237 +5035,6 @@ function pie(tries = 1) {
         const htmlItems = [`<select id="pieItem${itemNumber}">`];
         htmlItems.push(...categories);
         htmlItems.push("</select>");
-        // $places.html(
-        //     [
-        //         `<select id="pieItem${itemNumber}">`,
-        //         `<option value="CAR_SERVICES" data-icon="car-services" style="font-weight:bold;">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.CAR_SERVICES
-        //         }</option>`,
-        //         `<option value="GAS_STATION" data-icon="car-services">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.GAS_STATION
-        //         }</option>`,
-        //         `<option value="GARAGE_AUTOMOTIVE_SHOP" data-icon="car-services">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.GARAGE_AUTOMOTIVE_SHOP
-        //         }</option>`,
-        //         `<option value="CAR_WASH" data-icon="car-services">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.CAR_WASH
-        //         }</option>`,
-        //         `<option value="CHARGING_STATION" data-icon="car-services">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.CHARGING_STATION
-        //         }</option>`,
-        //         `<option value="TRANSPORTATION" data-icon="transportation" style="font-weight:bold;">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.TRANSPORTATION
-        //         }</option>`,
-        //         `<option value="AIRPORT" data-icon="transportation">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.AIRPORT
-        //         }</option>`,
-        //         `<option value="BUS_STATION" data-icon="transportation">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.BUS_STATION
-        //         }</option>`,
-        //         `<option value="FERRY_PIER" data-icon="transportation">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.FERRY_PIER
-        //         }</option>`,
-        //         `<option value="SEAPORT_MARINA_HARBOR" data-icon="transportation">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.SEAPORT_MARINA_HARBOR
-        //         }</option>`,
-        //         `<option value="SUBWAY_STATION" data-icon="transportation">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.SUBWAY_STATION
-        //         }</option>`,
-        //         `<option value="TRAIN_STATION" data-icon="transportation">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.TRAIN_STATION
-        //         }</option>`,
-        //         `<option value="BRIDGE" data-icon="transportation">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.BRIDGE
-        //         }</option>`,
-        //         `<option value="TUNNEL" data-icon="transportation">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.TUNNEL
-        //         }</option>`,
-        //         `<option value="TAXI_STATION" data-icon="transportation">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.TAXI_STATION
-        //         }</option>`,
-        //         `<option value="JUNCTION_INTERCHANGE" data-icon="transportation">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.JUNCTION_INTERCHANGE
-        //         }</option>`,
-        //         `<option value="PROFESSIONAL_AND_PUBLIC" data-icon="professional-and-public" style="font-weight:bold;">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.PROFESSIONAL_AND_PUBLIC
-        //         }</option>`,
-        //         `<option value="COLLEGE_UNIVERSITY" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.COLLEGE_UNIVERSITY
-        //         }</option>`,
-        //         `<option value="SCHOOL" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.SCHOOL
-        //         }</option>`,
-        //         `<option value="CONVENTIONS_EVENT_CENTER" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.CONVENTIONS_EVENT_CENTER
-        //         }</option>`,
-        //         `<option value="GOVERNMENT" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.GOVERNMENT
-        //         }</option>`,
-        //         `<option value="LIBRARY" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.LIBRARY
-        //         }</option>`,
-        //         `<option value="CITY_HALL" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.CITY_HALL
-        //         }</option>`,
-        //         `<option value="ORGANIZATION_OR_ASSOCIATION" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.ORGANIZATION_OR_ASSOCIATION
-        //         }</option>`,
-        //         `<option value="PRISON_CORRECTIONAL_FACILITY" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.PRISON_CORRECTIONAL_FACILITY
-        //         }</option>`,
-        //         `<option value="COURTHOUSE" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.COURTHOUSE
-        //         }</option>`,
-        //         `<option value="CEMETERY" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.CEMETERY
-        //         }</option>`,
-        //         `<option value="FIRE_DEPARTMENT" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.FIRE_DEPARTMENT
-        //         }</option>`,
-        //         `<option value="POLICE_STATION" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.POLICE_STATION
-        //         }</option>`,
-        //         `<option value="MILITARY" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.MILITARY
-        //         }</option>`,
-        //         `<option value="HOSPITAL_URGENT_CARE" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.HOSPITAL_URGENT_CARE
-        //         }</option>`,
-        //         `<option value="DOCTOR_CLINIC" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.DOCTOR_CLINIC
-        //         }</option>`,
-        //         `<option value="OFFICES" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.OFFICES
-        //         }</option>`,
-        //         `<option value="POST_OFFICE" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.POST_OFFICE
-        //         }</option>`,
-        //         `<option value="RELIGIOUS_CENTER" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.RELIGIOUS_CENTER
-        //         }</option>`,
-        //         `<option value="KINDERGARTEN" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.KINDERGARDEN
-        //         }</option>`,
-        //         `<option value="FACTORY_INDUSTRIAL" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.FACTORY_INDUSTRIAL
-        //         }</option>`,
-        //         `<option value="EMBASSY_CONSULATE" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.EMBASSY_CONSULATE
-        //         }</option>`,
-        //         `<option value="INFORMATION_POINT" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.INFORMATION_POINT
-        //         }</option>`,
-        //         `<option value="EMERGENCY_SHELTER" data-icon="professional-and-public">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.EMERGENCY_SHELTER
-        //         }</option>`,
-        //         `<option value="SHOPPING_AND_SERVICES" data-icon="shopping-and-services" style="font-weight:bold;">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.SHOPPING_AND_SERVICES
-        //         }</option>`,
-        //         `<option value="ARTS_AND_CRAFTS" data-icon="shopping-and-services">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.ARTS_AND_CRAFTS
-        //         }</option>`,
-        //         `<option value="BANK_FINANCIAL" data-icon="shopping-and-services">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.BANK_FINANCIAL
-        //         }</option>`,
-        //         `<option value="SPORTING_GOODS" data-icon="shopping-and-services">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.SPORTING_GOODS
-        //         }</option>`,
-        //         `<option value="BOOKSTORE" data-icon="shopping-and-services">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.BOOKSTORE
-        //         }</option>`,
-        //         `<option value="PHOTOGRAPHY" data-icon="shopping-and-services">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.PHOTOGRAPHY
-        //         }</option>`,
-        //         `<option value="CAR_DEALERSHIP" data-icon="shopping-and-services">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.CAR_DEALERSHIP
-        //         }</option>`,
-        //         `<option value="FASHION_AND_CLOTHING" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.FASHION_AND_CLOTHING}</option>`,
-        //         `<option value="CONVENIENCE_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.CONVENIENCE_STORE}</option>`,
-        //         `<option value="PERSONAL_CARE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.PERSONAL_CARE}</option>`,
-        //         `<option value="DEPARTMENT_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.DEPARTMENT_STORE}</option>`,
-        //         `<option value="PHARMACY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.PHARMACY}</option>`,
-        //         `<option value="ELECTRONICS" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.ELECTRONICS}</option>`,
-        //         `<option value="FLOWERS" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.FLOWERS}</option>`,
-        //         `<option value="FURNITURE_HOME_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.FURNITURE_HOME_STORE}</option>`,
-        //         `<option value="GIFTS" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.GIFTS}</option>`,
-        //         `<option value="GYM_FITNESS" data-icon="shopping-and-services">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.GYM_FITNESS
-        //         }</option>`,
-        //         `<option value="SWIMMING_POOL" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.SWIMMING_POOL}</option>`,
-        //         `<option value="HARDWARE_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.HARDWARE_STORE}</option>`,
-        //         `<option value="MARKET" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.MARKET}</option>`,
-        //         `<option value="SUPERMARKET_GROCERY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.SUPERMARKET_GROCERY}</option>`,
-        //         `<option value="JEWELRY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.JEWELRY}</option>`,
-        //         `<option value="LAUNDRY_DRY_CLEAN" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.LAUNDRY_DRY_CLEAN}</option>`,
-        //         `<option value="SHOPPING_CENTER" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.SHOPPING_CENTER}</option>`,
-        //         `<option value="MUSIC_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.MUSIC_STORE}</option>`,
-        //         `<option value="PET_STORE_VETERINARIAN_SERVICES" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.PET_STORE_VETERINARIAN_SERVICES}</option>`,
-        //         `<option value="TOY_STORE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.TOY_STORE}</option>`,
-        //         `<option value="TRAVEL_AGENCY" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.TRAVEL_AGENCY}</option>`,
-        //         `<option value="ATM" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.ATM}</option>`,
-        //         `<option value="CURRENCY_EXCHANGE" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.CURRENCY_EXCHANGE}</option>`,
-        //         `<option value="CAR_RENTAL" data-icon="shopping-and-services">${I18n.translations[I18n.currentLocale()].venues.categories.CAR_RENTAL}</option>`,
-        //         `<option value="FOOD_AND_DRINK" data-icon="food-and-drink" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.FOOD_AND_DRINK}</option>`,
-        //         `<option value="RESTAURANT" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.RESTAURANT}</option>`,
-        //         `<option value="BAKERY" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.BAKERY}</option>`,
-        //         `<option value="DESSERT" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.DESSERT}</option>`,
-        //         `<option value="CAFE" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.CAFE}</option>`,
-        //         `<option value="FAST_FOOD" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.FAST_FOOD}</option>`,
-        //         `<option value="FOOD_COURT" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.FOOD_COURT}</option>`,
-        //         `<option value="BAR" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.BAR}</option>`,
-        //         `<option value="ICE_CREAM" data-icon="food-and-drink">${I18n.translations[I18n.currentLocale()].venues.categories.ICE_CREAM}</option>`,
-        //         `<option value="CULTURE_AND_ENTERTAINEMENT" data-icon="culture-and-entertainement" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.CULTURE_AND_ENTERTAINEMENT}</option>`,
-        //         `<option value="ART_GALLERY" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.ART_GALLERY}</option>`,
-        //         `<option value="CASINO" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.CASINO}</option>`,
-        //         `<option value="CLUB" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.CLUB}</option>`,
-        //         `<option value="TOURIST_ATTRACTION_HISTORIC_SITE" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.TOURIST_ATTRACTION_HISTORIC_SITE}</option>`,
-        //         `<option value="MOVIE_THEATER" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.MOVIE_THEATER}</option>`,
-        //         `<option value="MUSEUM" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.MUSEUM}</option>`,
-        //         `<option value="MUSIC_VENUE" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.MUSIC_VENUE}</option>`,
-        //         `<option value="PERFORMING_ARTS_VENUE" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.PERFORMING_ARTS_VENUE}</option>`,
-        //         `<option value="GAME_CLUB" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.GAME_CLUB}</option>`,
-        //         `<option value="STADIUM_ARENA" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.STADIUM_ARENA}</option>`,
-        //         `<option value="THEME_PARK" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.THEME_PARK}</option>`,
-        //         `<option value="ZOO_AQUARIUM" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.ZOO_AQUARIUM}</option>`,
-        //         `<option value="RACING_TRACK" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.RACING_TRACK}</option>`,
-        //         `<option value="THEATER" data-icon="culture-and-entertainement">${I18n.translations[I18n.currentLocale()].venues.categories.THEATER}</option>`,
-        //         `<option value="OTHER" data-icon="other" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.OTHER}</option>`,
-        //         `<option value="CONSTRUCTION_SITE" data-icon="">${I18n.translations[I18n.currentLocale()].venues.categories.CONSTRUCTION_SITE}</option>`,
-        //         `<option value="LODGING" data-icon="lodging" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.LODGING}</option>`,
-        //         `<option value="HOTEL" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.HOTEL}</option>`,
-        //         `<option value="HOSTEL" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.HOSTEL}</option>`,
-        //         `<option value="CAMPING_TRAILER_PARK" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.CAMPING_TRAILER_PARK}</option>`,
-        //         `<option value="COTTAGE_CABIN" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.COTTAGE_CABIN}</option>`,
-        //         `<option value="BED_AND_BREAKFAST" data-icon="lodging">${I18n.translations[I18n.currentLocale()].venues.categories.BED_AND_BREAKFAST}</option>`,
-        //         `<option value="OUTDOORS" data-icon="outdoors" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.OUTDOORS}</option>`,
-        //         `<option value="PARK" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.PARK}</option>`,
-        //         `<option value="PLAYGROUND" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.PLAYGROUND}</option>`,
-        //         `<option value="BEACH" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.BEACH}</option>`,
-        //         `<option value="SPORTS_COURT" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.SPORTS_COURT}</option>`,
-        //         `<option value="GOLF_COURSE" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.GOLF_COURSE}</option>`,
-        //         `<option value="PLAZA" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.PLAZA}</option>`,
-        //         `<option value="PROMENADE" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.PROMENADE}</option>`,
-        //         `<option value="POOL" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.POOL}</option>`,
-        //         `<option value="SCENIC_LOOKOUT_VIEWPOINT" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.SCENIC_LOOKOUT_VIEWPOINT}</option>`,
-        //         `<option value="SKI_AREA" data-icon="outdoors">${I18n.translations[I18n.currentLocale()].venues.categories.SKI_AREA}</option>`,
-        //         `<option value="NATURAL_FEATURES" data-icon="natural-features" style="font-weight:bold;">${I18n.translations[I18n.currentLocale()].venues.categories.NATURAL_FEATURES}</option>`,
-        //         `<option value="ISLAND" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.ISLAND}</option>`,
-        //         `<option value="SEA_LAKE_POOL" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.SEA_LAKE_POOL}</option>`,
-        //         `<option value="RIVER_STREAM" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.RIVER_STREAM}</option>`,
-        //         `<option value="FOREST_GROVE" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.FOREST_GROVE}</option>`,
-        //         `<option value="FARM" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.FARM}</option>`,
-        //         `<option value="CANAL" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.CANAL}</option>`,
-        //         `<option value="SWAMP_MARSH" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.SWAMP_MARSH}</option>`,
-        //         `<option value="DAM" data-icon="natural-features">${I18n.translations[I18n.currentLocale()].venues.categories.DAM}</option>`,
-        //         `<option value="PARKING_LOT" data-icon="parking-lot" style="font-weight:bold;">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.PARKING_LOT
-        //         }</option>`,
-        //         `<option value="RESIDENCE_HOME" data-icon="residential" style="font-weight:bold;">${
-        //             I18n.translations[I18n.currentLocale()].venues.categories.RESIDENCE_HOME
-        //         }</option>`,
-        //         "</select>",
-        //     ].join(" ")
-        // );
         $places.html(htmlItems.join(" "));
 
         return $places.html();
