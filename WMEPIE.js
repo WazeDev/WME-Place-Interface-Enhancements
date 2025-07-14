@@ -4948,16 +4948,12 @@ function pie(tries = 1) {
                 if (mc !== null) {
                     if (!mc.processed) {
                         res.push(
-                            `<option value="${vsc.categoryId}" data-icon="${vsc.categoryId
-                                .toLowerCase()
-                                .replace("_", "-")}" style="font-weight:bold;">${mc.localizedName}</option>`
+                            `<option value="${vsc.categoryId}" data-icon="${vsc.categoryId.toLowerCase().replaceAll("_", "-")}" style="font-weight:bold;">${mc.localizedName}</option>`
                         );
                         mc.processed = true;
                     }
                     res.push(
-                        `<option value="${vsc.subCategoryId}" data-icon="${vsc.categoryId
-                            .toLowerCase()
-                            .replace("_", "-")}" style="font-weight:bold;">${vsc.localizedName}</option>`
+                        `<option value="${vsc.subCategoryId}" data-icon="${vsc.categoryId.toLowerCase().replaceAll("_", "-")}"">${vsc.localizedName}</option>`
                     );
                 }
             }
