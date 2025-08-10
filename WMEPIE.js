@@ -4736,27 +4736,25 @@ function pie(tries = 1) {
     function AddMakePrimaryButtons() {
         const selected = sdk.Editing.getSelection();
         if (selected?.objectType === "venue") {
-            waitForElementLoaded("div.alias-item-content").then(() => {
-                const $button = $("<div>", { class: "makePrimary" })
-                    .text("Make primary")
-                    .on("click", function () {
-                        const selected = sdk.Editing.getSelection();
-                        if(selected?.objectType !== "venue") return;
-                        const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
-                        if(selectedVenue === null) return;
-                        const toPrimary = $(this).parent().parent().find(".alias-item-content").text();
-                        const aliases = selectedVenue.aliases.filter((i) => i !== toPrimary);
-                        aliases.push(selectedVenue.name);
-                        // const multiaction = new MultiAction();
-                        // multiaction.doSubAction(W.model, new UpdateObject(obj, { aliases: aliases }));
-                        // multiaction.doSubAction(W.model, new UpdateObject(obj, { name: toPrimary }));
-                        // W.model.actionManager.add(multiaction);
-                        sdk.DataModel.Venues.updateVenue({aliases: aliases, name: toPrimary, venueId: selectedVenue.id});
-                    });
-                for (const aliasContent of $("div.alias-item-content")) {
-                    $(aliasContent).parent().find("wz-button.alias-item-action-delete").after($button);
-                }
-            });
+            const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+            if(selectedVenue !== null && selectedVenue.aliases.length > 0) {
+                waitForElementLoaded("div.alias-item-content").then(() => {
+                    const $button = $("<div>", { class: "make-primary-venue-button" }).text("Make primary")
+                        .on("click", function () {
+                                const selected = sdk.Editing.getSelection();
+                                if(selected?.objectType !== "venue") return;
+                                const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+                                if(selectedVenue === null) return;
+                                const toPrimary = $(this).parent().parent().find(".alias-item-content").text();
+                                const aliases = selectedVenue.aliases.filter((i) => i !== toPrimary);
+                                aliases.push(selectedVenue.name);
+                                unregisterEvents(AddMakePrimaryButtons);
+                                sdk.DataModel.Venues.updateVenue({aliases: aliases, name: toPrimary, venueId: selectedVenue.id});
+                                registerEvents(AddMakePrimaryButtons);
+                            });
+                    $("wz-button.alias-item-action-delete").after($button);
+                });
+            }
         }
     }
 
@@ -5004,8 +5002,8 @@ function pie(tries = 1) {
             ".pie-natural-features {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -16px -21px; width: 17px; height: 15px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-natural-features {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }",
             ".pie-parking-lot {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -65px -48px; width: 13px; height: 13px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-parking-lot {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }",
             ".pie-residential {background-image: url(//editor-assets.waze.com/beta/img/toolbar022c8e4d1f16c3825705364ff337bf1b.png); background-position: -15px -37px; width: 15px; height: 14px; } @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {.pie-residential {background-image:url(//editor-assets.waze.com/beta/img/toolbar@2xcd8b2ab08e978d00eeee7817e1a0edda.png); background-size: 99px 87px; } }",
-            ".makePrimary {border:1px solid gray; display:inline-block; cursor:pointer; margin-left:3px; border-radius:5px; padding:0px 2px 0px 2px; user-select: none; font-size:11px;}",
-            ".makePrimary:hover {border-color: #26bae8; color: #26bae8}",
+            ".make-primary-venue-button {border:1px solid gray; display:inline-block; cursor:pointer; margin-left:3px; border-radius:5px; padding:0px 2px 0px 2px; user-select: none; font-size:11px;}",
+            ".make-primary-venue-button:hover {border-color: #26bae8; color: #26bae8}",
             '.photoViewerOptionsContainer { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; grid-template-areas: "header header" "optionText optionSetting" "footer footer"}',
             ".photoViewerOptionsHeader { text-align: center; grid-area: header; }",
             ".photoViewerOptionsOptionSetting { grid-area: optionSetting; }",
