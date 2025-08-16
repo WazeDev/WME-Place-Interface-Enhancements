@@ -20,8 +20,7 @@
 				"useSingleVarDeclarator": "off",
 				"useForOf": "off"
 			},
-			"suspicious": {
-			},
+			"suspicious": {},
 			"complexity": {}
 		}
 	},
