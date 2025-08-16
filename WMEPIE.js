@@ -4738,6 +4738,7 @@ function pie(tries = 1) {
         if (selected?.objectType === "venue") {
             const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
             if(selectedVenue !== null && selectedVenue.aliases.length > 0) {
+                $(".make-primary-venue-button").remove();
                 waitForElementLoaded("div.alias-item-content").then(() => {
                     const $button = $("<div>", { class: "make-primary-venue-button" }).text("Make primary")
                         .on("click", function () {
