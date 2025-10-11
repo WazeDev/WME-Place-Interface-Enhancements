@@ -1430,7 +1430,7 @@ function pie(tries = 1) {
             "beforeunload",
             () => {
                 checkShortcutsChanged();
-                //saveSettings();
+                // saveSettings();
             },
             false
         );
@@ -2317,13 +2317,13 @@ function pie(tries = 1) {
      **/
     function DeleteImage(venue, imageID) {
         // const UpdateObject = require("Waze/Action/UpdateObject");
-        const newimages = [].concat(venue.images);
-        for (let i = newimages.length - 1; i >= 0; i--) {
-            if (newimages[i].id === imageID) newimages.splice(i, 1);
-        }
+        // const newimages = [].concat(venue.images);
+        // for (let i = newimages.length - 1; i >= 0; i--) {
+        //     if (newimages[i].id === imageID) newimages.splice(i, 1);
+        // }
         // W.model.actionManager.add(new UpdateObject(venue, { images: newimages }));
-        sdk.DataModel.Venues.updateVenue({ images: newimages, venueId: venue.id });
-        if (newimages.length > 0) {
+        sdk.DataModel.Venues.deleteImage({ images: newimages, venueId: venue.id });
+        if (venue.images.length > 0) {
             if (settings.PhotoViewerPreserveLayout) $(`#${imageID}`).css("visibility", "hidden");
             else $(`#${imageID}`).remove();
             $("#imagesqty").html($("#imagesqty").html() - 1);
@@ -5213,23 +5213,22 @@ function pie(tries = 1) {
 
     function checkShortcutsChanged() {
         let triggerSave = false;
-        for (const name in W.accelerators.Actions) {
-            let TempKeys = "";
-            if (W.accelerators.Actions[name].group === "wmepie") {
-                if (W.accelerators.Actions[name].shortcut) {
-                    if (W.accelerators.Actions[name].shortcut.altKey === true) TempKeys += "A";
-                    if (W.accelerators.Actions[name].shortcut.shiftKey === true) TempKeys += "S";
-                    if (W.accelerators.Actions[name].shortcut.ctrlKey === true) TempKeys += "C";
-                    if (TempKeys !== "") TempKeys += "+";
-                    if (W.accelerators.Actions[name].shortcut.keyCode)
-                        TempKeys += W.accelerators.Actions[name].shortcut.keyCode;
-                } else {
-                    TempKeys = "-1";
-                }
-                if (settings[name] !== Tempkeys) {
-                    triggerSave = true;
-                    break;
-                }
+        const shortcuts = sdk.Shortcuts.getAllShortcuts();
+        for (let i = 0; i < shortcuts.length; i++) {
+            // const TempKeys = shortcuts[i].shortcutKeys;
+            // if (W.accelerators.Actions[name].shortcut) {
+            //     if (W.accelerators.Actions[name].shortcut.altKey === true) TempKeys += "A";
+            //     if (W.accelerators.Actions[name].shortcut.shiftKey === true) TempKeys += "S";
+            //     if (W.accelerators.Actions[name].shortcut.ctrlKey === true) TempKeys += "C";
+            //     if (TempKeys !== "") TempKeys += "+";
+            //     if (W.accelerators.Actions[name].shortcut.keyCode)
+            //         TempKeys += W.accelerators.Actions[name].shortcut.keyCode;
+            // } else {
+            //     TempKeys = "-1";
+            // }
+            if (settings[shortcuts[i].shortcutId] !== shortcuts[i].shortcutKeys) {
+                triggerSave = true;
+                break;
             }
         }
         if (triggerSave) saveSettings();
