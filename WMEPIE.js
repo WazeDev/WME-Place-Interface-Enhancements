@@ -719,7 +719,7 @@ var UpdateObject, MultiAction;
         //W.editingMediator.on('change:editingEnabled', buildNewPlaceList);
 
         /********* SHORTCUTS *********/
-        new WazeWrap.Interface.Shortcut('CreateResidentialPlaceShortcut', 'Creates a resdiential Place point', 'wmepie', 'Place Interface Enhancements', settings.CreateResidentialPlaceShortcut, function(){startPlacementMode(resCategory, true);}, null).add();
+        new WazeWrap.Interface.Shortcut('CreateResidentialPlaceShortcut', 'Creates a residential Place point', 'wmepie', 'Place Interface Enhancements', settings.CreateResidentialPlaceShortcut, function(){startPlacementMode(resCategory, true);}, null).add();
 
         new WazeWrap.Interface.Shortcut('CreateParkingLotShortcut', 'Creates a parking lot Place', 'wmepie', 'Place Interface Enhancements', settings.CreateParkingLotShortcut, function(){startPlacementMode("PARKING_LOT", false);}, null).add();
         new WazeWrap.Interface.Shortcut('HideAreaPlacesShortcut', 'Toggle hiding area Places', 'wmepie', 'Place Interface Enhancements', settings.ToggleAreaPlacesShortcut, ToggleHideAreaPlaces, null).add();
