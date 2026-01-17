@@ -854,19 +854,19 @@ function pie(tries = 1) {
         }
 
         $(".pieSettingsCheckbox").on("change", function () {
-            const settingName = $(this)[0].id.substr(3);
+            const settingName = $(this)[0].id.substring(3);
             settings[settingName] = this.checked;
             saveSettings();
         });
 
         $("#piePlaceZoom").on("change", function () {
-            const settingName = $(this)[0].id.substr(3);
+            const settingName = $(this)[0].id.substring(3);
             settings[settingName] = $(this)[0].value;
             saveSettings();
         });
 
         $("#pieDefaultLockLevel").on("change", function () {
-            settings[$(this)[0].id.substr(3)] = $(this)[0].value;
+            settings[$(this)[0].id.substring(3)] = $(this)[0].value;
             saveSettings();
         });
 
@@ -877,7 +877,7 @@ function pie(tries = 1) {
         $("#piePlaceNameFontSize").on("focusout", function () {
             const fontSize = $(this)[0].value;
             if (fontSize === "" || fontSize === "0") $(this)[0].value = 12;
-            settings[$(this)[0].id.substr(3)] = fontSize;
+            settings[$(this)[0].id.substring(3)] = fontSize;
             saveSettings();
             // PIEPlaceNameLayer.styleMap.styles.default.defaultStyle.fontSize = `${fontSize}px`;
             DisplayPlaceNames();
@@ -3213,7 +3213,7 @@ function pie(tries = 1) {
         newPlaceCategory = category;
         // const polyDrawFeatureOptions = { callbacks: { done: doneHandler } };
         if (isPoint) {
-            let geo = await sdk.Map.drawPoint();
+            const geo = await sdk.Map.drawPoint();
             endPlacementMode(geo, category, isPoint);
         } else {
             if (drawPoly != null && drawPoly.events != null) drawPoly.deactivate();
@@ -3274,7 +3274,7 @@ function pie(tries = 1) {
         });
         NewPlace.attributes.categories.push("PARKING_LOT");
 
-        NewPlace.attributes.lockRank = Number(settings.DefaultLockLevel);
+        NewPlace.attributes.lockRank = Number.parseInt(settings.DefaultLockLevel, 10);
         NewPlace.attributes.name = `Parking - ${name}`;
         //NewPlace.attributes.phone = phone;
         //NewPlace.attributes.url = url;
@@ -3284,9 +3284,8 @@ function pie(tries = 1) {
         NewPlace.attributes.categoryAttributes.PARKING_LOT.costType = "FREE";
 
         if (address) {
-            let newAttributes,
-                UpdateFeatureAddress = require("Waze/Action/UpdateFeatureAddress");
-            newAttributes = {
+            // const UpdateFeatureAddress = require("Waze/Action/UpdateFeatureAddress");
+            const newAttributes = {
                 countryID: address.country.id,
                 stateID: address.state.id,
                 emptyCity: address.city.attributes.name ? null : true,
@@ -3401,7 +3400,7 @@ function pie(tries = 1) {
         }
         const newVenue = sdk.DataModel.Venues.getById({ venueId: newPlace.toString() });
         // newPlace.attributes.lockRank = Number(settings.DefaultLockLevel);
-        sdk.DataModel.Venues.updateVenue({ venueId: newPlace.toString(), lockRank: Number(settings.DefaultLockLevel) });
+        sdk.DataModel.Venues.updateVenue({ venueId: newPlace.toString(), lockRank: Number.parseInt(settings.DefaultLockLevel, 10) });
 
         const placeCentroid = turf.centroid(geometry);
         const closestSeg = findSDKClosestSegment(placeCentroid, settings.SkipPLR, settings.SkipPLR);
@@ -3425,8 +3424,8 @@ function pie(tries = 1) {
             // else newAttributes.emptyStreet = true;
 
             if (settings.UseCityFromClosestSeg) {
-                let street = sdk.DataModel.Streets.getById({ streetId: sdkSeg.primaryStreetId });
-                let city = sdk.DataModel.Cities.getById({ cityId: street.cityId });
+                const street = sdk.DataModel.Streets.getById({ streetId: sdkSeg.primaryStreetId });
+                const city = sdk.DataModel.Cities.getById({ cityId: street.cityId });
                 let streetId = sdkSeg.primaryStreetId;
                 // let cityName = address.attributes.city.attributes.name;
                 if (settings.UseAltCity && city.name === "") {
@@ -4372,7 +4371,8 @@ function pie(tries = 1) {
                         if (spotCount !== "0") {
                             const selection = sdk.Editing.getSelection();
                             if (selection?.objectType === "venue") {
-                                const myPlace = sdk.DataModel.Venues.getById({ venueId: selection.ids[0] });
+                                // const myPlace = 
+                                    sdk.DataModel.Venues.getById({ venueId: selection.ids[0] });
                                 // const myPlace = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
                                 // const existingAttr = myPlace.attributes.categoryAttributes.PARKING_LOT;
                                 // const newAttr = {};
@@ -4384,7 +4384,7 @@ function pie(tries = 1) {
                                 //     }
                                 // }
                                 // let spotPropValue;
-                                spotCount = Number.parseInt(spotCount);
+                                spotCount = Number.parseInt(spotCount, 10);
                                 if (spotCount < 11) spotPropValue = "R_1_TO_10";
                                 else if (spotCount < 31) spotPropValue = "R_11_TO_30";
                                 else if (spotCount < 61) spotPropValue = "R_31_TO_60";
