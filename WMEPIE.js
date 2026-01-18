@@ -13,9 +13,8 @@
 // @icon         data:image/jpeg;base64,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
 // @author       JustinS83
 // @grant        GM_xmlhttpRequest
-// @require      https://cdn.jsdelivr.net/npm/@turf/turf@7.2.0/turf.min.js
+// @require      https://cdn.jsdelivr.net/npm/@turf/turf@7.3.2/turf.min.js
 // @require      https://cdn.jsdelivr.net/npm/proj4@2.19.5/dist/proj4.min.js
-// @require      https://cdn.jsdelivr.net/npm/@terraformer/wkt@2.2.1/dist/t-wkt.umd.min.js
 // @require      https://greasyfork.org/scripts/24851-wazewrap/code/WazeWrap.js
 // @require      https://greasyfork.org/scripts/27023-jscolor/code/JSColor.js
 // @require      https://update.greasyfork.org/scripts/37486/1158035/WME%20Utils%20-%20HoursParser.js
@@ -485,6 +484,220 @@ function pie(tries = 1) {
             init2();
         });
     }
+
+    /**
+     * Returns orthogonalized geometry for the given geometry and threshold
+     * @function WazeWrap.Util.GeoJSONOrthogonalizeGeometry
+     * @param {GeoJSON.Geometry} The SDK/GeoJSON.Geometry to orthogonalize
+     * @param {integer} threshold to use for orthogonalization - the higher the threshold, the more nodes that will be removed
+     * @return {GeoJSON.Geometry } Orthogonalized geometry
+    **/
+    const GeoJSONOrthogonalizeGeometry = function (geometry, threshold = 12) {
+        const nomthreshold = threshold, // degrees within right or straight to alter
+            lowerThreshold = Math.cos((90 - nomthreshold) * Math.PI / 180),
+            upperThreshold = Math.cos(nomthreshold * Math.PI / 180);
+
+        function Orthogonalize() {
+            let nodes = structuredClone(geometry[0]),
+                points = nodes.slice(0, -1).map((n) => {
+                    const p = [...n];
+                    p[1] = lat2latp(p[1]);
+                    return p;
+                }),
+                corner = { i: 0, dotp: 1 },
+                epsilon = 1e-4,
+                i, j, score, motions;
+
+            // Triangle
+            if (points.length === 4) {
+                for (i = 0; i < 1000; i++) {
+                    motions = points.map(calcMotion);
+
+                    const tmp = addPoints(points[corner.i], motions[corner.i]);
+                    points[corner.i][0] = tmp[0];
+                    points[corner.i][1] = tmp[1];
+
+                    score = corner.dotp;
+                    if (score < epsilon)
+                        break;
+                }
+
+                const n = points[corner.i];
+                n[1] = latp2lat(n[1]);
+                const pp = n;
+
+                const id = nodes[corner.i].toString();
+                for (i = 0; i < nodes.length; i++) {
+                    if (nodes[i].toString() !== id)
+                        continue;
+
+                    nodes[i][0] = pp[0];
+                    nodes[i][1] = pp[1];
+                }
+
+                return nodes;
+            }
+            
+            const originalPoints = nodes.slice(0, -1).map((n) => {
+                    const p = [...n];
+                    p[1] = lat2latp(p[1]);
+                    return p;
+                });
+            score = Number.POSITIVE_INFINITY;
+
+            for (i = 0; i < 1000 && !(score < epsilon); i++) {
+                motions = points.map(calcMotion);
+                for (j = 0; j < motions.length; j++) {
+                    const tmp = addPoints(points[j], motions[j]);
+                    points[j][0] = tmp[0];
+                    points[j][1] = tmp[1];
+                }
+                const newScore = squareness(points);
+                if (newScore < score) {
+                    // best = [].concat(points);
+                    score = newScore;
+                }
+                // if (score < epsilon)
+                //     break;
+            }
+
+            // points = best;
+
+            for (i = 0; i < points.length; i++) {
+                // only move the points that actually moved
+                if (originalPoints[i][0] !== points[i][0] || originalPoints[i][1] !== points[i][1]) {
+                    const n = points[i];
+                    n[1] = latp2lat(n[1]);
+                    const pp = n;
+
+                    const id = nodes[i].toString();
+                    for (j = 0; j < nodes.length; j++) {
+                        if (nodes[j].toString() !== id)
+                            continue;
+
+                        nodes[j][0] = pp[0];
+                        nodes[j][1] = pp[1];
+                    }
+                }
+            }
+
+            // remove empty nodes on straight sections
+            for (i = 0; i < points.length; i++) {
+                const dotp = normalizedDotProduct(i, points);
+                if (dotp < -1 + epsilon) {
+                    const id = nodes[i].toString();
+                    for (j = 0; j < nodes.length; j++) {
+                        if (nodes[j].toString() !== id)
+                            continue;
+
+                        nodes[j] = false;
+                    }
+                }
+            }
+
+            return nodes.filter(item => item !== false);
+
+            function calcMotion(b, i, array) {
+                let a = array[(i - 1 + array.length) % array.length],
+                    c = array[(i + 1) % array.length],
+                    p = subtractPoints(a, b),
+                    q = subtractPoints(c, b),
+                    scale, dotp;
+
+                scale = 2 * Math.min(euclideanDistance(p, [0, 0]), euclideanDistance(q, [0, 0]));
+                p = normalizePoint(p, 1.0);
+                q = normalizePoint(q, 1.0);
+
+                dotp = filterDotProduct(p[0] * q[0] + p[1] * q[1]);
+
+                // nasty hack to deal with almost-straight segments (angle is closer to 180 than to 90/270).
+                if (array.length > 3) {
+                    if (dotp < -Math.SQRT1_2)
+                        dotp += 1.0;
+                } else if (dotp && Math.abs(dotp) < corner.dotp) {
+                    corner.i = i;
+                    corner.dotp = Math.abs(dotp);
+                }
+
+                return normalizePoint(addPoints(p, q), 0.1 * dotp * scale);
+            }
+        };
+
+        function lat2latp(lat) {
+            return 180 / Math.PI * Math.log(Math.tan(Math.PI / 4 + lat * (Math.PI / 180) / 2));
+        }
+
+        function latp2lat(a) {
+            return 180 / Math.PI * (2 * Math.atan(Math.exp(a * Math.PI / 180)) - Math.PI / 2);
+        }
+
+        function squareness(points) {
+            return points.reduce((sum, _val, i, array) => {
+                let dotp = normalizedDotProduct(i, array);
+
+                dotp = filterDotProduct(dotp);
+                return sum + 2.0 * Math.min(Math.abs(dotp - 1.0), Math.min(Math.abs(dotp), Math.abs(dotp + 1)));
+            }, 0);
+        }
+
+        function normalizedDotProduct(i, points) {
+            let a = points[(i - 1 + points.length) % points.length],
+                b = points[i],
+                c = points[(i + 1) % points.length],
+                p = subtractPoints(a, b),
+                q = subtractPoints(c, b);
+
+            p = normalizePoint(p, 1.0);
+            q = normalizePoint(q, 1.0);
+
+            return p[0] * q[0] + p[1] * q[1];
+        }
+
+        function subtractPoints(a, b) {
+            return [a[0] - b[0], a[1] - b[1]];
+        }
+
+        function addPoints(a, b) {
+            return [a[0] + b[0], a[1] + b[1]];
+        }
+
+        function euclideanDistance(a, b) {
+            const x = a[0] - b[0], y = a[1] - b[1];
+            return Math.sqrt((x * x) + (y * y));
+        }
+
+        function normalizePoint(point, scale) {
+            const vector = [0, 0];
+            const length = Math.sqrt(point[0] * point[0] + point[1] * point[1]);
+            if (length !== 0) {
+                vector[0] = point[0] / length;
+                vector[1] = point[1] / length;
+            }
+
+            vector[0] *= scale;
+            vector[1] *= scale;
+
+            return vector;
+        }
+
+        function filterDotProduct(dotp) {
+            if (lowerThreshold > Math.abs(dotp) || Math.abs(dotp) > upperThreshold)
+                return dotp;
+
+            return 0;
+        }
+
+        this.isDisabled = (nodes) => {
+            const points = nodes.slice(0, -1).map((n) => {
+                const p = n;
+                return [p[0], p[1]];
+            });
+
+            return squareness(points);
+        };
+
+        return Orthogonalize();
+    };
 
     /**
      * Finds the closest on-screen drivable segment to the given point, ignoring PLR and PR segments if the options are set
@@ -3579,7 +3792,7 @@ function pie(tries = 1) {
                 // const newOLGeom = WazeWrap.Util.OrthogonalizeGeometry(selected.getOLGeometry().clone().components[0].components);
                 // const olGeometry = selectedVenue.geometry.coordinates[0].map((p) => {return proj4("EPSG:4326", "EPSG:900913", p)});
                 // olGeometry.map((g) => { return OpenLayers.Geometry.Point(g[0], g[1])});
-                const newGeom = WazeWrap.Util.GeoJSONOrthogonalizeGeometry(selectedVenue.geometry.coordinates);
+                const newGeom = GeoJSONOrthogonalizeGeometry(selectedVenue.geometry.coordinates);
 
                 // const UFG = require("Waze/Action/UpdateFeatureGeometry");
                 const originalGeometry = selectedVenue.geometry;
