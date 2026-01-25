@@ -4087,7 +4087,7 @@ function pie(tries = 1) {
                 }"></i> <i id="pieEditGeom" class="fa fa-pencil-square-o fa-2x" aria-hidden="true" style="cursor:pointer;"></i> <i id="pieClearGeom" title="Clear geometry" class="fa fa-times fa-2x" aria-hidden="true" style="cursor:pointer; color:red;"></i></div></div>`
             );
             if (sdk.Editing.getSelection()?.objectType === "mapComment")
-                $("#edit-panel > div > div > div.tab-content > div > form > div:nth-child(4)").after($GeomMods);
+                $("#edit-panel > div > div.map-comment-feature-editor > div > div > form > div.map-comment-types").after($GeomMods);
             else $("#venue-edit-general > div:nth-child(9)").after($GeomMods);
 
             $("#pieorthogonalize").on("click", () => {
