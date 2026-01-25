@@ -3887,15 +3887,15 @@ function pie(tries = 1) {
                 '<div style="width:100%; height:18px;"><i class="fa fa-window-close" aria-hidden="true" style="float:right; cursor:pointer;" id="pieGeomClose"></i></div>',
                 '<div style="float:left; margin-right:20px;"><h3>Standard (lat, lon)</h3>',
                 '<div><textarea rows="7" cols="40" id="piePlaceGeomStandard" style="height:auto;"></textarea></div>',
-                !WazeWrap.hasMapCommentSelected() ? '<button id="pieBtnApplyStandardGeom">Apply</button>' : "",
+                '<button id="pieBtnApplyStandardGeom">Apply</button>',
                 "</div>",
                 '<div style="float:left; margin-right:20px;"><h3>Waze (lon lat)</h3>',
                 '<div><textarea rows="7" cols="40" id="piePlaceGeomWaze" style="height:auto;"></textarea></div>',
-                !WazeWrap.hasMapCommentSelected() ? '<button id="pieBtnApplyWazeGeom">Apply</button>' : "",
+                '<button id="pieBtnApplyWazeGeom">Apply</button>',
                 "</div>",
                 '<div style="float:left;"><h3>WKT</h3>',
                 '<div><textarea rows="7" cols="45" id="piePlaceGeomWKT" style="height:auto;"></textarea></div>',
-                !WazeWrap.hasMapCommentSelected() ? '<button id="pieBtnApplyWKTGeom">Apply</button>' : "",
+                '<button id="pieBtnApplyWKTGeom">Apply</button>',
                 "</div>",
                 "</div>", //end content div
                 "</div>", //end main div
@@ -4004,26 +4004,43 @@ function pie(tries = 1) {
             newGeom = turf.polygon([polygonGeometry]).geometry;
         }
         const selected = sdk.Editing.getSelection();
-        if(selected?.objectType !== "venue") return;
-        const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
-        if(selectedVenue === null) return;
-        sdk.DataModel.Venues.updateVenue({geometry: newGeom, venueId: selectedVenue.id});
+        if(selected?.objectType === "venue") {
+            const selectedVenue = sdk.DataModel.Venues.getById({venueId: selected.ids[0]});
+            if(selectedVenue === null) return;
+            sdk.DataModel.Venues.updateVenue({geometry: newGeom, venueId: selectedVenue.id});
+        }
+        else if(selected?.objectType === "mapComment") {
+            const mc = sdk.DataModel.MapComments.getById({mapCommentId: selected.ids[0]});
+            if(mc === null) return;
+            sdk.DataModel.MapComments.updateComment({geometry: newGeom, mapCommentId: mc.id});
+        }
     }
 
     function updateGeometryInputs() {
         // const currPlaceModel = WazeWrap.getSelectedFeatures()[0].WW.getObjectModel();
         // const currPlaceGeom = currPlaceModel.getOLGeometry().components[0].clone().components;
         const selection = sdk.Editing.getSelection();
-        if (selection.objectType !== "venue") {
-            console.error("Unable to edit geomtry for Non Venue");
+        let currentGeom;
+        if (selection.objectType === "venue") {
+            const selectedVenue = sdk.DataModel.Venues.getById({ venueId: selection.ids[0] });
+            if (selectedVenue.geometry.type === "Point") {
+                console.error("No Point in Editing Geometry of a point venue");
+                return;
+            }
+            currentGeom = selectedVenue.geometry.coordinates[0];
+        }
+        else if (selection.objectType === "mapComment") {
+            const mc = sdk.DataModel.MapComments.getById({ mapCommentId: selection.ids[0] });
+            if (mc.geometry.type === "Point") {
+                console.error("No Point in Editing Geometry of a point map comment");
+                return;
+            }
+            currentGeom = mc.geometry.coordinates[0];
+        }
+        else {
+            console.error("No venue or map comment selected for editing geometry");
             return;
         }
-        const selectedVenue = sdk.DataModel.Venues.getById({ venueId: selection.ids[0] });
-        if (selectedVenue.geometry.type === "Point") {
-            console.error("No Point in Editing Geometry of a point venue");
-            return;
-        }
-        const currPlaceGeom = selectedVenue.geometry.coordinates[0];
 
         let standardGeom = "",
             WMEGeom = "",
@@ -4031,16 +4048,16 @@ function pie(tries = 1) {
         WKTGeom = "POLYGON(";
 
         let coord;
-        for (let i = 0; i < currPlaceGeom.length; i++) {
+        for (let i = 0; i < currentGeom.length; i++) {
             if (i > 0) {
                 WKTGeom += ", ";
-                if (i < currPlaceGeom.length - 1) {
+                if (i < currentGeom.length - 1) {
                     standardGeom += "\n";
                     WMEGeom += "\n";
                 }
             }
-            coord = currPlaceGeom[i];
-            if (i < currPlaceGeom.length - 1) {
+            coord = currentGeom[i];
+            if (i < currentGeom.length - 1) {
                 // coord = coord.transform(W.Config.map.projection.local, W.Config.map.projection.remote);
                 standardGeom += `${coord[1]}, ${coord[0]}`;
                 WMEGeom += `${coord[0]} ${coord[1]}`;
