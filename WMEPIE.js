@@ -4168,44 +4168,59 @@ function pie(tries = 1) {
 
             $("#pierotate").on("click", () => {
                 settings.Rotate = !settings.Rotate;
+                settings.Resize = false;
                 $("#pierotate").css("color", settings.Rotate ? "rgb(0,180,0)" : "black");
+                $("#pieresize").css("color", settings.Resize ? "rgb(0,180,0)" : "black");
+
                 saveSettings();
-                getActiveEditor().then((val) => {
-                    if ((val.olControl.mode & OpenLayers.Control.ModifyFeature.ROTATE) === 0)
-                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
-                    else val.olControl.mode &= ~OpenLayers.Control.ModifyFeature.ROTATE;
-                    val.olControl.resetVertices();
-                });
+                // getActiveEditor().then((val) => {
+                //     if ((val.olControl.mode & OpenLayers.Control.ModifyFeature.ROTATE) === 0)
+                //         val.olControl.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
+                //     else val.olControl.mode &= ~OpenLayers.Control.ModifyFeature.ROTATE;
+                //     val.olControl.resetVertices();
+                // });
+                if(settings.Rotate) {
+                    sdk.Map.enablePolygonRotation();
+                } else {
+                    sdk.Map.disablePolygonRotation();
+                }
             });
 
             $("#pieresize").on("click", () => {
                 settings.Resize = !settings.Resize;
+                settings.Rotate = false;
                 $("#pieresize").css("color", settings.Resize ? "rgb(0,180,0)" : "black");
+                $("#pierotate").css("color", settings.Rotate ? "rgb(0,180,0)" : "black");
                 saveSettings();
-                getActiveEditor().then((val) => {
-                    if ((val.olControl.mode & OpenLayers.Control.ModifyFeature.RESIZE) === 0)
-                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
-                    else val.olControl.mode &= ~OpenLayers.Control.ModifyFeature.RESIZE;
-                    val.olControl.resetVertices();
-                });
+                // getActiveEditor().then((val) => {
+                //     if ((val.olControl.mode & OpenLayers.Control.ModifyFeature.RESIZE) === 0)
+                //         val.olControl.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
+                //     else val.olControl.mode &= ~OpenLayers.Control.ModifyFeature.RESIZE;
+                //     val.olControl.resetVertices();
+                // });
+                if(settings.Resize) {
+                    sdk.Map.enablePolygonResize();
+                } else {
+                    sdk.Map.disablePolygonResize();
+                }
             });
 
             //activate the changes when a Place is selected
-            if (settings.Rotate) {
-                getActiveEditor().then((val) => {
-                    if ((val.olControl.mode & OpenLayers.Control.ModifyFeature.ROTATE) === 0)
-                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
-                    val.olControl.resetVertices();
-                });
-            }
+            // if (settings.Rotate) {
+            //     getActiveEditor().then((val) => {
+            //         if ((val.olControl.mode & OpenLayers.Control.ModifyFeature.ROTATE) === 0)
+            //             val.olControl.mode |= OpenLayers.Control.ModifyFeature.ROTATE;
+            //         val.olControl.resetVertices();
+            //     });
+            // }
 
-            if (settings.Resize) {
-                getActiveEditor().then((val) => {
-                    if ((val.olControl.mode & OpenLayers.Control.ModifyFeature.RESIZE) === 0)
-                        val.olControl.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
-                    val.olControl.resetVertices();
-                });
-            }
+            // if (settings.Resize) {
+            //     getActiveEditor().then((val) => {
+            //         if ((val.olControl.mode & OpenLayers.Control.ModifyFeature.RESIZE) === 0)
+            //             val.olControl.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
+            //         val.olControl.resetVertices();
+            //     });
+            // }
         } else if (
             !WazeWrap.hasSelectedFeatures() &&
             W.geometryEditing.activeEditor &&
