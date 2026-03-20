@@ -343,7 +343,7 @@
     // Find closest segment to a point using Turf.js and SDK segments.
     // pointGeoJSON: WGS84 GeoJSON Point geometry {type:'Point', coordinates:[lon,lat]}
     // Returns: { closestPoint: WGS84 GeoJSON Point geometry, segment: SDK Segment }
-    function findClosestSegmentTurf(pointGeoJSON, skipPLR = false, skipPrivate = false) {
+    function findClosestSegmentTurf(pointGeoJSON, skipPLR = false, skipPrivate = false, sdkInstance = sdk) {
         try {
             if (!pointGeoJSON || !pointGeoJSON.coordinates) return null;
 
@@ -353,15 +353,15 @@
             let nearestPt = null;
             let closestSegment = null;
 
-            for (const seg of sdk.DataModel.Segments.getAll()) {
+            for (const seg of sdkInstance.DataModel.Segments.getAll()) {
                 if (!seg.geometry || seg.geometry.type !== 'LineString') continue;
                 const rt = seg.roadType;
                 if (_SKIP_ROAD_TYPES.has(rt)) continue; // always skip non-drivable
                 if (skipPLR && rt === 20 /* PARKING_LOT_ROAD */) continue;
                 if (skipPrivate && rt === 17 /* PRIVATE_ROAD */){
                     debugger;
-                    const segment = sdk.DataModel.Segments.getById({ segmentId: seg.id });
-                    const street  = sdk.DataModel.Streets.getById({ streetId: segment.primaryStreetId });
+                    const segment = sdkInstance.DataModel.Segments.getById({ segmentId: seg.id });
+                    const street  = sdkInstance.DataModel.Streets.getById({ streetId: segment.primaryStreetId });
                     if(street?.name === null || street?.name == "")
                         continue;
                 }
