@@ -343,7 +343,7 @@
     // Find closest segment to a point using Turf.js and SDK segments.
     // pointGeoJSON: WGS84 GeoJSON Point geometry {type:'Point', coordinates:[lon,lat]}
     // Returns: { closestPoint: WGS84 GeoJSON Point geometry, segment: SDK Segment }
-    async function findClosestSegmentTurf(pointGeoJSON, skipPLR = false, skipPrivate = false) {
+    function findClosestSegmentTurf(pointGeoJSON, skipPLR = false, skipPrivate = false, sdkInstance = sdk) {
         try {
             if (!pointGeoJSON || !pointGeoJSON.coordinates) return null;
 
@@ -353,15 +353,15 @@
             let nearestPt = null;
             let closestSegment = null;
 
-            for (const seg of sdk.DataModel.Segments.getAll()) {
+            for (const seg of sdkInstance.DataModel.Segments.getAll()) {
                 if (!seg.geometry || seg.geometry.type !== 'LineString') continue;
                 const rt = seg.roadType;
                 if (_SKIP_ROAD_TYPES.has(rt)) continue; // always skip non-drivable
                 if (skipPLR && rt === 20 /* PARKING_LOT_ROAD */) continue;
                 if (skipPrivate && rt === 17 /* PRIVATE_ROAD */){
                     debugger;
-                    const segment = sdk.DataModel.Segments.getById({ segmentId: seg.id });
-                    const street  = sdk.DataModel.Streets.getById({ streetId: segment.primaryStreetId });
+                    const segment = sdkInstance.DataModel.Segments.getById({ segmentId: seg.id });
+                    const street  = sdkInstance.DataModel.Streets.getById({ streetId: segment.primaryStreetId });
                     if(street?.name === null || street?.name == "")
                         continue;
                 }
@@ -524,6 +524,113 @@
         init2();
     }
 
+    const navPointManager = new (class NavPointManager {
+        constructor(wmeSdk) {
+            this.sdk = wmeSdk;
+            this.navPoints = new Map(); // placeId → navPoint
+            this.trackedEvents = new Set(); // to keep track of which events we're listening to, so we can avoid duplicates and properly clean up if needed
+        }
+
+        /**
+         * Generate a unique key for storing navigation points for a venue. Currently uses the venue ID, but can be extended to include other factors if needed.
+         * @param {Object} venue - SDK Venue object
+         * @returns {string} Unique key for the venue's navigation point
+         */
+        getNavPointKey(venue) {
+            return String(venue.id);
+        }
+
+        _applyEventTracking(eventName, handler) {
+            const eventHandler = { eventName, eventHandler: handler };
+            this.sdk.Events.on(eventHandler);
+            this.trackedEvents.add(eventHandler);
+        }
+
+        _revertAllTrackedEvents() {
+            for (const { eventName, eventHandler } of this.trackedEvents) {
+                this.sdk.Events.off({ eventName, eventHandler });
+            }
+            this.trackedEvents.clear();
+        }
+
+        startTrackingChanges() {
+            this.stopTrackingChanges(); // ensure no duplicate handlers
+
+            const invalidationHandler = ({ dataModelName }) => {
+                if (dataModelName !== 'venues' && dataModelName !== 'segments')
+                    return;
+
+                this._invalidateAllNavPoints();
+            };
+
+            this._applyEventTracking('wme-data-model-object-state-deleted', invalidationHandler);
+            this._applyEventTracking('wme-data-model-objects-added', invalidationHandler);
+            this._applyEventTracking('wme-data-model-objects-changed', invalidationHandler);
+            this._applyEventTracking('wme-data-model-objects-removed', invalidationHandler);
+            this._applyEventTracking('wme-data-model-objects-saved', invalidationHandler);
+            // The following  SDK calls ↴ won't be reverted by stopTrackingChange, since they are shared SDK events that may be used by other features 
+            this.sdk.Events.trackDataModelEvents({ dataModelName: 'venues' });
+            this.sdk.Events.trackDataModelEvents({ dataModelName: 'segments' });
+        }
+
+        stopTrackingChanges() {
+            this._revertAllTrackedEvents();
+            this._invalidateAllNavPoints();
+        }
+
+        /**
+         * Invalidate all cached navigation points, forcing recalculation on next access.
+         */
+        _invalidateAllNavPoints() {
+            this.navPoints.clear();
+        }
+
+        /**
+         * Get the raw navigation point for a venue, which is either the explicitly defined navigation point, the centroid of the polygon geometry, or the point geometry itself.
+         * @param {Object} venue 
+         * @returns {Object|null} WGS84 GeoJSON Point geometry or null if it cannot be determined
+         */
+        getVenueRawNavPoint(venue) {
+            if (!venue || !venue.id || !venue.geometry) return null;
+            if (venue.navigationPoints && venue.navigationPoints.length > 0) return venue.navigationPoints[0].point;
+            if (venue.geometry.type === 'Polygon') return turf.centroid(venue.geometry).geometry;
+            return venue.geometry; // assume Point
+        }
+
+        /**
+         * Calculate the "on-segment" navigation point for a venue by finding the closest point on the nearest road segment to the venue's raw nav point.
+         * Caches the result in this.navPoints for future retrieval.
+         * @param {Object} venue - SDK Venue object
+         * @return {Object|null} WGS84 GeoJSON Point geometry of the on-segment nav point, or null if it cannot be calculated
+         */
+        calculateVenueOnSegmentNavPoint(venue) {
+            if (!venue || !venue.id || !venue.geometry) return null;
+
+            const navPoint = this.getVenueRawNavPoint(venue);
+            const closestSeg = findClosestSegmentTurf(navPoint, false, false, this.sdk);
+            if (!closestSeg || !closestSeg.closestPoint) return null;
+
+            this.navPoints.set(this.getNavPointKey(venue), closestSeg.closestPoint);
+            return closestSeg.closestPoint;
+        }
+
+        /**
+         * Get the navigation point for a venue, calculating and caching it if not already available.
+         * @param {Object} venue - SDK Venue object
+         * @returns {Object|null} WGS84 GeoJSON Point geometry or null if it cannot be determined
+         */
+        getVenueOnSegmentNavPoint(venue) {
+            if (!venue || !venue.id) return null;
+            const venueKey = this.getNavPointKey(venue);
+            if (!this.navPoints.has(venueKey)) {
+                return this.calculateVenueOnSegmentNavPoint(venue);
+            }
+
+            return this.navPoints.get(venueKey);
+        }
+    })(sdk);
+    navPointManager.startTrackingChanges();
+
     function init2() {
         // Collapsible section headers — state persisted in localStorage
         const PIE_LS_SECTIONS = 'WME_PIE_sectionStates';
@@ -660,12 +767,12 @@
 
         $('#_cbShowNavPointClosestSegmentOnHover').change(async function () {
             if (this.checked) {
-                navPointHandlers.mouseenter = async ({ featureId, layerName }) => {
+                navPointHandlers.mouseenter = ({ featureId, layerName }) => {
                     if (layerName !== 'venues') return;
                     const venue = sdk.DataModel.Venues.getById({ venueId: featureId });
                     if (!venue) return;
                     sdk.Map.removeAllFeaturesFromLayer({ layerName: _PIE_SHOW_STOP_POINTS_LAYER });
-                    await drawNavPointClosestSegmentLines(venue);
+                    drawNavPointClosestSegmentLines(venue);
                 };
                 navPointHandlers.mouseleave = ({ layerName }) => {
                     if (layerName !== 'venues') return;
@@ -852,12 +959,12 @@
         $('#pieSimplifyFactor')[0].value = settings.SimplifyFactor;
 
         if (settings.ShowNavPointClosestSegmentOnHover) {
-            navPointHandlers.mouseenter = async ({ featureId, layerName }) => {
+            navPointHandlers.mouseenter = ({ featureId, layerName }) => {
                 if (layerName !== 'venues') return;
                 const venue = sdk.DataModel.Venues.getById({ venueId: featureId });
                 if (!venue) return;
                 sdk.Map.removeAllFeaturesFromLayer({ layerName: _PIE_SHOW_STOP_POINTS_LAYER });
-                await drawNavPointClosestSegmentLines(venue);
+                drawNavPointClosestSegmentLines(venue);
             };
             navPointHandlers.mouseleave = ({ layerName }) => {
                 if (layerName !== 'venues') return;
@@ -1984,24 +2091,18 @@
         DisplayPlaceNames();
     }
 
-    async function drawNavPointClosestSegmentLines(sdkVenue) {
+    function drawNavPointClosestSegmentLines(sdkVenue) {
         try {
             if (sdk.Map.getZoomLevel() < 16) return;
             const isArea = sdkVenue.geometry.type === 'Polygon';
 
-            // navPoint is a WGS84 GeoJSON Point geometry
-            let navPoint;
-            if (sdkVenue.navigationPoints && sdkVenue.navigationPoints.length > 0) navPoint = sdkVenue.navigationPoints[0].point;
-            else navPoint = isArea ? turf.centroid(sdkVenue.geometry).geometry : sdkVenue.geometry;
-
-            //nav point to closest segment
-            const closestSeg = await findClosestSegmentTurf(navPoint, false, false);
-            if (!closestSeg) return;
+            const navPoint = navPointManager.getVenueRawNavPoint(sdkVenue);
+            const targetNavPoint = navPointManager.getVenueOnSegmentNavPoint(sdkVenue);
             sdk.Map.addFeaturesToLayer({
                 layerName: _PIE_SHOW_STOP_POINTS_LAYER,
                 features: [
-                    turf.lineString([navPoint.coordinates, closestSeg.closestPoint.coordinates], { styleName: 'lineStyleToClosestSeg' }, { id: 'pie_hover_line_to_seg' }),
-                    turf.point(closestSeg.closestPoint.coordinates, { styleName: 'pointStyle' }, { id: 'pie_hover_pt_seg' }),
+                    turf.lineString([navPoint.coordinates, targetNavPoint.coordinates], { styleName: 'lineStyleToClosestSeg' }, { id: 'pie_hover_line_to_seg' }),
+                    turf.point(targetNavPoint.coordinates, { styleName: 'pointStyle' }, { id: 'pie_hover_pt_seg' }),
                 ],
             });
 
@@ -2054,8 +2155,8 @@
     }
 
     // navPointGeoJSON: WGS84 GeoJSON Point geometry
-    async function drawNearestLanding(navPointGeoJSON, ignorePLR = false, ignorePrivate = false) {
-        const closestSegment = await findClosestSegmentTurf(navPointGeoJSON, ignorePLR, ignorePrivate);
+    function drawNearestLanding(navPointGeoJSON, ignorePLR = false, ignorePrivate = false) {
+        const closestSegment = findClosestSegmentTurf(navPointGeoJSON, ignorePLR, ignorePrivate);
         if (!closestSegment) return;
         clearClosesetSegmentLayerFeatures();
         drawLine(navPointGeoJSON, closestSegment.closestPoint, 'lineStyleToClosestSeg', 'pointStyle');
@@ -2293,7 +2394,7 @@
         sdk.DataModel.Venues.updateVenue({ venueId: newPlaceId, lockRank: Number(settings.DefaultLockLevel) });
 
         const searchPoint = turf.centroid(geometry).geometry;
-        const closestSeg = await findClosestSegmentTurf(searchPoint, settings.SkipPLR, settings.SkipPLR);
+        const closestSeg = findClosestSegmentTurf(searchPoint, settings.SkipPLR, settings.SkipPLR);
 
         if (closestSeg) {
             const sdkSeg = closestSeg.segment;
