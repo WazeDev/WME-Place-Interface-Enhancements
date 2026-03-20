@@ -343,7 +343,7 @@
     // Find closest segment to a point using Turf.js and SDK segments.
     // pointGeoJSON: WGS84 GeoJSON Point geometry {type:'Point', coordinates:[lon,lat]}
     // Returns: { closestPoint: WGS84 GeoJSON Point geometry, segment: SDK Segment }
-    async function findClosestSegmentTurf(pointGeoJSON, skipPLR = false, skipPrivate = false) {
+    function findClosestSegmentTurf(pointGeoJSON, skipPLR = false, skipPrivate = false) {
         try {
             if (!pointGeoJSON || !pointGeoJSON.coordinates) return null;
 
@@ -660,12 +660,12 @@
 
         $('#_cbShowNavPointClosestSegmentOnHover').change(async function () {
             if (this.checked) {
-                navPointHandlers.mouseenter = async ({ featureId, layerName }) => {
+                navPointHandlers.mouseenter = ({ featureId, layerName }) => {
                     if (layerName !== 'venues') return;
                     const venue = sdk.DataModel.Venues.getById({ venueId: featureId });
                     if (!venue) return;
                     sdk.Map.removeAllFeaturesFromLayer({ layerName: _PIE_SHOW_STOP_POINTS_LAYER });
-                    await drawNavPointClosestSegmentLines(venue);
+                    drawNavPointClosestSegmentLines(venue);
                 };
                 navPointHandlers.mouseleave = ({ layerName }) => {
                     if (layerName !== 'venues') return;
@@ -852,12 +852,12 @@
         $('#pieSimplifyFactor')[0].value = settings.SimplifyFactor;
 
         if (settings.ShowNavPointClosestSegmentOnHover) {
-            navPointHandlers.mouseenter = async ({ featureId, layerName }) => {
+            navPointHandlers.mouseenter = ({ featureId, layerName }) => {
                 if (layerName !== 'venues') return;
                 const venue = sdk.DataModel.Venues.getById({ venueId: featureId });
                 if (!venue) return;
                 sdk.Map.removeAllFeaturesFromLayer({ layerName: _PIE_SHOW_STOP_POINTS_LAYER });
-                await drawNavPointClosestSegmentLines(venue);
+                drawNavPointClosestSegmentLines(venue);
             };
             navPointHandlers.mouseleave = ({ layerName }) => {
                 if (layerName !== 'venues') return;
@@ -1984,7 +1984,7 @@
         DisplayPlaceNames();
     }
 
-    async function drawNavPointClosestSegmentLines(sdkVenue) {
+    function drawNavPointClosestSegmentLines(sdkVenue) {
         try {
             if (sdk.Map.getZoomLevel() < 16) return;
             const isArea = sdkVenue.geometry.type === 'Polygon';
@@ -1995,7 +1995,7 @@
             else navPoint = isArea ? turf.centroid(sdkVenue.geometry).geometry : sdkVenue.geometry;
 
             //nav point to closest segment
-            const closestSeg = await findClosestSegmentTurf(navPoint, false, false);
+            const closestSeg = findClosestSegmentTurf(navPoint, false, false);
             if (!closestSeg) return;
             sdk.Map.addFeaturesToLayer({
                 layerName: _PIE_SHOW_STOP_POINTS_LAYER,
@@ -2054,8 +2054,8 @@
     }
 
     // navPointGeoJSON: WGS84 GeoJSON Point geometry
-    async function drawNearestLanding(navPointGeoJSON, ignorePLR = false, ignorePrivate = false) {
-        const closestSegment = await findClosestSegmentTurf(navPointGeoJSON, ignorePLR, ignorePrivate);
+    function drawNearestLanding(navPointGeoJSON, ignorePLR = false, ignorePrivate = false) {
+        const closestSegment = findClosestSegmentTurf(navPointGeoJSON, ignorePLR, ignorePrivate);
         if (!closestSegment) return;
         clearClosesetSegmentLayerFeatures();
         drawLine(navPointGeoJSON, closestSegment.closestPoint, 'lineStyleToClosestSeg', 'pointStyle');
@@ -2293,7 +2293,7 @@
         sdk.DataModel.Venues.updateVenue({ venueId: newPlaceId, lockRank: Number(settings.DefaultLockLevel) });
 
         const searchPoint = turf.centroid(geometry).geometry;
-        const closestSeg = await findClosestSegmentTurf(searchPoint, settings.SkipPLR, settings.SkipPLR);
+        const closestSeg = findClosestSegmentTurf(searchPoint, settings.SkipPLR, settings.SkipPLR);
 
         if (closestSeg) {
             const sdkSeg = closestSeg.segment;
