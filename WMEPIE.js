@@ -359,7 +359,6 @@
                 if (_SKIP_ROAD_TYPES.has(rt)) continue; // always skip non-drivable
                 if (skipPLR && rt === 20 /* PARKING_LOT_ROAD */) continue;
                 if (skipPrivate && rt === 17 /* PRIVATE_ROAD */){
-                    debugger;
                     const segment = sdk.DataModel.Segments.getById({ segmentId: seg.id });
                     const street  = sdk.DataModel.Streets.getById({ streetId: segment.primaryStreetId });
                     if(street?.name === null || street?.name == "")
@@ -2196,7 +2195,6 @@
                             const textLoc = isPoint ? venue.geometry : turf.centroid(venue.geometry).geometry;
                             const lockStr = showLock ? ' (L' + ((venue.lockRank ?? 0) + 1) + ')' : '';
                             let placeName = WordWrap((venue.name || '').trim() + lockStr);
-                            debugger;
                             if (venue.categories && venue.categories[0] === 'RESIDENTIAL') {
                                 const houseNum = sdk.DataModel.Venues.getAddress({ venueId: venue.id })?.houseNumber || '';
                                 placeName = houseNum + ((venue.name || '').trim() !== '' ? ' - ' + (venue.name || '') : '') + lockStr;
@@ -2461,7 +2459,6 @@
                 j,
                 score,
                 motions;
-            debugger;
             if (points.length === 3) {
                 for (i = 0; i < 1000; i++) {
                     motions = points.map(calcMotion);
