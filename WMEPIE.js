@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2026.04.20.02
+// @version      2026.05.03
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@
     let GLE;
     let navPointManager = null;
     var catalog = [];
-    const updateMessage = 'Small SDK tweaks.';
+    const updateMessage = 'Prevent Place Area panel duplication upon resizing an area place.<br>Removed orange circle behind place labels.';
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -259,6 +259,7 @@
                 labelOutlineWidth: '${labelOutlineWidth}',
                 fontColor: '${fontColor}',
                 labelOutlineColor: '${labelOutlineColor}',
+                pointRadius: 0,
             },
         },
     ];
@@ -3417,13 +3418,14 @@
 
     async function updatePlaceSizeDisplay() {
         const runId = ++_areaSizeRunId;
-        $(WME_DOM.venueAreaSize).remove();
 
         // Wait for the venue panel DOM to finish rendering before inspecting or injecting.
         await new Promise((r) => setTimeout(r, 100));
 
         // If another call started during the delay, let it win — bail without injecting.
         if (runId !== _areaSizeRunId) return;
+
+        $(WME_DOM.venueAreaSize).remove();
 
         const selected = safeGetSelection();
         if (selected?.objectType === 'venue') {
