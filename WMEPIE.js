@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2026.04.20.02
+// @version      2026.05.15.00
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@
     let GLE;
     let navPointManager = null;
     var catalog = [];
-    const updateMessage = 'Small SDK tweaks.';
+    const updateMessage = 'Fixes to "Use alt city when primary has none" and "Ignore PLRs & unnamed PR" handling.';
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -2521,7 +2521,8 @@
         sdk.DataModel.Venues.updateVenue({ venueId: newPlaceId, lockRank: Number(settings.DefaultLockLevel) });
 
         const searchPoint = turf.centroid(geometry).geometry;
-        const closestSeg = findClosestSegmentTurf(searchPoint, settings.SkipPLR, false);
+        // The Skip PLR & Skip Unnamed PR settings were merged. Passing SkipPLR for both. I did not change the function in case they are split in the future.
+        const closestSeg = findClosestSegmentTurf(searchPoint, settings.SkipPLR, settings.SkipPLR);
 
         if (closestSeg) {
             const sdkSeg = closestSeg.segment;
@@ -2530,12 +2531,20 @@
 
                 // Only apply alt city logic if UseCityFromClosestSeg is ON
                 if (settings.UseCityFromClosestSeg && settings.UseAltCity) {
-                    const primaryCity = sdk.DataModel.Cities.getById({ cityId: sdk.DataModel.Streets.getById({ streetId }).cityId });
+                    const primaryStreet = sdk.DataModel.Streets.getById({ streetId });
+                    const primaryCity = sdk.DataModel.Cities.getById({ cityId: primaryStreet.cityId });
                     if (primaryCity.name === '' && sdkSeg.alternateStreetIds.length > 0) {
                         for (const altId of sdkSeg.alternateStreetIds) {
-                            const altCity = sdk.DataModel.Cities.getById({ cityId: sdk.DataModel.Streets.getById({ streetId: altId }).cityId });
+                            const altStreet = sdk.DataModel.Streets.getById({ streetId: altId });
+                            const altCity = sdk.DataModel.Cities.getById({ cityId: altStreet.cityId });
                             if (altCity.name) {
-                                streetId = altId;
+                                const streetMatch = sdk.DataModel.Streets.getStreet({ cityId: altStreet.cityId, streetName: primaryStreet.name })?.id;
+                                if (streetMatch) {
+                                    streetId = streetMatch;
+                                }
+                                else {
+                                    streetId = sdk.DataModel.Streets.addStreet({ cityId: altStreet.cityId, streetName: primaryStreet.name }).id;
+                                }
                                 break;
                             }
                         }
