@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2026.06.09.01
+// @version      2026.06.19.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -50,7 +50,7 @@
     let GLE;
     let navPointManager = null;
     var catalog = [];
-    const updateMessage = 'Updating to latest Hours Parser';
+    const updateMessage = 'Minor fix for default lock level of 1.';
     var lastSelectedFeature;
     const SCRIPT_VERSION = GM_info.script.version.toString();
     const SCRIPT_NAME = GM_info.script.name;
@@ -2519,7 +2519,10 @@
                 venueId: newPlaceId,
             });
         }
-        sdk.DataModel.Venues.updateVenue({ venueId: newPlaceId, lockRank: Number(settings.DefaultLockLevel) });
+        try { // setting lock to value its already at causes error, so catch error here and ignore.
+            sdk.DataModel.Venues.updateVenue({ venueId: newPlaceId, lockRank: Number(settings.DefaultLockLevel) });
+        } catch (e) {}
+
 
         const searchPoint = turf.centroid(geometry).geometry;
         // The Skip PLR & Skip Unnamed PR settings were merged. Passing SkipPLR for both. I did not change the function in case they are split in the future.
