@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Place Interface Enhancements
 // @namespace    https://greasyfork.org/users/30701-justins83-waze
-// @version      2026.06.09.01
+// @version      2026.06.24.01
 // @description  Enhancements to various Place interfaces
 // @include      https://www.waze.com/editor*
 // @include      https://www.waze.com/*/editor*
@@ -16,7 +16,7 @@
 // @require      https://update.greasyfork.org/scripts/509664/WME%20Utils%20-%20Bootstrap.js
 // @require      https://greasyfork.org/scripts/37486-wme-utils-hoursparser/code/WME%20Utils%20-%20HoursParser.js
 // @require      https://greasyfork.org/scripts/38421-wme-utils-navigationpoint/code/WME%20Utils%20-%20NavigationPoint.js
-// @require      https://greasyfork.org/scripts/569692/code/WME%20Utils%20-%20SDK%20Google%20Link%20Enhancer.js
+// @require      https://update.greasyfork.org/scripts/569692/WME%20Utils%20-%20SDK%20Google%20Link%20Enhancer.js
 // @require      https://greasyfork.org/scripts/375202-photo-viewer-db-interface/code/Photo%20Viewer%20DB%20Interface.js
 // @require      https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js
 // @connect     greasyfork.org
@@ -425,7 +425,12 @@
         loadTranslations();
 
         GLE = new SDKGoogleLinkEnhancer(sdk, turf, { layerName: layerNames.closedPlaces });
-        hoursparser = new HoursParser();
+        try {
+            hoursparser = new HoursParser();
+        } catch (e) {
+            console.warn('PIE: HoursParser failed to initialize (old WME module may be missing):', e.message);
+            hoursparser = null;
+        }
 
         var $section = $('<div>', { id: 'WMEPIESettings' });
         $section.html(
@@ -2140,6 +2145,7 @@
         }
 
         if (!replaceAll) pasteHours = pasteHours + ',' + getOpeningHours(getSelectedFeatures()[0]).join(',');
+        if (!hoursparser) { $('#PIEHoursParserError').text('Hours Parser unavailable (WME module missing)'); return; }
         var parserResult = hoursparser.parseHours(pasteHours);
         if (parserResult.hours && parserResult.overlappingHours === false && parserResult.sameOpenAndCloseTimes === false && parserResult.parseError === false) {
             sdk.DataModel.Venues.updateVenue({ venueId: getSelectedPlace().id, openingHours: parserResult.hours });
